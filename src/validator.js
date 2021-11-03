@@ -13,40 +13,57 @@ const NOT_GREEN_PASS = 'NOT_GREEN_PASS';
 const NOT_VALID = 'NOT_VALID';
 const NOT_VALID_YET = 'NOT_VALID_YET';
 const VALID = 'VALID';
+const INVALID = 'INVALID';
 const PARTIALLY_VALID = 'PARTIALLY_VALID'; // only in Italy
 
-const addDays = (date, days) => addHours(date, 24 * days);
+const findProperty = (rules, name, type) => rules.find((element) => {
+  const propertyType = !type ? GENERIC_TYPE : type;
+  return element.name === name && element.type === propertyType;
+});
+
+const clearExtraTime = (strDateTime) => {
+  try {
+    if (strDateTime.contains('T')) {
+      return strDateTime.substring(0, strDateTime.indexOf('T'));
+    }
+    return strDateTime;
+  } catch (e) {
+    return strDateTime;
+  }
+};
 
 const addHours = (date, hours) => new Date(date.getTime() + hours * 60 * 60 * 1000);
+
+const addDays = (date, days) => addHours(date, 24 * days);
 
 const checkVaccinations = (certificate, rules) => {
   try {
     const last = certificate.vaccinations[certificate.vaccinations.length - 1];
     const type = last.medicinalProduct;
 
-    const vaccine_start_day_not_complete = findProperty(
+    const vaccineStartDayNotComplete = findProperty(
       rules,
       'vaccine_start_day_not_complete',
       type,
     );
-    const vaccine_end_day_not_complete = findProperty(
+    const vaccineEndDayNotComplete = findProperty(
       rules,
       'vaccine_end_day_not_complete',
       type,
     );
-    const vaccine_start_day_complete = findProperty(
+    const vaccineStartDayComplete = findProperty(
       rules,
       'vaccine_start_day_complete',
       type,
     );
-    const vaccine_end_day_complete = findProperty(
+    const vaccineEndDayComplete = findProperty(
       rules,
       'vaccine_end_day_complete',
       type,
     );
 
     // Check vaccine type is in list
-    if (!type || !vaccine_end_day_complete) return { code: NOT_VALID, message: 'Vaccine Type is not in list' };
+    if (!type || !vaccineEndDayComplete) return { code: NOT_VALID, message: 'Vaccine Type is not in list' };
 
     const startNow = new Date(Date.now());
     const endNow = new Date(Date.now());
@@ -69,8 +86,8 @@ const checkVaccinations = (certificate, rules) => {
     }
 
     if (last.doseNumber < last.totalSeriesOfDoses) {
-      startDate = addDays(startDate, vaccine_start_day_not_complete.value);
-      endDate = addDays(endDate, vaccine_end_day_not_complete.value);
+      startDate = addDays(startDate, vaccineStartDayNotComplete.value);
+      endDate = addDays(endDate, vaccineEndDayNotComplete.value);
 
       if (startDate > endNow) {
         return {
@@ -103,8 +120,8 @@ const checkVaccinations = (certificate, rules) => {
     }
 
     if (last.doseNumber >= last.totalSeriesOfDoses) {
-      startDate = addDays(startDate, vaccine_start_day_complete.value);
-      endDate = addDays(endDate, vaccine_end_day_complete.value);
+      startDate = addDays(startDate, vaccineStartDayComplete.value);
+      endDate = addDays(endDate, vaccineEndDayComplete.value);
 
       if (startDate > endNow) {
         return {
@@ -168,8 +185,8 @@ const checkTests = (certificate, rules) => {
       "molecular_test_end_hours"
     ); */
 
-    const rapid_test_start_hours = findProperty(rules, 'rapid_test_start_hours');
-    const rapid_test_end_hours = findProperty(rules, 'rapid_test_end_hours');
+    const rapidTestStartHours = findProperty(rules, 'rapid_test_start_hours');
+    const rapidTestEndHours = findProperty(rules, 'rapid_test_end_hours');
 
     const last = certificate.tests[certificate.tests.length - 1];
 
@@ -178,10 +195,10 @@ const checkTests = (certificate, rules) => {
 
     let endDate = new Date(Date.parse(last.dateTimeOfCollection));
 
-    startDate = addHours(startDate, rapid_test_start_hours.value);
-    endDate = addHours(endDate, rapid_test_end_hours.value);
+    startDate = addHours(startDate, rapidTestStartHours.value);
+    endDate = addHours(endDate, rapidTestEndHours.value);
 
-    if (last.testResult == DETECTED) return { code: NOT_VALID, message: 'Test Result is DETECTED' };
+    if (last.testResult === DETECTED) return { code: NOT_VALID, message: 'Test Result is DETECTED' };
 
     if (startDate > now) {
       return {
@@ -218,7 +235,7 @@ const checkTests = (certificate, rules) => {
   }
 };
 
-const checkRecovery = (certificate, rules) => {
+const checkRecovery = (certificate) => {
   try {
     // Not used (weird)
     // let recovery_cert_start_day = findProperty(rules, "recovery_cert_start_day");
@@ -268,22 +285,6 @@ const checkRecovery = (certificate, rules) => {
   }
 };
 
-const findProperty = (rules, name, type) => rules.find((element) => {
-  if (!type) type = GENERIC_TYPE;
-  return element.name == name && element.type == type;
-});
-
-const clearExtraTime = (strDateTime) => {
-  try {
-    if (strDateTime.contains('T')) {
-      return strDateTime.substring(0, strDateTime.indexOf('T'));
-    }
-    return strDateTime;
-  } catch (e) {
-    return strDateTime;
-  }
-};
-
 const checkRules = (certificate) => {
   const rules = JSON.parse(fs.readFileSync(`${CACHE_FOLDER}/rules.json`));
 
@@ -310,30 +311,30 @@ const checkRules = (certificate) => {
   }
 
   return {
-    result: result.code == VALID || result.code == PARTIALLY_VALID,
+    result: result.code === VALID || result.code === PARTIALLY_VALID,
     code: result.code,
     message: result.message,
   };
 };
-
 
 async function checkSignature(dcc) {
   const signatureslist = JSON.parse(
     fs.readFileSync(`${CACHE_FOLDER}/signatureslist.json`),
   );
   const signatures = JSON.parse(fs.readFileSync(`${CACHE_FOLDER}/signatures.json`));
-  for (key of signatureslist) {
+  for (const key of signatureslist) {
     const signature = signatures[key];
     if (signature) {
       try {
         const verifier = rs.KEYUTIL.getKey(
           `-----BEGIN CERTIFICATE-----\n${signature}\n-----END CERTIFICATE-----`,
         ).getPublicKeyXYHex();
-        verified = await dcc.checkSignature(verifier);
+        const verified = await dcc.checkSignature(verifier);
         if (verified) {
           break;
         }
       } catch (err) {
+        throw new Error(err);
       }
     } else {
       // The signature list does not comply with the public key list (update problem?)

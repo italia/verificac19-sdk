@@ -15,5 +15,5 @@ class CertificateParsingError extends GenericError {
 
 module.exports = {
   GenericError,
-  CertificateParsingError
+  CertificateParsingError,
 };

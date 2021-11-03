@@ -36,8 +36,7 @@ async function updateSignatures() {
     );
     if (resp.status === 200) {
       header = { 'X-RESUME-TOKEN': resp.headers['x-resume-token'] };
-      id = resp.headers['x-kid'];
-      signatures[id] = resp.data;
+      signatures[resp.headers['x-kid']] = resp.data;
     }
   } while (resp.status === 200);
 

@@ -1,5 +1,5 @@
 const { DCC } = require('dcc-utils');
-const {CertificateParsingError} = require('./errors.js')
+const { CertificateParsingError } = require('./errors');
 
 const dccToModel = (payload) => {
   const dateOfBirth = payload.dob;
@@ -18,7 +18,7 @@ const dccToModel = (payload) => {
   let vaccinations;
   if (vList && vList.length > 0) {
     vaccinations = [];
-    for (v of vList) {
+    for (const v of vList) {
       const object = {
         disease: v.tg,
         vaccine: v.vp,
@@ -38,7 +38,7 @@ const dccToModel = (payload) => {
   let tests;
   if (tList && tList.length > 0) {
     tests = [];
-    for (t of tList) {
+    for (const t of tList) {
       const object = {
         disease: t.tg,
         typeOfTest: t.tt,
@@ -59,7 +59,7 @@ const dccToModel = (payload) => {
   let recoveryStatements;
   if (rList && rList.length > 0) {
     recoveryStatements = [];
-    for (r of rList) {
+    for (const r of rList) {
       const object = {
         disease: r.tg,
         dateOfFirstPositiveTest: r.fr,

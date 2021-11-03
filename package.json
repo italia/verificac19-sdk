@@ -21,7 +21,7 @@
     "jest": "^27.3.1"
   },
   "scripts": {
-    "test": "jest"
+    "test": "eslint src test && jest"
   },
   "repository": {
     "type": "git",
