@@ -1,16 +1,15 @@
 // Update procedures
-const fs = require('fs');
 const axios = require('axios');
-const { CACHE_FOLDER } = require('./consts');
+const cache = require('./cache');
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
-fs.promises.mkdir(CACHE_FOLDER, { recursive: true });
+cache.setUp();
 
 async function updateRules() {
   const resp = await axios.get(`${API_URL}/settings`);
   const json = JSON.stringify(resp.data, null, 1);
-  fs.writeFileSync(`${CACHE_FOLDER}/rules.json`, json);
+  cache.storeRules(json);
   return resp.data;
 }
 
@@ -19,7 +18,7 @@ async function updateSignaturesList() {
     `${API_URL}/signercertificate/status`,
   );
   const json = JSON.stringify(resp.data, null, 1);
-  fs.writeFileSync(`${CACHE_FOLDER}/signatureslist.json`, json);
+  cache.storeSignatureList(json);
   return resp.data;
 }
 
@@ -41,7 +40,7 @@ async function updateSignatures() {
   } while (resp.status === 200);
 
   const json = JSON.stringify(signatures, null, 1);
-  fs.writeFile(`${CACHE_FOLDER}/signatures.json`, json);
+  cache.storeSignatures(json);
   return signatures;
 }
 

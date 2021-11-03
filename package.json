@@ -21,7 +21,7 @@
     "jest": "^27.3.1"
   },
   "scripts": {
-    "test": "eslint src test && jest"
+    "test": "eslint src test && VC19_CACHE_FOLDER=./test/data/cache jest"
   },
   "repository": {
     "type": "git",

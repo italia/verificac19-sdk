@@ -1,6 +1,5 @@
-const fs = require('fs');
 const rs = require('jsrsasign');
-const { CACHE_FOLDER } = require('./consts');
+const cache = require('./cache');
 
 // Generic Type parameter
 const GENERIC_TYPE = 'GENERIC';
@@ -286,7 +285,7 @@ const checkRecovery = (certificate) => {
 };
 
 const checkRules = (certificate) => {
-  const rules = JSON.parse(fs.readFileSync(`${CACHE_FOLDER}/rules.json`));
+  const rules = cache.getRules();
 
   let result;
 
@@ -318,10 +317,8 @@ const checkRules = (certificate) => {
 };
 
 async function checkSignature(dcc) {
-  const signatureslist = JSON.parse(
-    fs.readFileSync(`${CACHE_FOLDER}/signatureslist.json`),
-  );
-  const signatures = JSON.parse(fs.readFileSync(`${CACHE_FOLDER}/signatures.json`));
+  const signatureslist = cache.getSignatureList();
+  const signatures = cache.getSignatures();
   for (const key of signatureslist) {
     const signature = signatures[key];
     if (signature) {
