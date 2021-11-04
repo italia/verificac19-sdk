@@ -35,10 +35,8 @@
     "url": "https://github.com/astagi/verificac19-sdk/issues"
   },
   "homepage": "https://github.com/astagi/verificac19-sdk#readme",
-  "jest": {
-    "collectCoverage": true,
-    "collectCoverageFrom": [
-      "./src/*.js"
-    ]
+  "nyc": {
+    "include": "src",
+    "exclude": "src/service.js" 
   }
 }
