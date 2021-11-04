@@ -35,11 +35,12 @@ async function updateSignatures() {
     );
     if (resp.status === 200) {
       header = { 'X-RESUME-TOKEN': resp.headers['x-resume-token'] };
-      signatures[resp.headers['x-kid']] = resp.data;
+      signatures[resp.headers['x-kid']] = `-----BEGIN CERTIFICATE-----${resp.data}-----END CERTIFICATE-----`;
     }
   } while (resp.status === 200);
 
   const json = JSON.stringify(signatures, null, 1);
+  console.log(json)
   cache.storeSignatures(json);
   return signatures;
 }
