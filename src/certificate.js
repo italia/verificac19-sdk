@@ -1,7 +1,8 @@
 const { DCC } = require('dcc-utils');
 const { CertificateParsingError } = require('./errors');
 
-const dccToModel = (payload) => {
+const dccToModel = (dcc) => {
+  const { payload } = dcc;
   const dateOfBirth = payload.dob;
 
   const person = {
@@ -79,13 +80,14 @@ const dccToModel = (payload) => {
     vaccinations,
     tests,
     recoveryStatements,
+    dcc,
   };
 };
 
 const fromImage = async (path) => {
   try {
     const dcc = await DCC.fromImage(path);
-    return dccToModel(dcc.payload);
+    return dccToModel(dcc);
   } catch (error) {
     throw new CertificateParsingError(error);
   }
@@ -94,7 +96,7 @@ const fromImage = async (path) => {
 const fromRaw = async (payload) => {
   try {
     const dcc = await DCC.fromRaw(payload);
-    return dccToModel(dcc.payload);
+    return dccToModel(dcc);
   } catch (error) {
     throw new CertificateParsingError(error);
   }
