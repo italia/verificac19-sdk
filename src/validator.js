@@ -337,9 +337,10 @@ async function checkSignature(certificate) {
   for (const key of signaturesList) {
     if (signatures[key]) {
       try {
-        verified = await certificate.dcc.checkSignatureWithCertificate(
-          `-----BEGIN CERTIFICATE-----\n${signatures[key]}\n-----END CERTIFICATE-----`,
-        );
+        verified = await certificate.dcc.checkSignatureWithCertificate(signatures[key]);
+        if (verified) {
+          break;
+        }
       } catch (err) {
         continue;
       }
