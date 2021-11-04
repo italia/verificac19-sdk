@@ -9,8 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
-    "dcc-utils": "^0.3.0",
-    "jsrsasign": "^10.4.1"
+    "dcc-utils": "^0.3.0"
   },
   "devDependencies": {
     "codecov": "^3.8.3",
@@ -21,7 +20,7 @@
     "jest": "^27.3.1"
   },
   "scripts": {
-    "test": "eslint src test && VC19_CACHE_FOLDER=./test/data/cache jest"
+    "test": "eslint src test && jest --clearCache && VC19_CACHE_FOLDER=./test/data/cache jest"
   },
   "repository": {
     "type": "git",

@@ -1,8 +1,6 @@
 const { Certificate } = require('../src');
 const { CertificateParsingError } = require('../src/errors');
 
-jest.setTimeout(10000);
-
 describe('Testing Certificate', () => {
   test('get certificate from image', async () => {
     const dcc = await Certificate.fromImage('./test/data/example_qr_vaccine_recovery.png');

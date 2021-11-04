@@ -1,15 +1,15 @@
 const { Certificate, Validator } = require('../src');
 
-jest.setTimeout(10000);
-
 describe('Testing Validator', () => {
-  test('get certificate from image', async () => {
-    const dcc = await Certificate.fromImage('./test/data/example_qr_vaccine_recovery.png');
-    Validator.checkRules(dcc);
+  test('rules verification', async () => {
+    const dcc = await Certificate.fromImage('./test/data/shit.png');
+    expect(Validator.checkRules(dcc).result).toStrictEqual(false);
   });
 
-  test('get certificate from raw', async () => {
-    const dcc = await Certificate.fromImage('./test/data/example_qr_vaccine_recovery.png');
-    Validator.checkRules(dcc);
+  test('signature verification', async () => {
+    const dcc = await Certificate.fromImage('./test/data/shit.png');
+    const isSignatureValid = await Validator.checkSignature(dcc);
+    console.log(isSignatureValid);
+    expect(isSignatureValid).toStrictEqual(true);
   });
 });

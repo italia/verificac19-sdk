@@ -1,4 +1,3 @@
-const rs = require('jsrsasign');
 const cache = require('./cache');
 
 // Generic Type parameter
@@ -276,7 +275,6 @@ const checkRecovery = (certificate) => {
         } ] `,
     };
   } catch (err) {
-    console.log(err);
     return {
       code: NOT_GREEN_PASS,
       message: `Recovery statement is not present or is not a green pass : ${err.toString()}`,
@@ -284,20 +282,36 @@ const checkRecovery = (certificate) => {
   }
 };
 
+const checkUVCI = (r, UVCIList) => {
+  if (r) {
+    for (const op of r) {
+      if (UVCIList.includes(op.certificateIdentifier)) {
+        return false;
+      }
+    }
+  }
+  return true;
+};
+
 const checkRules = (certificate) => {
   const rules = cache.getRules();
+  const UVCIList = findProperty(
+    rules,
+    'black_list_uvci',
+    'black_list_uvci',
+  ).value.split(';').filter((uvci) => uvci !== '');
 
   let result;
 
-  if (certificate.vaccinations) {
+  if (certificate.vaccinations && checkUVCI(certificate.vaccinations, UVCIList)) {
     result = checkVaccinations(certificate, rules);
   }
 
-  if (certificate.tests) {
+  if (certificate.tests && checkUVCI(certificate.tests, UVCIList)) {
     result = checkTests(certificate, rules);
   }
 
-  if (certificate.recoveryStatements) {
+  if (certificate.recoveryStatements && checkUVCI(certificate.recoveryStatements, UVCIList)) {
     result = checkRecovery(certificate, rules);
   }
 
@@ -305,7 +319,7 @@ const checkRules = (certificate) => {
     return {
       result: false,
       code: NOT_GREEN_PASS,
-      message: 'No vaccination, test or recovery statement found in payload',
+      message: 'No vaccination, test or recovery statement found in payload or UVCI is in blacklist',
     };
   }
 
@@ -316,28 +330,22 @@ const checkRules = (certificate) => {
   };
 };
 
-async function checkSignature(dcc) {
-  const signatureslist = cache.getSignatureList();
+async function checkSignature(certificate) {
+  const signaturesList = cache.getSignatureList();
   const signatures = cache.getSignatures();
-  for (const key of signatureslist) {
-    const signature = signatures[key];
-    if (signature) {
+  let verified = false;
+  for (const key of signaturesList) {
+    if (signatures[key]) {
       try {
-        const verifier = rs.KEYUTIL.getKey(
-          `-----BEGIN CERTIFICATE-----\n${signature}\n-----END CERTIFICATE-----`,
-        ).getPublicKeyXYHex();
-        const verified = await dcc.checkSignature(verifier);
-        if (verified) {
-          break;
-        }
+        verified = await certificate.dcc.checkSignatureWithCertificate(
+          `-----BEGIN CERTIFICATE-----\n${signatures[key]}\n-----END CERTIFICATE-----`,
+        );
       } catch (err) {
-        throw new Error(err);
+        continue;
       }
-    } else {
-      // The signature list does not comply with the public key list (update problem?)
-      console.log('Signature not found!!');
     }
   }
+  return !!verified;
 }
 
 module.exports = { checkSignature, checkRules };
