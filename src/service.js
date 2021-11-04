@@ -40,7 +40,6 @@ async function updateSignatures() {
   } while (resp.status === 200);
 
   const json = JSON.stringify(signatures, null, 1);
-  console.log(json)
   cache.storeSignatures(json);
   return signatures;
 }

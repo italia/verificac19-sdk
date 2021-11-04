@@ -10,6 +10,7 @@ examples/data/certificates.json
 
 mycodes/
 coverage/
+.nyc_output/
 
 # IDE
 .idea

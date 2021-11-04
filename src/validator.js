@@ -161,7 +161,6 @@ const checkVaccinations = (certificate, rules) => {
 
     return { code: NOT_VALID, message: 'Vaccination format is invalid' };
   } catch (err) {
-    console.log(err);
     return {
       code: NOT_GREEN_PASS,
       message:
@@ -224,7 +223,6 @@ const checkTests = (certificate, rules) => {
         } ] `,
     };
   } catch (err) {
-    console.log(err);
     return {
       code: NOT_GREEN_PASS,
       message:
