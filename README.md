@@ -26,7 +26,27 @@ env variable.
 Verify a DCC
 
 ```js
+const {Certificate, Validator} = require('verificac19-sdk');
 
+const main = async () => {
+  const myDCC = await Certificate.fromImage('./data/myDCC.png');
+  const rulesOk = Validator.checkRules(myDCC);
+  const signatureOk = await Validator.checkSignature(myDCC);
+}
+```
+
+## Development
+
+Install dependencies
+
+```sh
+npm i
+```
+
+Run tests
+
+```sh
+npm run test
 ```
 
 ## License

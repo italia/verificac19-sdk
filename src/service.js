@@ -6,23 +6,23 @@ const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
 cache.setUp();
 
-async function updateRules() {
+const updateRules = async () => {
   const resp = await axios.get(`${API_URL}/settings`);
   const json = JSON.stringify(resp.data, null, 1);
   cache.storeRules(json);
   return resp.data;
-}
+};
 
-async function updateSignaturesList() {
+const updateSignaturesList = async () => {
   const resp = await axios.get(
     `${API_URL}/signercertificate/status`,
   );
   const json = JSON.stringify(resp.data, null, 1);
   cache.storeSignatureList(json);
   return resp.data;
-}
+};
 
-async function updateSignatures() {
+const updateSignatures = async () => {
   let header;
   let resp;
   const signatures = {};
@@ -38,10 +38,9 @@ async function updateSignatures() {
       signatures[resp.headers['x-kid']] = `-----BEGIN CERTIFICATE-----${resp.data}-----END CERTIFICATE-----`;
     }
   } while (resp.status === 200);
-
   const json = JSON.stringify(signatures, null, 1);
   cache.storeSignatures(json);
   return signatures;
-}
+};
 
 module.exports = { updateSignatures, updateSignaturesList, updateRules };
