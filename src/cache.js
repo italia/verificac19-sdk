@@ -19,7 +19,7 @@ const storeSignatureList = (data) => {
 };
 
 const storeSignatures = (data) => {
-  fs.writeFile(path.join(CACHE_FOLDER, SIGNATURES_FILE), data);
+  fs.writeFileSync(path.join(CACHE_FOLDER, SIGNATURES_FILE), data);
 };
 
 const getRules = () => JSON.parse(fs.readFileSync(path.join(CACHE_FOLDER, RULES_FILE)));
