@@ -10,7 +10,7 @@ npm i verificac19-sdk
 
 ## Usage
 
-Download and cache rules and keys
+### Download and cache rules and keys
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -25,7 +25,9 @@ const main = async () => {
 ⚠️ Default cache folder is `.cache`, to change it please set `VC19_CACHE_FOLDER`
 env variable.
 
-Verify a DCC
+👉🏻 See an example `examples/syncdata.js`
+
+### Verify a DCC
 
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
@@ -36,6 +38,8 @@ const main = async () => {
   const signatureOk = await Validator.checkSignature(myDCC);
 }
 ```
+
+👉🏻 See an example `examples/verifydccs.js`
 
 ## Development
 
