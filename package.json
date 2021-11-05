@@ -9,7 +9,7 @@
   },
   "dependencies": {
     "axios": "^0.24.0",
-    "dcc-utils": "^0.3.0"
+    "dcc-utils": "^0.3.1"
   },
   "devDependencies": {
     "chai": "^4.3.4",
@@ -37,6 +37,6 @@
   "homepage": "https://github.com/astagi/verificac19-sdk#readme",
   "nyc": {
     "include": "src",
-    "exclude": "src/service.js" 
+    "exclude": "src/service.js"
   }
 }
