@@ -1,4 +1,6 @@
-# VerificaC19 Node.js SDK
+# VerificaC19 SDK for Node.js
+
+This project is a work in progress.
 
 ## Installation (not available yet)
 
@@ -49,6 +51,9 @@ Run tests
 npm run test
 ```
 
-## License
+## Authors
+Copyright (c) 2021 - Andrea Stagi
+Parts of the core code have been written by [Area servizi ICT, Politecnico di Milano](https://www.ict.polimi.it/).
 
-Area servizi ICT del Politecnico di Milano
+## License
+VerificaC19-SDK for Node.js is available under the [MIT](https://opensource.org/licenses/mit-license.php) license.
