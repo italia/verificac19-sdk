@@ -1,6 +1,6 @@
 {
   "name": "verificac19-sdk",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "<h1 align=\"center\">DCC Utils</h1>",
   "main": "index.js",
   "directories": {
@@ -29,7 +29,7 @@
     "type": "git",
     "url": "git+https://github.com/astagi/verificac19-sdk.git"
   },
-  "author": "",
+  "author": "Andrea Stagi",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/astagi/verificac19-sdk/issues"

@@ -57,6 +57,7 @@ npm run test
 
 ## Authors
 Copyright (c) 2021 - Andrea Stagi
+
 Parts of the core code have been written by [Area servizi ICT, Politecnico di Milano](https://www.ict.polimi.it/).
 
 ## License
