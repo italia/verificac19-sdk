@@ -32,7 +32,7 @@
     "src"
   ],
   "scripts": {
-    "test": "eslint src test && VC19_CACHE_FOLDER=./test/data/cache nyc mocha -t 200000 test/",
+    "test": "eslint src test examples && VC19_CACHE_FOLDER=./test/data/cache nyc mocha -t 200000 test/",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov"
   },
   "repository": {
