@@ -4,7 +4,7 @@
 <img src="https://github.com/astagi/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
 <a href="https://codecov.io/gh/astagi/verificac19-sdk"><img src="https://codecov.io/gh/astagi/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
 
-VerificaC19 SDK implementation for Node.js. ⚠️ This project is a work in progress.
+VerificaC19 SDK implementation for Node.js.
 
 ## Installation (not available yet)
 
