@@ -23,7 +23,8 @@
     "nyc": "^15.1.0"
   },
   "scripts": {
-    "test": "eslint src test && VC19_CACHE_FOLDER=./test/data/cache nyc --reporter=text mocha -t 200000 test/"
+    "test": "eslint src test && VC19_CACHE_FOLDER=./test/data/cache nyc mocha -t 200000 test/",
+    "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov"
   },
   "repository": {
     "type": "git",
