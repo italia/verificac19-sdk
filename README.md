@@ -1,6 +1,10 @@
 # VerificaC19 SDK for Node.js
 
-This project is a work in progress.
+<a href="https://www.npmjs.com/package/verificac19-sdk"><img src="https://img.shields.io/npm/v/verificac19-sdk.svg?logo=npm" /></a>
+<img src="https://github.com/astagi/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
+<a href="https://codecov.io/gh/astagi/verificac19-sdk"><img src="https://codecov.io/gh/astagi/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
+
+VerificaC19 SDK implementation for Node.js. ⚠️ This project is a work in progress.
 
 ## Installation (not available yet)
 
@@ -25,7 +29,7 @@ const main = async () => {
 ⚠️ Default cache folder is `.cache`, to change it please set `VC19_CACHE_FOLDER`
 env variable.
 
-👉🏻 See an example `examples/syncdata.js`
+👉🏻  See an example [examples/syncdata.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/syncdata.js).
 
 ### Verify a DCC
 
@@ -39,7 +43,7 @@ const main = async () => {
 }
 ```
 
-👉🏻 See an example `examples/verifydccs.js`
+👉🏻  See an example [examples/verifydccs.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/verifydccs.js).
 
 ## Development
 
