@@ -6,7 +6,7 @@
 
 VerificaC19 SDK implementation for Node.js. ⚠️ This project is a work in progress.
 
-## Installation (not available yet)
+## Installation
 
 ```sh
 npm i verificac19-sdk
