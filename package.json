@@ -1,12 +1,7 @@
 {
   "name": "verificac19-sdk",
   "version": "0.0.0",
-  "description": "<h1 align=\"center\">DCC Utils</h1>",
-  "main": "index.js",
-  "directories": {
-    "example": "examples",
-    "test": "test"
-  },
+  "description": "VerificaC19 SDK for Node.js",
   "dependencies": {
     "axios": "^0.24.0",
     "dcc-utils": "^0.4.0"
@@ -22,6 +17,20 @@
     "mocha": "^9.1.3",
     "nyc": "^15.1.0"
   },
+  "keywords": [
+    "health",
+    "covid19",
+    "utils",
+    "rules",
+    "validation",
+    "dcc",
+    "sdk",
+    "node"
+  ],
+  "main": "src/index.js",
+  "files": [
+    "src"
+  ],
   "scripts": {
     "test": "eslint src test && VC19_CACHE_FOLDER=./test/data/cache nyc mocha -t 200000 test/",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov"
