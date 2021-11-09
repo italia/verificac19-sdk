@@ -170,6 +170,12 @@ describe('Testing integration between Certificate and Validator', () => {
     verifyRulesFromCertificate(
       dccWithNegativeVaccinations, false, Validator.codes.NOT_VALID,
     );
+    // Malformed vaccination
+    const dccWithMalformedVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SK_3.png');
+    dccWithMalformedVaccinations.vaccinations[1].doseNumber = 'a';
+    verifyRulesFromCertificate(
+      dccWithMalformedVaccinations, false, Validator.codes.NOT_VALID,
+    );
     mockdate.reset();
   });
 });
