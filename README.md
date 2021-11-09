@@ -69,13 +69,13 @@ const main = async () => {
 
 you can compare the resulting `code` with `Validator.codes` values
 
-```js
-VALID
-PARTIALLY_VALID
-NOT_VALID
-NOT_VALID_YET
-NOT_GREEN_PASS
-```
+| | Code            | Description                              |
+|-| --------------- | ---------------------------------------- |
+|✅| VALID           | Certificate is valid in Italy and Europe |
+|🔵| PARTIALLY_VALID | Certificate is valid only in Italy       | 
+|❌| NOT_VALID       | Certificate is not valid                 | 
+|❌| NOT_VALID_YET   | Certificate is not valid yet             | 
+|❌| NOT_EU_DCC      | Certificate is not an EU DCC             | 
 
 for example 
 
