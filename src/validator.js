@@ -7,7 +7,7 @@ const GENERIC_TYPE = 'GENERIC';
 const DETECTED = '260373001';
 
 // Certificate Status
-const NOT_GREEN_PASS = 'NOT_GREEN_PASS';
+const NOT_EU_DCC = 'NOT_EU_DCC';
 const NOT_VALID = 'NOT_VALID';
 const NOT_VALID_YET = 'NOT_VALID_YET';
 const VALID = 'VALID';
@@ -18,7 +18,7 @@ const codes = {
   PARTIALLY_VALID,
   NOT_VALID,
   NOT_VALID_YET,
-  NOT_GREEN_PASS,
+  NOT_EU_DCC,
 };
 
 const findProperty = (rules, name, type) => rules.find((element) => {
@@ -169,7 +169,7 @@ const checkVaccinations = (certificate, rules) => {
     return { code: NOT_VALID, message: 'Vaccination format is invalid' };
   } catch (err) {
     return {
-      code: NOT_GREEN_PASS,
+      code: NOT_EU_DCC,
       message:
         `Vaccination is not present or is not a green pass : ${err.toString()}`,
     };
@@ -231,7 +231,7 @@ const checkTests = (certificate, rules) => {
     };
   } catch (err) {
     return {
-      code: NOT_GREEN_PASS,
+      code: NOT_EU_DCC,
       message:
         `Test Result is not present or is not a green pass : ${err.toString()}`,
     };
@@ -281,7 +281,7 @@ const checkRecovery = (certificate) => {
     };
   } catch (err) {
     return {
-      code: NOT_GREEN_PASS,
+      code: NOT_EU_DCC,
       message: `Recovery statement is not present or is not a green pass : ${err.toString()}`,
     };
   }
@@ -323,7 +323,7 @@ const checkRules = (certificate) => {
   if (!result) {
     return {
       result: false,
-      code: NOT_GREEN_PASS,
+      code: NOT_EU_DCC,
       message: 'No vaccination, test or recovery statement found in payload or UVCI is in blacklist',
     };
   }

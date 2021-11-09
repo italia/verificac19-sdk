@@ -147,21 +147,21 @@ describe('Testing integration between Certificate and Validator', () => {
     const dccWithoutRecovery = await Certificate.fromImage('./test/data/eu_test_certificates/SK_6.png');
     dccWithoutRecovery.recoveryStatements = [];
     verifyRulesFromCertificate(
-      dccWithoutRecovery, false, Validator.codes.NOT_GREEN_PASS,
+      dccWithoutRecovery, false, Validator.codes.NOT_EU_DCC,
     );
 
     // Not valid greenpass without tests
     const dccWithoutTests = await Certificate.fromImage('./test/data/eu_test_certificates/SK_7.png');
     dccWithoutTests.tests = [];
     verifyRulesFromCertificate(
-      dccWithoutTests, false, Validator.codes.NOT_GREEN_PASS,
+      dccWithoutTests, false, Validator.codes.NOT_EU_DCC,
     );
 
     // Not valid greenpass without vaccinations
     const dccWithoutVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SK_3.png');
     dccWithoutVaccinations.vaccinations = [];
     verifyRulesFromCertificate(
-      dccWithoutVaccinations, false, Validator.codes.NOT_GREEN_PASS,
+      dccWithoutVaccinations, false, Validator.codes.NOT_EU_DCC,
     );
 
     // Negative vaccination
