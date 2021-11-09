@@ -16,9 +16,9 @@ npm i verificac19-sdk
 
 ## Usage
 
-### Download and cache rules and keys
+### Download and cache rules and signatures
 
-You can download and cache rules and keys using `Service` module.
+You can download and cache rules and signatures using `Service` module.
 
 ```js
 const {Service} = require('verificac19-sdk');
