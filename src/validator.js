@@ -11,8 +11,15 @@ const NOT_GREEN_PASS = 'NOT_GREEN_PASS';
 const NOT_VALID = 'NOT_VALID';
 const NOT_VALID_YET = 'NOT_VALID_YET';
 const VALID = 'VALID';
-const INVALID = 'INVALID';
 const PARTIALLY_VALID = 'PARTIALLY_VALID'; // only in Italy
+
+const codes = {
+  NOT_GREEN_PASS,
+  NOT_VALID,
+  NOT_VALID_YET,
+  VALID,
+  PARTIALLY_VALID,
+};
 
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
@@ -78,7 +85,7 @@ const checkVaccinations = (certificate, rules) => {
 
     if (last.doseNumber <= 0) {
       return {
-        code: INVALID,
+        code: NOT_VALID,
         message: `${doses} - Invalid number of doses`,
       };
     }
@@ -347,4 +354,6 @@ async function checkSignature(certificate) {
   return !!verified;
 }
 
-module.exports = { checkSignature, checkRules };
+module.exports = {
+  checkSignature, checkRules, codes,
+};
