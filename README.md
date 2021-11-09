@@ -6,6 +6,8 @@
 
 VerificaC19 SDK implementation for Node.js.
 
+*Read this in other languages: [Italian 🇮🇹](https://github.com/astagi/verificac19-sdk/blob/master/README.it.md).*
+
 ## Installation
 
 ```sh
@@ -16,7 +18,7 @@ npm i verificac19-sdk
 
 ### Download and cache rules and keys
 
-You can download and cache rules and keys using `Service`.
+You can download and cache rules and keys using `Service` module.
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -38,14 +40,14 @@ const main = async () => {
 }
 ```
 
-⚠️ Rules and signature will be cached in a folder called `.cache`, 
+⚠️ By default rules and signature will be cached in a folder called `.cache`, 
 to change it please set `VC19_CACHE_FOLDER` env variable.
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/syncdata.js).
 
 ### Verify a DCC
 
-You can verify a DCC using `Certificate` and `Validator`.
+You can verify a DCC using `Certificate` and `Validator` modules.
 
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
