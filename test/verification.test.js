@@ -5,14 +5,18 @@ const { Certificate, Validator } = require('../src');
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-match'));
 
-const verifyRulesFromImage = async (imagePath, expectedResult, expectedCode, expectedMessageReg = null) => {
-  const dcc = await Certificate.fromImage(imagePath);
+const verifyRulesFromCertificate = (dcc, expectedResult, expectedCode, expectedMessageReg = null) => {
   const rulesReport = Validator.checkRules(dcc);
   chai.expect(rulesReport.result).to.be.equal(expectedResult);
   chai.expect(rulesReport.code).to.be.equal(expectedCode);
   if (expectedMessageReg) {
     chai.expect(rulesReport.message).to.match(new RegExp(expectedMessageReg));
   }
+};
+
+const verifyRulesFromImage = async (imagePath, expectedResult, expectedCode, expectedMessageReg = null) => {
+  const dcc = await Certificate.fromImage(imagePath);
+  return verifyRulesFromCertificate(dcc, expectedResult, expectedCode, expectedMessageReg);
 };
 
 const verifyRulesAndSignature = async (imagePath, expectedRules, expectedSignature) => {
@@ -138,6 +142,33 @@ describe('Testing integration between Certificate and Validator', () => {
       './test/data/eu_test_certificates/SK_6.png', false,
       Validator.codes.NOT_VALID_YET,
       '^Recovery statement is not valid yet, starts at .*$',
+    );
+    // Not valid greenpass without recovery
+    const dccWithoutRecovery = await Certificate.fromImage('./test/data/eu_test_certificates/SK_6.png');
+    dccWithoutRecovery.recoveryStatements = [];
+    verifyRulesFromCertificate(
+      dccWithoutRecovery, false, Validator.codes.NOT_GREEN_PASS,
+    );
+
+    // Not valid greenpass without tests
+    const dccWithoutTests = await Certificate.fromImage('./test/data/eu_test_certificates/SK_7.png');
+    dccWithoutTests.tests = [];
+    verifyRulesFromCertificate(
+      dccWithoutTests, false, Validator.codes.NOT_GREEN_PASS,
+    );
+
+    // Not valid greenpass without vaccinations
+    const dccWithoutVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SK_3.png');
+    dccWithoutVaccinations.vaccinations = [];
+    verifyRulesFromCertificate(
+      dccWithoutVaccinations, false, Validator.codes.NOT_GREEN_PASS,
+    );
+
+    // Negative vaccination
+    const dccWithNegativeVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SK_3.png');
+    dccWithNegativeVaccinations.vaccinations[1].doseNumber = -1;
+    verifyRulesFromCertificate(
+      dccWithNegativeVaccinations, false, Validator.codes.NOT_VALID,
     );
     mockdate.reset();
   });
