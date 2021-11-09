@@ -43,4 +43,12 @@ const updateSignatures = async () => {
   return signatures;
 };
 
-module.exports = { updateSignatures, updateSignaturesList, updateRules };
+const updateAll = async () => {
+  await updateRules();
+  await updateSignaturesList();
+  await updateSignatures();
+};
+
+module.exports = {
+  updateSignatures, updateSignaturesList, updateRules, updateAll,
+};

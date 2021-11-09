@@ -17,6 +17,7 @@
     "eslint-plugin-jest": "^24.4.0",
     "mocha": "^9.1.3",
     "mockdate": "^3.0.5",
+    "nock": "^13.2.0",
     "nyc": "^15.1.0"
   },
   "keywords": [
@@ -48,7 +49,6 @@
   },
   "homepage": "https://github.com/astagi/verificac19-sdk#readme",
   "nyc": {
-    "include": "src",
-    "exclude": "src/service.js"
+    "include": "src"
   }
 }

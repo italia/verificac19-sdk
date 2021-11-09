@@ -1,0 +1,187 @@
+[
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "EU/1/20/1525",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "EU/1/20/1525",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "EU/1/20/1525",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "EU/1/20/1525",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "EU/1/21/1529",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "EU/1/21/1529",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "EU/1/21/1529",
+    "value": "84"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "EU/1/21/1529",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "EU/1/20/1507",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "EU/1/20/1507",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "EU/1/20/1507",
+    "value": "42"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "EU/1/20/1507",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "EU/1/20/1528",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "EU/1/20/1528",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "EU/1/20/1528",
+    "value": "42"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "EU/1/20/1528",
+    "value": "15"
+  },
+  {
+    "name": "rapid_test_start_hours",
+    "type": "GENERIC",
+    "value": "0"
+  },
+  {
+    "name": "rapid_test_end_hours",
+    "type": "GENERIC",
+    "value": "48"
+  },
+  {
+    "name": "molecular_test_start_hours",
+    "type": "GENERIC",
+    "value": "0"
+  },
+  {
+    "name": "molecular_test_end_hours",
+    "type": "GENERIC",
+    "value": "72"
+  },
+  {
+    "name": "recovery_cert_start_day",
+    "type": "GENERIC",
+    "value": "0"
+  },
+  {
+    "name": "recovery_cert_end_day",
+    "type": "GENERIC",
+    "value": "180"
+  },
+  {
+    "name": "ios",
+    "type": "APP_MIN_VERSION",
+    "value": "1.1.2"
+  },
+  {
+    "name": "android",
+    "type": "APP_MIN_VERSION",
+    "value": "1.1.2"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "Covishield",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "Covishield",
+    "value": "84"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "Covishield",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "Covishield",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "R-COVI",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "R-COVI",
+    "value": "84"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "R-COVI",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "R-COVI",
+    "value": "365"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "Covid-19-recombinant",
+    "value": "15"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "Covid-19-recombinant",
+    "value": "84"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "Covid-19-recombinant",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "Covid-19-recombinant",
+    "value": "365"
+  },
+  {
+    "name": "black_list_uvci",
+    "type": "black_list_uvci",
+    "value": "URN:UVCI:01:FR:W7V2BE46QSBJ#L;URN:UVCI:01:FR:T5DWTJYS4ZR8#4;URN:UVCI:01DE/A80013335/TCXSI5Q08B0DIJGMIZJDF#T;URN:UVCI:01:PL:1/AF2AA5873FAF45DFA826B8A01237BDC4;01IT8523A6CADC834919A5214EA30779372D#1;01IT3DA01DD1A0AA4E4E92A10C11B04D39DB#8;01ITD85669BBC8E145FCA9CC83555B413952#3;01ITE901A12151934BAE92D7A537824BA260#3;01IT6E37CB3368F64C6884B3D2A74C266772#0;01ITC9E3B8B6B0344918AE7508E7094D9BCA#7;01ITB00C5897FF354FAFACFAFA391E613F59#8;01IT4C850BC31D3B41329A7EFC1F2AB5D2C5#2;01IT851F1A334C6B450DAD611A5DA4836404#6;01IT8658CD2A96F8435685D63B5C1DBC243F#5;01ITC78D2B44EA9D4C52A77C14C970676B62#9;URN:UVCI:01:PL:1/2A992C33754A4D379A7F61089485BB75;01IT757644969C3C4AC2B975AD9361F57BA0#2;01ITABF64E1EC2944E48A7EDC6AE13D7BCD1#4;"
+  }
+]

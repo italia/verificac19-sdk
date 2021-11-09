@@ -22,14 +22,24 @@ You can download and cache rules and keys using `Service`.
 const {Service} = require('verificac19-sdk');
 
 const main = async () => {
+  await Service.updateAll();
+}
+```
+
+Alternatively you can indivudally update rules and signatures.
+
+```js
+const {Service} = require('verificac19-sdk');
+
+const main = async () => {
   await Service.updateRules();
   await Service.updateSignaturesList();
   await Service.updateSignatures();
 }
 ```
 
-⚠️ Default cache folder is `.cache`, to change it please set `VC19_CACHE_FOLDER`
-env variable.
+⚠️ Rules and signature will be cached in a folder called `.cache`, 
+to change it please set `VC19_CACHE_FOLDER` env variable.
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/syncdata.js).
 
