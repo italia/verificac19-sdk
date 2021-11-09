@@ -14,11 +14,11 @@ const VALID = 'VALID';
 const PARTIALLY_VALID = 'PARTIALLY_VALID'; // only in Italy
 
 const codes = {
-  NOT_GREEN_PASS,
-  NOT_VALID,
-  NOT_VALID_YET,
   VALID,
   PARTIALLY_VALID,
+  NOT_VALID,
+  NOT_VALID_YET,
+  NOT_GREEN_PASS,
 };
 
 const findProperty = (rules, name, type) => rules.find((element) => {

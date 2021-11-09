@@ -60,11 +60,11 @@ const main = async () => {
 you can compare the resulting `code` with `Validator.codes` values
 
 ```js
-NOT_GREEN_PASS
-NOT_VALID
-NOT_VALID_YET
 VALID
 PARTIALLY_VALID
+NOT_VALID
+NOT_VALID_YET
+NOT_GREEN_PASS
 ```
 
 for example 
