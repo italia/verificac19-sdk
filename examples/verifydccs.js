@@ -7,6 +7,7 @@ const main = async () => {
     const signatureOk = await Validator.checkSignature(dccTest);
     console.log(`Is this DCC valid? ${rulesSummary.result && signatureOk}`);
     console.log(rulesSummary);
+    console.log(rulesSummary.code === Validator.codes.NOT_VALID);
     await Certificate.fromImage('./test/data/invalid.png'); // This throws an exception
   } catch (error) {
     console.log(error);

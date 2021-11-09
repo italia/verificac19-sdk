@@ -16,6 +16,8 @@ npm i verificac19-sdk
 
 ### Download and cache rules and keys
 
+You can download and cache rules and keys using `Service`.
+
 ```js
 const {Service} = require('verificac19-sdk');
 
@@ -33,14 +35,43 @@ env variable.
 
 ### Verify a DCC
 
+You can verify a DCC using `Certificate` and `Validator`.
+
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
 
 const main = async () => {
   const myDCC = await Certificate.fromImage('./data/myDCC.png');
-  const rulesOk = Validator.checkRules(myDCC);
+  const rulesOk = Validator.checkRules(myDCC).result;
   const signatureOk = await Validator.checkSignature(myDCC);
 }
+```
+
+`checkRules` method returns an object containing a `code` and a `message` alongside the `result`
+
+```js
+{
+  result: false,
+  code: 'NOT_VALID',
+  message: 'Test Result is expired at : 2021-05-22T12:34:56.000Z'
+}
+```
+
+you can compare the resulting `code` with `Validator.codes` values
+
+```js
+NOT_GREEN_PASS
+NOT_VALID
+NOT_VALID_YET
+VALID
+PARTIALLY_VALID
+```
+
+for example 
+
+```js
+const rulesSummary = Validator.checkRules(dccTest);
+console.log(rulesSummary.code === Validator.codes.NOT_VALID);
 ```
 
 👉🏻  See an example [examples/verifydccs.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/verifydccs.js).
