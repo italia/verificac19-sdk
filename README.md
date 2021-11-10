@@ -1,12 +1,12 @@
 # VerificaC19 SDK for Node.js
 
 <a href="https://www.npmjs.com/package/verificac19-sdk"><img src="https://img.shields.io/npm/v/verificac19-sdk.svg?logo=npm" /></a>
-<img src="https://github.com/astagi/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
-<a href="https://codecov.io/gh/astagi/verificac19-sdk"><img src="https://codecov.io/gh/astagi/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
+<img src="https://github.com/italia/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
+<a href="https://codecov.io/gh/italia/verificac19-sdk"><img src="https://codecov.io/gh/italia/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
 
 VerificaC19 SDK implementation for Node.js.
 
-*Read this in other languages: [Italian 🇮🇹](https://github.com/astagi/verificac19-sdk/blob/master/README.it.md).*
+*Read this in other languages: [Italian 🇮🇹](https://github.com/italia/verificac19-sdk/blob/master/README.it.md).*
 
 ## Installation
 
@@ -43,7 +43,7 @@ const main = async () => {
 ⚠️ By default rules and signature will be cached in a folder called `.cache`, 
 to change it please set `VC19_CACHE_FOLDER` env variable.
 
-👉🏻  See an example [examples/syncdata.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/syncdata.js).
+👉🏻  See an example [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 
 ### Verify a DCC
 
@@ -86,7 +86,7 @@ const rulesSummary = Validator.checkRules(dccTest);
 console.log(rulesSummary.code === Validator.codes.NOT_VALID);
 ```
 
-👉🏻  See an example [examples/verifydccs.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/verifydccs.js).
+👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 
 ## Development
 

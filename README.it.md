@@ -1,8 +1,8 @@
 # VerificaC19 SDK per Node.js
 
 <a href="https://www.npmjs.com/package/verificac19-sdk"><img src="https://img.shields.io/npm/v/verificac19-sdk.svg?logo=npm" /></a>
-<img src="https://github.com/astagi/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
-<a href="https://codecov.io/gh/astagi/verificac19-sdk"><img src="https://codecov.io/gh/astagi/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
+<img src="https://github.com/italia/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
+<a href="https://codecov.io/gh/italia/verificac19-sdk"><img src="https://codecov.io/gh/italia/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
 
 Implementazione per Node.js di VerificaC19 SDK.
 
@@ -41,7 +41,7 @@ const main = async () => {
 ⚠️ Regole e chiavi vengono salvati di default nella cartella `.cache`, 
 per cambiare questa impostazione occorre settare la variabile di ambiente `VC19_CACHE_FOLDER`.
 
-👉🏻  Vedi l'esempio [examples/syncdata.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/syncdata.js).
+👉🏻  Vedi l'esempio [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 
 ### Verifica un DCC
 
@@ -84,7 +84,7 @@ const rulesSummary = Validator.checkRules(dccTest);
 console.log(rulesSummary.code === Validator.codes.NOT_VALID);
 ```
 
-👉🏻  Vedi l'esempio [examples/verifydccs.js](https://github.com/astagi/verificac19-sdk/blob/master/examples/verifydccs.js).
+👉🏻  Vedi l'esempio [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 
 ## Development
 

@@ -40,14 +40,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/astagi/verificac19-sdk.git"
+    "url": "git+https://github.com/italia/verificac19-sdk.git"
   },
   "author": "Andrea Stagi",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/astagi/verificac19-sdk/issues"
+    "url": "https://github.com/italia/verificac19-sdk/issues"
   },
-  "homepage": "https://github.com/astagi/verificac19-sdk#readme",
+  "homepage": "https://github.com/italia/verificac19-sdk#readme",
   "nyc": {
     "include": "src"
   }
