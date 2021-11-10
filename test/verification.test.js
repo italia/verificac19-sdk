@@ -149,21 +149,18 @@ describe('Testing integration between Certificate and Validator', () => {
     verifyRulesFromCertificate(
       dccWithoutRecovery, false, Validator.codes.NOT_EU_DCC,
     );
-
     // Not valid greenpass without tests
     const dccWithoutTests = await Certificate.fromImage('./test/data/eu_test_certificates/SK_7.png');
     dccWithoutTests.tests = [];
     verifyRulesFromCertificate(
       dccWithoutTests, false, Validator.codes.NOT_EU_DCC,
     );
-
     // Not valid greenpass without vaccinations
     const dccWithoutVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SK_3.png');
     dccWithoutVaccinations.vaccinations = [];
     verifyRulesFromCertificate(
       dccWithoutVaccinations, false, Validator.codes.NOT_EU_DCC,
     );
-
     // Negative vaccination
     const dccWithNegativeVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SK_3.png');
     dccWithNegativeVaccinations.vaccinations[1].doseNumber = -1;
@@ -177,5 +174,16 @@ describe('Testing integration between Certificate and Validator', () => {
       dccWithMalformedVaccinations, false, Validator.codes.NOT_VALID,
     );
     mockdate.reset();
+    // SM vaccination (Sputnik-V)
+    const dccSMSputnikVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SM_1.png');
+    verifyRulesFromCertificate(
+      dccSMSputnikVaccinations, true, Validator.codes.VALID,
+    );
+    // Other countries vaccination with Sputnik-V
+    const dccITSputnikVaccinations = await Certificate.fromImage('./test/data/eu_test_certificates/SM_1.png');
+    dccITSputnikVaccinations.vaccinations[0].countryOfVaccination = 'IT';
+    verifyRulesFromCertificate(
+      dccITSputnikVaccinations, false, Validator.codes.NOT_VALID,
+    );
   });
 });
