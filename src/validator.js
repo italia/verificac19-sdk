@@ -340,18 +340,14 @@ async function checkSignature(certificate) {
   const signaturesList = cache.getSignatureList();
   const signatures = cache.getSignatures();
   let verified = false;
-  for (const key of signaturesList) {
-    if (signatures[key]) {
-      try {
-        verified = await certificate.dcc.checkSignatureWithCertificate(signatures[key]);
-        if (verified) {
-          break;
-        }
-      } catch (err) {
-        continue;
-      }
+  if (certificate.kid && signaturesList.includes(certificate.kid)) {
+    try {
+      verified = await certificate.dcc.checkSignatureWithCertificate(signatures[certificate.kid]);
+    } catch (err) {
+      return false;
     }
   }
+
   return !!verified;
 }
 
