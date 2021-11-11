@@ -3,6 +3,7 @@ const { CertificateParsingError } = require('./errors');
 
 const dccToModel = (dcc) => {
   const { payload } = dcc;
+  const { kid } = dcc;
   const dateOfBirth = payload.dob;
 
   const person = {
@@ -81,6 +82,7 @@ const dccToModel = (dcc) => {
     tests,
     recoveryStatements,
     dcc,
+    kid,
   };
 };
 
