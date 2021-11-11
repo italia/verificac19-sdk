@@ -344,7 +344,7 @@ async function checkSignature(certificate) {
     try {
       verified = await certificate.dcc.checkSignatureWithCertificate(signatures[certificate.kid]);
     } catch (err) {
-      return false;
+      // invalid signature or key, return false
     }
   }
 
