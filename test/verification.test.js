@@ -66,7 +66,7 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Doses 1/1 - Vaccination is valid .*$',
     );
     await verifyRulesFromImage(
-      './test/data/eu_test_certificates/SK_6.png', false,
+      './test/data/eu_test_certificates/SK_6.png', true,
       Validator.codes.VALID,
       '^Recovery statement is valid .*$',
     );
