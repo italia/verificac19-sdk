@@ -54,17 +54,18 @@ const {Certificate, Validator} = require('verificac19-sdk');
 
 const main = async () => {
   const myDCC = await Certificate.fromImage('./data/myDCC.png');
-  const rulesOk = Validator.checkRules(myDCC).result;
-  const signatureOk = await Validator.checkSignature(myDCC);
+  const validationResult = await Validator.validate(myDCC);
 }
 ```
 
-`checkRules` method returns an object containing a `code` and a `message` alongside the `result`
+`validate` method returns an object containing `person` name, `date_of_birth`, `code` and a `message` alongside the `result`
 
 ```js
 {
-  result: false,
+  person: 'Gabriele Musterfrau-Gößinger',
+  date_of_birth: '1998-02-26',
   code: 'NOT_VALID',
+  result: false,
   message: 'Test Result is expired at : 2021-05-22T12:34:56.000Z'
 }
 ```
@@ -82,8 +83,20 @@ you can compare the resulting `code` with `Validator.codes` values
 for example 
 
 ```js
-const rulesSummary = Validator.checkRules(dccTest);
+const rulesSummary = await Validator.validate(dccTest);
 console.log(rulesSummary.code === Validator.codes.NOT_VALID);
+```
+
+You can also use `Validator.checkRules` and `Validator.checkSignature` methods.
+
+```js
+const {Certificate, Validator} = require('verificac19-sdk');
+
+const main = async () => {
+  const myDCC = await Certificate.fromImage('./data/myDCC.png');
+  const rulesOk = Validator.checkRules(myDCC).result;
+  const signatureOk = await Validator.checkSignature(myDCC);
+}
 ```
 
 👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
