@@ -1,3 +1,4 @@
+const { sign } = require('crypto');
 const cache = require('./cache');
 
 // Generic Type parameter
@@ -351,6 +352,28 @@ async function checkSignature(certificate) {
   return !!verified;
 }
 
+const buildResponse = (certificate, rulesResult, signatureOk) => {
+  let motivation = rulesResult;
+  if (!signatureOk) {
+    motivation = {
+      code: NOT_VALID,
+      result: false,
+      message: "Invalid signature"
+    }
+  }
+  return {
+    person: certificate.person ? `${certificate.person.givenName} ${certificate.person.familyName}` : null,
+    date_of_birth: certificate.dateOfBirth ? certificate.dateOfBirth : null,
+    ...motivation
+  }
+}
+
+async function validate(certificate) {
+  const rulesResult = checkRules(certificate);
+  const signatureOk = await checkSignature(certificate);
+  return buildResponse(certificate, rulesResult, signatureOk)
+}
+
 module.exports = {
-  checkSignature, checkRules, codes,
+  checkSignature, checkRules, validate, codes,
 };

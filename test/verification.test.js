@@ -29,14 +29,30 @@ const verifyRulesAndSignature = async (imagePath, expectedRules, expectedSignatu
   return areRulesOk && isSignatureVerified;
 };
 
+const verifyRulesAndSignatureWithVerify = async (imagePath, expectedRules, expectedSignature) => {
+  const dcc = await Certificate.fromImage(imagePath);
+  const certificateResult = await Validator.validate(dcc);
+  chai.expect(certificateResult.result).to.be.equal(expectedRules && expectedSignature);
+  return certificateResult.result;
+};
+
 describe('Testing integration between Certificate and Validator', () => {
-  it('makes rules verification', async () => {
+  it('makes rules verification with individual methods', async () => {
     await verifyRulesAndSignature(path.join('test', 'data', 'shit.png'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', '2.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'example_qr_vaccine_recovery.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'mouse.jpeg'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', 'signed_cert.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'uk_qr_vaccine_dose1.png'), false, false);
+  });
+
+  it('makes rules verification with verify', async () => {
+    await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'shit.png'), false, true);
+    await verifyRulesAndSignatureWithVerify(path.join('test', 'data', '2.png'), false, false);
+    await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'example_qr_vaccine_recovery.png'), false, false);
+    await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'mouse.jpeg'), false, true);
+    await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'signed_cert.png'), false, false);
+    await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'uk_qr_vaccine_dose1.png'), false, false);
   });
 
   it('makes rules verification on SK testing certificates', async () => {
