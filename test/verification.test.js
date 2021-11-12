@@ -32,8 +32,7 @@ describe('Testing integration between Certificate and Validator', () => {
   it('makes rules verification', async () => {
     await verifyRulesAndSignature('./test/data/shit.png', false, true);
     await verifyRulesAndSignature('./test/data/2.png', false, false);
-	// recovery, start=10/08/2021 (VALID)
-    await verifyRulesAndSignature('./test/data/example_qr_vaccine_recovery.png', true, false);
+    await verifyRulesAndSignature('./test/data/example_qr_vaccine_recovery.png', false, false);
     await verifyRulesAndSignature('./test/data/mouse.jpeg', false, true);
     await verifyRulesAndSignature('./test/data/signed_cert.png', false, false);
     await verifyRulesAndSignature('./test/data/uk_qr_vaccine_dose1.png', false, false);
@@ -67,8 +66,8 @@ describe('Testing integration between Certificate and Validator', () => {
     );
     await verifyRulesFromImage(
       './test/data/eu_test_certificates/SK_6.png', false,
-      Validator.codes.VALID,
-      '^Recovery statement is valid .*$',
+      Validator.codes.NOT_VALID,
+      '^Recovery statement is expired at .*$',
     );
     await verifyRulesFromImage(
       './test/data/eu_test_certificates/SK_7.png', false,
