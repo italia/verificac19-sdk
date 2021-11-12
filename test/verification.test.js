@@ -32,7 +32,7 @@ describe('Testing integration between Certificate and Validator', () => {
   it('makes rules verification', async () => {
     await verifyRulesAndSignature('./test/data/shit.png', false, true);
     await verifyRulesAndSignature('./test/data/2.png', false, false);
-    // recovery, start=10/08/2021 (VALID)
+	// recovery, start=10/08/2021 (VALID)
     await verifyRulesAndSignature('./test/data/example_qr_vaccine_recovery.png', true, false);
     await verifyRulesAndSignature('./test/data/mouse.jpeg', false, true);
     await verifyRulesAndSignature('./test/data/signed_cert.png', false, false);
