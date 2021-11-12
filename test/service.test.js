@@ -4,6 +4,7 @@ const path = require('path');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
+const mockdate = require('mockdate');
 
 process.env.VC19_CACHE_FOLDER = './test/data/tempcache';
 const { Service } = require('../src');
@@ -48,9 +49,30 @@ const mockRequests = () => {
 describe('Testing Service', () => {
   it('checks caching individually', async () => {
     mockRequests();
-    await Service.updateRules();
-    await Service.updateSignaturesList();
-    await Service.updateSignatures();
+    let result;
+    result = await Service.updateRules();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignaturesList();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignatures();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateRules();
+    chai.expect(result).to.be.equal(false);
+    result = await Service.updateSignaturesList();
+    chai.expect(result).to.be.equal(false);
+    result = await Service.updateSignatures();
+    chai.expect(result).to.be.equal(false);
+
+    // You can update cache after 24 hours
+    mockRequests();
+    mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    result = await Service.updateRules();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignaturesList();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignatures();
+    chai.expect(result).not.to.be.equal(false);
+    mockdate.reset();
   });
   it('checks caching all', async () => {
     mockRequests();
