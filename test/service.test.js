@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -12,17 +13,15 @@ chai.use(chaiAsPromised);
 const mockRequests = () => {
   nock('https://get.dgc.gov.it/v1/dgc')
     .get('/settings')
-    .replyWithFile(200, './test/mock/settings.json', {
+    .replyWithFile(200, path.join('test', 'mock', 'settings.json'), {
       'Content-Type': 'application/json',
     });
+  const xkids = JSON.parse(fs.readFileSync(path.join('test', 'data', 'DSC-validation.json'))).map((el) => el.kid);
   nock('https://get.dgc.gov.it/v1/dgc')
     .get('/signercertificate/status')
-    .replyWithFile(200, './test/mock/status.json', {
-      'Content-Type': 'application/json',
-    });
+    .reply(200, xkids);
 
-  const xkids = JSON.parse(fs.readFileSync('./test/mock/status.json'));
-  const signatures = JSON.parse(fs.readFileSync('./test/mock/signaturesarray.json'));
+  const signatures = JSON.parse(fs.readFileSync(path.join('test', 'data', 'DSC-validation.json'))).map((el) => el.raw_data);
   nock('https://get.dgc.gov.it/v1/dgc')
     .get('/signercertificate/update')
     .reply(200, signatures[0], { 'X-RESUME-TOKEN': '1', 'X-KID': xkids[0] });
