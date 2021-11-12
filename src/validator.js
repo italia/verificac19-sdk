@@ -239,21 +239,23 @@ const checkTests = (certificate, rules) => {
   }
 };
 
-const checkRecovery = (certificate) => {
+const checkRecovery = (certificate, rules) => {
   try {
-    // Not used (weird)
-    // let recovery_cert_start_day = findProperty(rules, "recovery_cert_start_day");
-    // let recovery_cert_end_day = findProperty(rules, "recovery_cert_end_day");
+    const recoveryCertStartDay = findProperty(rules, 'recovery_cert_start_day');
+    const recoveryCertEndDay = findProperty(rules, 'recovery_cert_end_day');
 
     const last = certificate.recoveryStatements[certificate.recoveryStatements.length - 1];
 
     const now = new Date(Date.now());
-    const startDate = new Date(
+    let startDate = new Date(
       Date.parse(clearExtraTime(last.certificateValidFrom)),
     );
-    const endDate = new Date(
+    let endDate = new Date(
       Date.parse(clearExtraTime(last.certificateValidUntil)),
     );
+
+    startDate = addDays(startDate, recoveryCertStartDay.value);
+    endDate = addDays(endDate, recoveryCertEndDay.value);
 
     if (startDate > now) {
       return {
