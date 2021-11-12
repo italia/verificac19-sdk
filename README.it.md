@@ -73,7 +73,7 @@ Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
 | | Code            | Description                                   |
 |-| --------------- | --------------------------------------------- |
 |✅| VALID           | Il certificato è valido in Italia e in Europa |
-|🔵| PARTIALLY_VALID | Il certificato è valido solo in Italia        | 
+|✅| PARTIALLY_VALID | Il certificato è valido solo in Italia        | 
 |❌| NOT_VALID       | Il certificato non è valido                   | 
 |❌| NOT_VALID_YET   | Il certificato non è ancora valido            | 
 |❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | 
