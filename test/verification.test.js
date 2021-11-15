@@ -160,6 +160,13 @@ describe('Testing integration between Certificate and Validator', () => {
       Validator.codes.NOT_VALID_YET,
       '^Recovery statement is not valid yet, starts at .*$',
     );
+    // Recovery statement is not valid
+    mockdate.set('2022-04-22T12:34:56.000Z');
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Recovery statement is expired at .*$',
+    );
     // Not valid greenpass without recovery
     const dccWithoutRecovery = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'),
