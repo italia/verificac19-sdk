@@ -5,7 +5,11 @@ const { addHours, addDays } = require('./utils');
 const GENERIC_TYPE = 'GENERIC';
 
 // Test Result
-const DETECTED = '260373001';
+const TEST_DETECTED = '260373001';
+
+// Test Types
+const TEST_RAPID = 'LP217198-3';
+const TEST_MOLECULAR = 'LP6464-4';
 
 // Certificate Status
 const NOT_EU_DCC = 'NOT_EU_DCC';
@@ -185,31 +189,28 @@ const checkVaccinations = (certificate, rules) => {
 
 const checkTests = (certificate, rules) => {
   try {
-    // Not used (weird)
-    /* let molecular_test_start_hours = findProperty(
-      rules,
-      "molecular_test_start_hours"
-    );
-
-    let molecular_test_end_hours = findProperty(
-      rules,
-      "molecular_test_end_hours"
-    ); */
-
-    const rapidTestStartHours = findProperty(rules, 'rapid_test_start_hours');
-    const rapidTestEndHours = findProperty(rules, 'rapid_test_end_hours');
+    let testStartHours;
+    let testEndHours;
 
     const last = certificate.tests[certificate.tests.length - 1];
+    if (last.typeOfTest === TEST_MOLECULAR) {
+      testStartHours = findProperty(rules, 'molecular_test_start_hours');
+      testEndHours = findProperty(rules, 'molecular_test_end_hours');
+    } else if (last.typeOfTest === TEST_RAPID) {
+      testStartHours = findProperty(rules, 'rapid_test_start_hours');
+      testEndHours = findProperty(rules, 'rapid_test_end_hours');
+    } else {
+      return { code: NOT_VALID, message: 'Test type is not valid' };
+    }
 
     const now = new Date(Date.now());
     let startDate = new Date(Date.parse(last.dateTimeOfCollection));
-
     let endDate = new Date(Date.parse(last.dateTimeOfCollection));
 
-    startDate = addHours(startDate, rapidTestStartHours.value);
-    endDate = addHours(endDate, rapidTestEndHours.value);
+    startDate = addHours(startDate, testStartHours.value);
+    endDate = addHours(endDate, testEndHours.value);
 
-    if (last.testResult === DETECTED) return { code: NOT_VALID, message: 'Test Result is DETECTED' };
+    if (last.testResult === TEST_DETECTED) return { code: NOT_VALID, message: 'Test Result is DETECTED' };
 
     if (startDate > now) {
       return {
