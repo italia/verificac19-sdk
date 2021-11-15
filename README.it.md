@@ -33,7 +33,37 @@ per cambiare questa impostazione occorre settare la variabile di ambiente `VC19_
 
 ### Verifica un DCC
 
-Puoi verificare un DCC utilizzando i moduli `Certificate` e `Validator`.
+Puoi caricare un DCC da un'immagine o da una stringa usando il modulo `Certificate`.
+
+```js
+const {Certificate} = require('verificac19-sdk');
+
+const main = async () => {
+  const myDCCfromImage = await Certificate.fromImage('./data/myDCC.png');
+  const myDCCfromRaw = await Certificate.fromRaw('HC1:6BF+70790T9WJWG.FKY*4GO0.O1CV2...etc..');
+}
+```
+
+Il contenuto del DCC caricato sarà il seguente:
+
+```js
+{
+  person: {
+    standardisedFamilyName: 'MUSTERMANN',
+    familyName: 'Mustermann',
+    standardisedGivenName: 'ERIKA',
+    givenName: 'Erika'
+  },
+  dateOfBirth: '1964-08-12',
+  kid: 'TH15154F4k3K1D=',
+  vaccinations: [ ... ],       // Array of vaccinations (if any)
+  tests: [ ... ],              // Array of tests (if any)
+  recoveryStatements: [ ... ], // Array of recovery statements (if any)
+  dcc: DCCObject               // from dcc-utils https://github.com/ministero-salute/dcc-utils
+}
+```
+
+Puoi verificare un DCC utilizzando il modulo `Validator`.
 
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
@@ -44,12 +74,13 @@ const main = async () => {
 }
 ```
 
-Il metodo `validate` torna un oggetto contenente il nome della `person`, `date_of_birth`, `code` e `message` insieme al risultato (`result`)
+Il metodo `validate` torna un oggetto contenente il nome della persona `person`,
+`date_of_birth`, `code` e `message` insieme al risultato (`result`)
 
 ```js
 {
-  person: 'Gabriele Musterfrau-Gößinger',
-  date_of_birth: '1998-02-26',
+  person: 'Erika Mustermann',
+  date_of_birth: '1964-08-12',
   code: 'NOT_VALID',
   result: false,
   message: 'Test Result is expired at : 2021-05-22T12:34:56.000Z'

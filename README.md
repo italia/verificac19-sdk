@@ -35,7 +35,37 @@ to change it please set `VC19_CACHE_FOLDER` env variable.
 
 ### Verify a DCC
 
-You can verify a DCC using `Certificate` and `Validator` modules.
+You can load a DCC from an image or from a raw string using `Certificate` module.
+
+```js
+const {Certificate} = require('verificac19-sdk');
+
+const main = async () => {
+  const myDCCfromImage = await Certificate.fromImage('./data/myDCC.png');
+  const myDCCfromRaw = await Certificate.fromRaw('HC1:6BF+70790T9WJWG.FKY*4GO0.O1CV2...etc..');
+}
+```
+
+Loaded DCC has the following structure:
+
+```js
+{
+  person: {
+    standardisedFamilyName: 'MUSTERMANN',
+    familyName: 'Mustermann',
+    standardisedGivenName: 'ERIKA',
+    givenName: 'Erika'
+  },
+  dateOfBirth: '1964-08-12',
+  kid: 'TH15154F4k3K1D=',
+  vaccinations: [ ... ],       // Array of vaccinations (if any)
+  tests: [ ... ],              // Array of tests (if any)
+  recoveryStatements: [ ... ], // Array of recovery statements (if any)
+  dcc: DCCObject               // from dcc-utils https://github.com/ministero-salute/dcc-utils
+}
+```
+
+You can verify a DCC using `Validator` module.
 
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
@@ -51,8 +81,8 @@ const main = async () => {
 
 ```js
 {
-  person: 'Gabriele Musterfrau-Gößinger',
-  date_of_birth: '1998-02-26',
+  person: 'Erika Mustermann',
+  date_of_birth: '1964-08-12',
   code: 'NOT_VALID',
   result: false,
   message: 'Test Result is expired at : 2021-05-22T12:34:56.000Z'
