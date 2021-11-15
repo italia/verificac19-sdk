@@ -16,9 +16,9 @@ npm i verificac19-sdk
 
 ## Usage
 
-### Download and cache rules and signatures
+### Download and cache rules and DSCs
 
-You can download and cache rules and signatures using `Service` module.
+You can download and cache rules and DSCs using `Service` module.
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -28,19 +28,7 @@ const main = async () => {
 }
 ```
 
-Alternatively you can indivudally update rules and signatures.
-
-```js
-const {Service} = require('verificac19-sdk');
-
-const main = async () => {
-  await Service.updateRules();
-  await Service.updateSignaturesList();
-  await Service.updateSignatures();
-}
-```
-
-⚠️ By default rules and signature will be cached in a folder called `.cache`, 
+⚠️ By default rules and DSCs will be cached in a folder called `.cache`, 
 to change it please set `VC19_CACHE_FOLDER` env variable.
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
@@ -58,7 +46,8 @@ const main = async () => {
 }
 ```
 
-`validate` method returns an object containing `person` name, `date_of_birth`, `code` and a `message` alongside the `result`
+`validate` method returns an object containing `person` name, 
+`date_of_birth`, `code` and a `message` alongside the `result`
 
 ```js
 {
@@ -87,7 +76,25 @@ const rulesSummary = await Validator.validate(dccTest);
 console.log(rulesSummary.code === Validator.codes.NOT_VALID);
 ```
 
-You can also use `Validator.checkRules` and `Validator.checkSignature` methods.
+👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
+
+### Alternative methods
+
+To update rules and DSCs you can also use `updateRules`, 
+`updateSignaturesList` and `updateSignatures` methods
+
+```js
+const {Service} = require('verificac19-sdk');
+
+const main = async () => {
+  await Service.updateRules();
+  await Service.updateSignaturesList();
+  await Service.updateSignatures();
+}
+```
+
+To verify a DCC you can also use `Validator.checkRules` and 
+`Validator.checkSignature` methods.
 
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
@@ -98,8 +105,6 @@ const main = async () => {
   const signatureOk = await Validator.checkSignature(myDCC);
 }
 ```
-
-👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 
 ## Development
 
@@ -119,6 +124,15 @@ npm run test
 Copyright (c) 2021 - Andrea Stagi
 
 Parts of the core code have been written by [Area servizi ICT, Politecnico di Milano](https://www.ict.polimi.it/).
+
+## Contributors
+Here is a list of contributors. Thank you to everyone involved for improving this project, day by day.
+
+<a href="https://github.com/italia/verificac19-sdk">
+  <img
+  src="https://contributors-img.web.app/image?repo=italia/verificac19-sdk"
+  />
+</a>
 
 ## License
 VerificaC19-SDK for Node.js is available under the [MIT](https://opensource.org/licenses/mit-license.php) license.
