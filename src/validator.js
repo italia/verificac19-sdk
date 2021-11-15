@@ -65,9 +65,18 @@ const checkVaccinations = (certificate, rules) => {
     );
 
     // Check vaccine type is in list
-    if (type === 'Sputnik-V' && last.countryOfVaccination !== 'SM') return { code: NOT_VALID, message: 'Vaccine Sputnik-V is valid only in San Marino' };
-    if (!type || !vaccineEndDayComplete) return { code: NOT_VALID, message: 'Vaccine Type is not in list' };
-
+    if (type === 'Sputnik-V' && last.countryOfVaccination !== 'SM') {
+      return {
+        code: NOT_VALID,
+        message: 'Vaccine Sputnik-V is valid only in San Marino',
+      };
+    }
+    if (!type || !vaccineEndDayComplete) {
+      return {
+        code: NOT_VALID,
+        message: 'Vaccine Type is not in list',
+      };
+    }
     const startNow = new Date(Date.now());
     const endNow = new Date(Date.now());
 
