@@ -6,32 +6,34 @@ const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
 cache.setUp();
 
-const checkCRL = async (chunk=1, version=0) => {
-  let resp;
-  do {
-    try {
-      resp = await axios
-        .get(`https://testaka4.sogei.it/v1/dgc/drl/check?chunk=${chunk}&version=${version}`);
-        chunk += 1;
-    } catch {
-      break;
-    }
-  } while (resp.status === 200 && chunk !== resp.data.chunk);
-}
+const checkCRL = async () => {
+  const crlStatus = cache.getCRLStatus();
+  try {
+    const resp = await axios
+      .get(`https://testaka4.sogei.it/v1/dgc/drl/check?version=${crlStatus.version}`);
+    return resp.status === 200;
+  } catch {
+    return false;
+  }
+};
 
-const updateCRL = async (chunk=1, version=0) => {
+const updateCRL = async () => {
   let resp;
+  if (!await checkCRL()) { return; }
+  const crlStatus = cache.getCRLStatus();
   do {
     try {
       resp = await axios
-        .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${chunk}&version=${version}`);
-        console.log(resp.data.revokedUcvi);
-        chunk += 1;
+        .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
+      console.log(resp.data.revokedUcvi);
+      crlStatus.chunk += 1;
+      cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
     } catch {
       break;
     }
-  } while (resp.status === 200 && chunk !== resp.data.chunk);
-}
+  } while (resp.status === 200 && crlStatus.chunk > resp.data.chunk);
+  cache.storeCRLStatus(1, crlStatus.version + 1);
+};
 
 const updateRules = async () => {
   if (!cache.needRulesUpdate()) return false;
