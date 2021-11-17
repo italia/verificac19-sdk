@@ -4,7 +4,7 @@
 <img src="https://github.com/italia/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
 <a href="https://codecov.io/gh/italia/verificac19-sdk"><img src="https://codecov.io/gh/italia/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
 
-Implementazione per Node.js di VerificaC19 SDK.
+Implementazione ufficiale per Node.js di VerificaC19 SDK ([lista degli SDK ufficiali](https://github.com/ministero-salute/it-dgc-verificac19-sdk-onboarding#lista-librerie)).
 
 ## Installazione
 
