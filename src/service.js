@@ -25,10 +25,10 @@ const updateCRL = async () => {
     try {
       resp = await axios
         .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
-      console.log(resp.data.revokedUcvi);
+      await cache.storeCRLRevokedUCVI(resp.data.revokedUcvi);
       crlStatus.chunk += 1;
       cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
-    } catch {
+    } catch (err) {
       break;
     }
   } while (resp.status === 200 && crlStatus.chunk > resp.data.chunk);

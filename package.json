@@ -4,7 +4,8 @@
   "description": "VerificaC19 SDK for Node.js",
   "dependencies": {
     "axios": "^0.24.0",
-    "dcc-utils": "^0.4.0"
+    "dcc-utils": "^0.4.0",
+    "mongodb": "^4.2.0"
   },
   "devDependencies": {
     "chai": "^4.3.4",

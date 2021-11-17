@@ -131,20 +131,28 @@ const {Certificate, Validator} = require('verificac19-sdk');
 
 const main = async () => {
   const myDCC = await Certificate.fromImage('./data/myDCC.png');
-  const rulesOk = Validator.checkRules(myDCC).result;
+  const rulesOk = await Validator.checkRules(myDCC).result;
   const signatureOk = await Validator.checkSignature(myDCC);
 }
 ```
 
 ## Development
 
-Install dependencies
+### Install dependencies
 
 ```sh
 npm i
 ```
 
-Run tests
+### Run tests
+
+Run mongodb services using Docker
+
+```sh
+docker-compose up
+```
+
+Set `VC19_CACHE_FOLDER` and run tests
 
 ```sh
 npm run test

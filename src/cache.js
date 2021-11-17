@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { MongoClient } = require('mongodb');
 const { addHours } = require('./utils');
 
 const CACHE_FOLDER = process.env.VC19_CACHE_FOLDER || '.cache';
@@ -14,6 +15,12 @@ const RULES_FILE_PATH = path.join(CACHE_FOLDER, RULES_FILE);
 const SIGNATURES_LIST_FILE_PATH = path.join(CACHE_FOLDER, SIGNATURES_LIST_FILE);
 
 const UPDATE_WINDOW_HOURS = 24;
+const DB_NAME = 'VC19';
+
+const mongoClient = new MongoClient(process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017');
+
+let db;
+let dbUvciCollection;
 
 const fileNeedsUpdate = (filePath) => {
   try {
@@ -26,11 +33,14 @@ const fileNeedsUpdate = (filePath) => {
   return true;
 };
 
-const setUp = () => {
+const setUp = async () => {
   fs.promises.mkdir(CACHE_FOLDER, { recursive: true });
   if (!fs.existsSync(CRL_FILE_PATH)) {
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
   }
+  await mongoClient.connect();
+  db = mongoClient.db(DB_NAME);
+  dbUvciCollection = db.collection('uvci');
 };
 
 const storeCRLStatus = (chunk = 1, version = 0) => {
@@ -63,6 +73,15 @@ const getSignatureList = () => JSON.parse(fs.readFileSync(SIGNATURES_LIST_FILE_P
 
 const getSignatures = () => JSON.parse(fs.readFileSync(SIGNATURES_FILE_PATH));
 
+const storeCRLRevokedUCVI = async (revokedUcvi) => {
+  const revokedUcviForDb = revokedUcvi.map((uvci) => ({ _id: uvci }));
+  if (revokedUcviForDb.length !== 0) {
+    await dbUvciCollection.insertMany(revokedUcviForDb);
+  }
+};
+
+const isUVCIRevoked = async (uvci) => (!!await dbUvciCollection.findOne({ _id: uvci }));
+
 module.exports = {
   setUp,
   storeRules,
@@ -76,4 +95,6 @@ module.exports = {
   needSignaturesUpdate,
   getCRLStatus,
   storeCRLStatus,
+  storeCRLRevokedUCVI,
+  isUVCIRevoked,
 };

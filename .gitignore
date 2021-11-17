@@ -18,3 +18,4 @@ coverage/
 
 # Cache
 .cache
+/db-data

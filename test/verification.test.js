@@ -6,8 +6,8 @@ const { Certificate, Validator } = require('../src');
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-match'));
 
-const verifyRulesFromCertificate = (dcc, expectedResult, expectedCode, expectedMessageReg = null) => {
-  const rulesReport = Validator.checkRules(dcc);
+const verifyRulesFromCertificate = async (dcc, expectedResult, expectedCode, expectedMessageReg = null) => {
+  const rulesReport = await Validator.checkRules(dcc);
   chai.expect(rulesReport.result).to.be.equal(expectedResult);
   chai.expect(rulesReport.code).to.be.equal(expectedCode);
   if (expectedMessageReg) {
@@ -22,7 +22,7 @@ const verifyRulesFromImage = async (imagePath, expectedResult, expectedCode, exp
 
 const verifyRulesAndSignature = async (imagePath, expectedRules, expectedSignature) => {
   const dcc = await Certificate.fromImage(imagePath);
-  const areRulesOk = Validator.checkRules(dcc).result;
+  const areRulesOk = (await Validator.checkRules(dcc)).result;
   chai.expect(areRulesOk).to.be.equal(expectedRules);
   const isSignatureVerified = await Validator.checkSignature(dcc);
   chai.expect(isSignatureVerified).to.be.equal(expectedSignature);

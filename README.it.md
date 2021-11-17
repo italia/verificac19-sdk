@@ -129,7 +129,7 @@ const {Certificate, Validator} = require('verificac19-sdk');
 
 const main = async () => {
   const myDCC = await Certificate.fromImage('./data/myDCC.png');
-  const rulesOk = Validator.checkRules(myDCC).result;
+  const rulesOk = await Validator.checkRules(myDCC).result;
   const signatureOk = await Validator.checkSignature(myDCC);
 }
 ```
