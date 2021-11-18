@@ -117,9 +117,12 @@ To update rules and DSCs you can also use `updateRules`,
 const {Service} = require('verificac19-sdk');
 
 const main = async () => {
+  await Service.setUp();
   await Service.updateRules();
   await Service.updateSignaturesList();
   await Service.updateSignatures();
+  await Service.updateCRL();
+  await Service.tearDown();
 }
 ```
 

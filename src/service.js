@@ -4,7 +4,9 @@ const cache = require('./cache');
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
-cache.setUp();
+const setUp = async () => {
+  await cache.setUp();
+};
 
 const checkCRL = async () => {
   const crlStatus = cache.getCRLStatus();
@@ -29,6 +31,7 @@ const updateCRL = async () => {
       crlStatus.chunk += 1;
       cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
     } catch (err) {
+      console.log(err);
       break;
     }
   } while (resp.status === 200 && crlStatus.chunk > resp.data.chunk);
@@ -75,12 +78,18 @@ const updateSignatures = async () => {
   return signatures;
 };
 
+const tearDown = async () => {
+  await cache.tearDown();
+};
+
 const updateAll = async () => {
+  await setUp();
   await updateRules();
   await updateSignaturesList();
   await updateSignatures();
+  await tearDown();
 };
 
 module.exports = {
-  updateSignatures, updateSignaturesList, updateRules, updateAll, updateCRL, checkCRL,
+  updateSignatures, updateSignaturesList, updateRules, updateAll, updateCRL, checkCRL, setUp, tearDown,
 };
