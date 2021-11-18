@@ -16,86 +16,94 @@ const SIGNATURES_LIST_FILE_PATH = path.join(CACHE_FOLDER, SIGNATURES_LIST_FILE);
 
 const UPDATE_WINDOW_HOURS = 24;
 
-const UVCI = mongoose.model('UVCI', new mongoose.Schema({
-  _id: String,
-}));
-
-const fileNeedsUpdate = (filePath) => {
-  try {
-    if (addHours(fs.statSync(filePath).mtime, UPDATE_WINDOW_HOURS) > new Date(Date.now())) {
-      return false;
+class Cache {
+  async setUp() {
+    fs.mkdirSync(CACHE_FOLDER, { recursive: true });
+    if (!fs.existsSync(CRL_FILE_PATH)) {
+      fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
     }
-  } catch (err) {
-    // Needs update
+    this._dbConnection = await mongoose.createConnection(
+      process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017/VC19?authSource=admin',
+    );
+    this._dbModel = this._dbConnection.model('UVCI', new mongoose.Schema({
+      _id: String,
+    }));
   }
-  return true;
-};
 
-const setUp = async () => {
-  fs.promises.mkdir(CACHE_FOLDER, { recursive: true });
-  if (!fs.existsSync(CRL_FILE_PATH)) {
-    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
+  fileNeedsUpdate(filePath) {
+    try {
+      if (addHours(fs.statSync(filePath).mtime, UPDATE_WINDOW_HOURS) > new Date(Date.now())) {
+        return false;
+      }
+    } catch (err) {
+      // Needs update
+    }
+    return true;
   }
-  await mongoose.connect(process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017/VC19?authSource=admin');
-};
 
-const storeCRLStatus = (chunk = 1, version = 0) => {
-  fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk, version }));
-};
-
-const storeRules = (data) => {
-  fs.writeFileSync(RULES_FILE_PATH, data);
-};
-
-const storeSignaturesList = (data) => {
-  fs.writeFileSync(SIGNATURES_LIST_FILE_PATH, data);
-};
-
-const storeSignatures = (data) => {
-  fs.writeFileSync(SIGNATURES_FILE_PATH, data);
-};
-
-const needRulesUpdate = () => fileNeedsUpdate(RULES_FILE_PATH);
-
-const needSignaturesUpdate = () => fileNeedsUpdate(SIGNATURES_FILE_PATH);
-
-const needSignaturesListUpdate = () => fileNeedsUpdate(SIGNATURES_LIST_FILE_PATH);
-
-const getCRLStatus = () => JSON.parse(fs.readFileSync(CRL_FILE_PATH));
-
-const getRules = () => JSON.parse(fs.readFileSync(RULES_FILE_PATH));
-
-const getSignatureList = () => JSON.parse(fs.readFileSync(SIGNATURES_LIST_FILE_PATH));
-
-const getSignatures = () => JSON.parse(fs.readFileSync(SIGNATURES_FILE_PATH));
-
-const storeCRLRevokedUCVI = async (revokedUcvi) => {
-  const revokedUcviForDb = revokedUcvi.map((uvci) => ({ _id: uvci }));
-  if (revokedUcviForDb.length !== 0) {
-    await UVCI.insertMany(revokedUcviForDb);
+  storeCRLStatus(chunk = 1, version = 0) {
+    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk, version }));
   }
-};
 
-const isUVCIRevoked = async (uvci) => (!!await UVCI.findOne({ _id: uvci }));
+  storeRules(data) {
+    fs.writeFileSync(RULES_FILE_PATH, data);
+  }
 
-const tearDown = async () => {
-  await mongoose.disconnect();
-};
+  storeSignaturesList(data) {
+    fs.writeFileSync(SIGNATURES_LIST_FILE_PATH, data);
+  }
 
-module.exports = {
-  setUp,
-  storeRules,
-  storeSignaturesList,
-  storeSignatures,
-  getRules,
-  getSignatureList,
-  getSignatures,
-  needRulesUpdate,
-  needSignaturesListUpdate,
-  needSignaturesUpdate,
-  getCRLStatus,
-  storeCRLStatus,
-  storeCRLRevokedUCVI,
-  isUVCIRevoked,
-  tearDown,
-};
+  storeSignatures(data) {
+    fs.writeFileSync(SIGNATURES_FILE_PATH, data);
+  }
+
+  needRulesUpdate() {
+    return this.fileNeedsUpdate(RULES_FILE_PATH);
+  }
+
+  needSignaturesUpdate() {
+    return this.fileNeedsUpdate(SIGNATURES_FILE_PATH);
+  }
+
+  needSignaturesListUpdate() {
+    return this.fileNeedsUpdate(SIGNATURES_LIST_FILE_PATH);
+  }
+
+  getCRLStatus() {
+    return JSON.parse(fs.readFileSync(CRL_FILE_PATH));
+  }
+
+  getRules() {
+    return JSON.parse(fs.readFileSync(RULES_FILE_PATH));
+  }
+
+  getSignatureList() {
+    return JSON.parse(fs.readFileSync(SIGNATURES_LIST_FILE_PATH));
+  }
+
+  getSignatures() {
+    return JSON.parse(fs.readFileSync(SIGNATURES_FILE_PATH));
+  }
+
+  async storeCRLRevokedUCVI(revokedUcvi) {
+    const revokedUcviForDb = revokedUcvi.map((uvci) => ({ _id: uvci }));
+    if (revokedUcviForDb.length !== 0) {
+      await this._dbModel.insertMany(revokedUcviForDb);
+    }
+  }
+
+  async isUVCIRevoked(uvci) {
+    return !!await this._dbModel.findOne({ _id: uvci });
+  }
+
+  async tearDown() {
+    if (this._dbConnection) {
+      await this._dbConnection.close();
+    }
+    await mongoose.disconnect();
+  }
+}
+
+const cacheSingleton = new Cache();
+
+module.exports = cacheSingleton;
