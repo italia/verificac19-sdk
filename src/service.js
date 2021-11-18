@@ -21,21 +21,21 @@ const checkCRL = async () => {
 
 const updateCRL = async () => {
   let resp;
-  if (!await checkCRL()) { return; }
-  const crlStatus = cache.getCRLStatus();
-  do {
-    try {
-      resp = await axios
-        .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
-      await cache.storeCRLRevokedUCVI(resp.data.revokedUcvi);
-      crlStatus.chunk += 1;
-      cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
-    } catch (err) {
-      console.log(err);
-      break;
-    }
-  } while (resp.status === 200 && crlStatus.chunk > resp.data.chunk);
-  cache.storeCRLStatus(1, crlStatus.version + 1);
+  while (await checkCRL()) {
+    const crlStatus = cache.getCRLStatus();
+    do {
+      try {
+        resp = await axios
+          .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
+        await cache.storeCRLRevokedUCVI(resp.data.revokedUcvi);
+        crlStatus.chunk += 1;
+        cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
+      } catch {
+        break;
+      }
+    } while (resp.status === 200 && crlStatus.chunk > resp.data.chunk);
+    cache.storeCRLStatus(1, crlStatus.version + 1);
+  }
 };
 
 const updateRules = async () => {
