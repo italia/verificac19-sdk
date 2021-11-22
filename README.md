@@ -8,6 +8,10 @@ VerificaC19 SDK implementation for Node.js.
 
 *Read this in other languages: [Italian 🇮🇹](https://github.com/italia/verificac19-sdk/blob/master/README.it.md).*
 
+## Requirements
+
+- Node.js version >= 12.x
+
 ## Installation
 
 ```sh

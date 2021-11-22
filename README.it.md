@@ -6,6 +6,10 @@
 
 Implementazione per Node.js di VerificaC19 SDK.
 
+## Requisiti
+
+- Node.js versione >= 12.x
+
 ## Installazione
 
 ```sh
