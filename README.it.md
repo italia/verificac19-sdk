@@ -6,6 +6,10 @@
 
 Implementazione per Node.js di VerificaC19 SDK.
 
+## Requisiti
+
+- Node.js versione >= 12.x
+
 ## Installazione
 
 ```sh
@@ -74,7 +78,7 @@ const main = async () => {
 }
 ```
 
-Il metodo `validate` torna un oggetto contenente il nome della persona `person`,
+`Validator.validate` torna un oggetto contenente il nome della persona `person`,
 `date_of_birth`, `code` e `message` insieme al risultato (`result`)
 
 ```js

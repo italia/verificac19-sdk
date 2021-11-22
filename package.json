@@ -1,6 +1,6 @@
 {
   "name": "verificac19-sdk",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "VerificaC19 SDK for Node.js",
   "dependencies": {
     "axios": "^0.24.0",
@@ -34,8 +34,10 @@
   ],
   "main": "src/index.js",
   "files": [
-    "src"
+    "src",
+    "types"
   ],
+  "types": "types/index.d.ts",
   "scripts": {
     "lint": "eslint src test examples",
     "test": "nyc mocha -t 200000 --file test/global.js test/",
