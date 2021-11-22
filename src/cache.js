@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const crl = require('./crl');
+
+const crl = require(process.env.VC19_CRL_ADAPTER_MODULE || './crl');
 const { addHours } = require('./utils');
 
 const CACHE_FOLDER = process.env.VC19_CACHE_FOLDER || '.cache';
