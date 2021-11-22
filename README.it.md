@@ -6,6 +6,10 @@
 
 Implementazione per Node.js di VerificaC19 SDK.
 
+## Requisiti
+
+- Node.js versione >= 12.x
+
 ## Installazione
 
 ```sh
@@ -14,9 +18,9 @@ npm i verificac19-sdk
 
 ## Utilizzo
 
-### Scarica e salva regole e chiavi
+### Scarica e salva regole e DSC
 
-Puoi scaricare e salvare regole e chiavi utilizzando il modulo `Service`.
+Puoi scaricare e salvare regole e DSC utilizzando il modulo `Service`.
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -26,7 +30,90 @@ const main = async () => {
 }
 ```
 
-In alternativa puoi scaricare e salvare le regole e le chiavi utilizzando gli opportuni metodi singoli.
+⚠️ Regole e DSC vengono salvati di default nella cartella `.cache`, 
+per cambiare questa impostazione occorre settare la variabile di ambiente `VC19_CACHE_FOLDER`.
+
+👉🏻  Vedi l'esempio [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
+
+### Verifica un DCC
+
+Puoi caricare un DCC da un'immagine o da una stringa usando il modulo `Certificate`.
+
+```js
+const {Certificate} = require('verificac19-sdk');
+
+const main = async () => {
+  const myDCCfromImage = await Certificate.fromImage('./data/myDCC.png');
+  const myDCCfromRaw = await Certificate.fromRaw('HC1:6BF+70790T9WJWG.FKY*4GO0.O1CV2...etc..');
+}
+```
+
+Il contenuto del DCC caricato sarà il seguente:
+
+```js
+{
+  person: {
+    standardisedFamilyName: 'MUSTERMANN',
+    familyName: 'Mustermann',
+    standardisedGivenName: 'ERIKA',
+    givenName: 'Erika'
+  },
+  dateOfBirth: '1964-08-12',
+  kid: 'TH15154F4k3K1D=',
+  vaccinations: [ ... ],       // Array of vaccinations (if any)
+  tests: [ ... ],              // Array of tests (if any)
+  recoveryStatements: [ ... ], // Array of recovery statements (if any)
+  dcc: DCCObject               // from dcc-utils https://github.com/ministero-salute/dcc-utils
+}
+```
+
+Puoi verificare un DCC utilizzando il modulo `Validator`.
+
+```js
+const {Certificate, Validator} = require('verificac19-sdk');
+
+const main = async () => {
+  const myDCC = await Certificate.fromImage('./data/myDCC.png');
+  const validationResult = await Validator.validate(myDCC);
+}
+```
+
+Il metodo `validate` torna un oggetto contenente il nome della persona `person`,
+`date_of_birth`, `code` e `message` insieme al risultato (`result`)
+
+```js
+{
+  person: 'Erika Mustermann',
+  date_of_birth: '1964-08-12',
+  code: 'NOT_VALID',
+  result: false,
+  message: 'Test Result is expired at : 2021-05-22T12:34:56.000Z'
+}
+```
+
+Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
+
+| | Code            | Description                                   |
+|-| --------------- | --------------------------------------------- |
+|✅| VALID           | Il certificato è valido in Italia e in Europa |
+|✅| PARTIALLY_VALID | Il certificato è valido solo in Italia        | 
+|❌| NOT_VALID       | Il certificato non è valido                   | 
+|❌| NOT_VALID_YET   | Il certificato non è ancora valido            | 
+|❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | 
+
+per esempio 
+
+```js
+const rulesSummary = Validator.validate(dccTest);
+console.log(rulesSummary.code === Validator.codes.NOT_VALID);
+```
+
+👉🏻  Vedi l'esempio [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
+
+### Metodi alternativi
+
+Per scaricare e salvare le regole e le DSC puoi anche usare i metodi
+`updateRules`, `updateSignaturesList` e `updateSignatures`.
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -38,14 +125,8 @@ const main = async () => {
 }
 ```
 
-⚠️ Regole e chiavi vengono salvati di default nella cartella `.cache`, 
-per cambiare questa impostazione occorre settare la variabile di ambiente `VC19_CACHE_FOLDER`.
-
-👉🏻  Vedi l'esempio [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
-
-### Verifica un DCC
-
-Puoi verificare un DCC utilizzando i moduli `Certificate` e `Validator`.
+Per validare un DCC puoi anche usare i metodi `Validator.checkRules` e 
+`Validator.checkSignature`.
 
 ```js
 const {Certificate, Validator} = require('verificac19-sdk');
@@ -56,35 +137,6 @@ const main = async () => {
   const signatureOk = await Validator.checkSignature(myDCC);
 }
 ```
-
-Il metodo `checkRules` torna un oggetto contenente `code` e `message` insieme al risultato (`result`)
-
-```js
-{
-  result: false,
-  code: 'NOT_VALID',
-  message: 'Test Result is expired at : 2021-05-22T12:34:56.000Z'
-}
-```
-
-Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
-
-| | Code            | Description                                   |
-|-| --------------- | --------------------------------------------- |
-|✅| VALID           | Il certificato è valido in Italia e in Europa |
-|🔵| PARTIALLY_VALID | Il certificato è valido solo in Italia        | 
-|❌| NOT_VALID       | Il certificato non è valido                   | 
-|❌| NOT_VALID_YET   | Il certificato non è ancora valido            | 
-|❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | 
-
-per esempio 
-
-```js
-const rulesSummary = Validator.checkRules(dccTest);
-console.log(rulesSummary.code === Validator.codes.NOT_VALID);
-```
-
-👉🏻  Vedi l'esempio [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 
 ## Development
 
@@ -105,5 +157,13 @@ Copyright (c) 2021 - Andrea Stagi
 
 Parte del codice principale è stata scritta da [Area servizi ICT, Politecnico di Milano](https://www.ict.polimi.it/).
 
+## Contributori
+
+<a href="https://github.com/italia/verificac19-sdk">
+  <img
+  src="https://contributors-img.web.app/image?repo=italia/verificac19-sdk"
+  />
+</a>
+
 ## Licenza
-VerificaC19-SDK per Node.js è disponibile sotto la licenza [MIT](https://opensource.org/licenses/mit-license.php).
+VerificaC19-SDK per Node.js è disponibile sotto licenza [MIT](https://opensource.org/licenses/mit-license.php).

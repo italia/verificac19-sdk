@@ -7,6 +7,7 @@ const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 cache.setUp();
 
 const updateRules = async () => {
+  if (!cache.needRulesUpdate()) return false;
   const resp = await axios.get(`${API_URL}/settings`);
   const json = JSON.stringify(resp.data, null, 1);
   cache.storeRules(json);
@@ -14,15 +15,17 @@ const updateRules = async () => {
 };
 
 const updateSignaturesList = async () => {
+  if (!cache.needSignaturesListUpdate()) return false;
   const resp = await axios.get(
     `${API_URL}/signercertificate/status`,
   );
   const json = JSON.stringify(resp.data, null, 1);
-  cache.storeSignatureList(json);
+  cache.storeSignaturesList(json);
   return resp.data;
 };
 
 const updateSignatures = async () => {
+  if (!cache.needSignaturesUpdate()) return false;
   let header;
   let resp;
   const signatures = {};

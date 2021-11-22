@@ -1,3 +1,4 @@
+const path = require('path');
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const { Certificate } = require('../src');
@@ -7,7 +8,7 @@ chai.use(chaiAsPromised);
 
 describe('Testing Certificate', () => {
   it('gets certificate from image', async () => {
-    const dcc = await Certificate.fromImage('./test/data/example_qr_vaccine_recovery.png');
+    const dcc = await Certificate.fromImage(path.join('test', 'data', 'example_qr_vaccine_recovery.png'));
     chai.expect(dcc.person.standardisedFamilyName).to.be.equal('GANTES');
   });
 
@@ -17,7 +18,7 @@ describe('Testing Certificate', () => {
   });
 
   it('gets certificate from invalid image', async () => {
-    await chai.expect(Certificate.fromImage('./test/data/not_valid_certificate.png')).to.be.rejectedWith(CertificateParsingError);
+    await chai.expect(Certificate.fromImage(path.join('test', 'data', 'not_valid_certificate.png'))).to.be.rejectedWith(CertificateParsingError);
   });
 
   it('gets certificate from invalid raw', async () => {
@@ -26,7 +27,7 @@ describe('Testing Certificate', () => {
     )).to.be.rejectedWith(CertificateParsingError);
   });
   it('gets some invalid certificates', async () => {
-    await chai.expect(Certificate.fromImage('./test/data/not_valid_certificate.png')).to.be.rejectedWith(CertificateParsingError);
-    await chai.expect(Certificate.fromImage('./test/data/invalid.png')).to.be.rejectedWith(CertificateParsingError);
+    await chai.expect(Certificate.fromImage(path.join('test', 'data', 'not_valid_certificate.png'))).to.be.rejectedWith(CertificateParsingError);
+    await chai.expect(Certificate.fromImage(path.join('test', 'data', 'invalid.png'))).to.be.rejectedWith(CertificateParsingError);
   });
 });
