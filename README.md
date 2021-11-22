@@ -80,7 +80,7 @@ const main = async () => {
 }
 ```
 
-`validate` method returns an object containing `person` name, 
+`Validator.validate` returns an object containing `person` name, 
 `date_of_birth`, `code` and a `message` alongside the `result`
 
 ```js
