@@ -32,8 +32,10 @@
   ],
   "main": "src/index.js",
   "files": [
-    "src"
+    "src",
+    "types"
   ],
+  "types": "types/index.d.ts",
   "scripts": {
     "lint": "eslint src test examples",
     "test": "nyc mocha -t 200000 test/",
