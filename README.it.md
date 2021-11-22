@@ -9,6 +9,10 @@ Implementazione per Node.js di VerificaC19 SDK.
 ## Requisiti
 
 - Node.js versione >= 12.x
+- MongoDB versione >= 5.x (usato per memorizzare la CRL)
+
+⚠️ Se non vuoi usare MongoDB per la CRL, 
+leggi [come costruire il tuo sistema di gestione CRL](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 ## Installazione
 
@@ -32,6 +36,9 @@ const main = async () => {
 
 ⚠️ Regole e DSC vengono salvati di default nella cartella `.cache`, 
 per cambiare questa impostazione occorre settare la variabile di ambiente `VC19_CACHE_FOLDER`.
+
+⚠️ Se non vuoi usare MongoDB per la CRL, 
+leggi [come costruire il tuo sistema di gestione CRL](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 👉🏻  Vedi l'esempio [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 

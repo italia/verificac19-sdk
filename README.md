@@ -11,6 +11,10 @@ VerificaC19 SDK implementation for Node.js.
 ## Requirements
 
 - Node.js version >= 12.x
+- MongoDB version >= 5.x (used to store CRL)
+
+⚠️ If you don't want to use MongoDB to store CRL, 
+read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 ## Installation
 
@@ -20,7 +24,7 @@ npm i verificac19-sdk
 
 ## Usage
 
-### Download and cache rules and DSCs
+### Download and cache rules, CRL and DSCs
 
 You can download and cache rules and DSCs using `Service` module.
 
@@ -34,6 +38,9 @@ const main = async () => {
 
 ⚠️ By default rules and DSCs will be cached in a folder called `.cache`, 
 to change it please set `VC19_CACHE_FOLDER` env variable.
+
+⚠️ If you don't want to use MongoDB to store CRL, 
+read [how to write your own CRL management system]().
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 
