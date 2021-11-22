@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const mongoose = require('mongoose');
+const crl = require('./crl');
 const { addHours } = require('./utils');
 
 const CACHE_FOLDER = process.env.VC19_CACHE_FOLDER || '.cache';
@@ -22,12 +22,7 @@ class Cache {
     if (!fs.existsSync(CRL_FILE_PATH)) {
       fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
     }
-    this._dbConnection = await mongoose.createConnection(
-      process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017/VC19?authSource=admin',
-    );
-    this._dbModel = this._dbConnection.model('UVCI', new mongoose.Schema({
-      _id: String,
-    }));
+    await crl.setUp();
   }
 
   fileNeedsUpdate(filePath) {
@@ -85,29 +80,21 @@ class Cache {
     return JSON.parse(fs.readFileSync(SIGNATURES_FILE_PATH));
   }
 
-  async storeCRLRevokedUCVI(revokedUcvi) {
-    const session = await this._dbModel.startSession();
-    await session.withTransaction(() => {
-      const revokedUcviForDb = revokedUcvi.map((uvci) => ({ _id: uvci }));
-      return this._dbModel.insertMany(revokedUcviForDb);
-    });
-    session.endSession();
+  async storeCRLRevokedUVCI(revokedUvci) {
+    await crl.storeRevokedUVCI(revokedUvci);
   }
 
   async isUVCIRevoked(uvci) {
-    return !!await this._dbModel.findOne({ _id: uvci });
+    return crl.isUVCIRevoked(uvci);
   }
 
   async tearDown() {
-    if (this._dbConnection) {
-      await this._dbConnection.close();
-    }
-    await mongoose.disconnect();
+    return crl.tearDown();
   }
 
   async cleanCRL() {
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
-    await this._dbModel.deleteMany();
+    return crl.clean();
   }
 }
 

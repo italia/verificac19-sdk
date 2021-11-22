@@ -27,7 +27,7 @@ const updateCRL = async () => {
       try {
         resp = await axios
           .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
-        await cache.storeCRLRevokedUCVI(resp.data.revokedUcvi);
+        await cache.storeCRLRevokedUVCI(resp.data.revokedUvci || resp.data.revokedUcvi);
         crlStatus.chunk += 1;
         cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
       } catch (err) {
