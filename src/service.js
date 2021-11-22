@@ -30,10 +30,11 @@ const updateCRL = async () => {
         await cache.storeCRLRevokedUCVI(resp.data.revokedUcvi);
         crlStatus.chunk += 1;
         cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
-      } catch {
+      } catch (err) {
+        console.log(err);
         break;
       }
-    } while (resp.status === 200 && crlStatus.chunk > resp.data.chunk);
+    } while (resp.status === 200 && crlStatus.chunk < resp.data.lastChunk);
     cache.storeCRLStatus(1, crlStatus.version + 1);
   }
 };
@@ -90,6 +91,18 @@ const updateAll = async () => {
   await tearDown();
 };
 
+const cleanCRL = async () => {
+  await cache.cleanCRL();
+};
+
 module.exports = {
-  updateSignatures, updateSignaturesList, updateRules, updateAll, updateCRL, checkCRL, setUp, tearDown,
+  updateSignatures,
+  updateSignaturesList,
+  updateRules,
+  updateAll,
+  updateCRL,
+  checkCRL,
+  setUp,
+  tearDown,
+  cleanCRL,
 };

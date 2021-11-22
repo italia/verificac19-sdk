@@ -86,10 +86,12 @@ class Cache {
   }
 
   async storeCRLRevokedUCVI(revokedUcvi) {
-    const revokedUcviForDb = revokedUcvi.map((uvci) => ({ _id: uvci }));
-    if (revokedUcviForDb.length !== 0) {
-      await this._dbModel.insertMany(revokedUcviForDb);
-    }
+    const session = await this._dbModel.startSession();
+    await session.withTransaction(() => {
+      const revokedUcviForDb = revokedUcvi.map((uvci) => ({ _id: uvci }));
+      return this._dbModel.insertMany(revokedUcviForDb);
+    });
+    session.endSession();
   }
 
   async isUVCIRevoked(uvci) {
@@ -101,6 +103,11 @@ class Cache {
       await this._dbConnection.close();
     }
     await mongoose.disconnect();
+  }
+
+  async cleanCRL() {
+    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
+    await this._dbModel.deleteMany();
   }
 }
 
