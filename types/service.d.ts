@@ -1,6 +1,6 @@
 import { Rule, Signatures, SignaturesList } from "./models";
 
-declare namespace Service {
+declare module Service {
   function updateSignatures(): Promise<Signatures>;
   function updateSignaturesList(): Promise<SignaturesList>;
   function updateRules(): Promise<Rule[]>;

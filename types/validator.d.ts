@@ -1,8 +1,9 @@
-import { RulesResult, DCCCertificate } from "./models";
+import { RulesResult, DCCCertificate, ValidateGP } from "./models";
 
-declare namespace Validator {
+declare module Validator {
   function checkSignature(certificate: DCCCertificate): Promise<boolean>;
   function checkRules(certificate: DCCCertificate): RulesResult;
+  function validate(certificate: DCCCertificate): Promise<ValidateGP>
 
   namespace codes {
     const VALID: "VALID";
