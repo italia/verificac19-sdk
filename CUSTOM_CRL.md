@@ -20,12 +20,12 @@ class MyCRLManager {
     // Return true if `uvci` is present (UVCI revoked), false otherwise
   }
 
-  async tearDown() {
-    // Close your db, clean resources ...
-  }
-
   async clean() {
     // Remove all data from db
+  }
+
+  async tearDown() {
+    // Close your db, clean resources ...
   }
 }
 ```
@@ -38,10 +38,16 @@ const crlManager = new MyCRLManager();
 module.exports = crlManager;
 ```
 
-In order to make SDK using your custom CRL manager, set `VC19_CRL_ADAPTER_MODULE` 
-with the name/path of your module (e.g. 'mycrladapter').
+In order to make SDK using your custom CRL manager.
 
-👉🏻  See an example [examples/crladapter/index.js](https://github.com/italia/verificac19-sdk/blob/master/examples/crladapter/index.js).
+```js
+const { Service } = require('verificac19-sdk');
+const crlManager = require('./crlmanager');
 
-⚠️ The example above uses [Lowdb 1.0.0](https://github.com/typicode/lowdb), 
+await Service.setUp(crlManager);
+```
+
+👉🏻  See an example [examples/crlmanager.js](https://github.com/italia/verificac19-sdk/blob/master/examples/crlmanager.js).
+
+⚠️ The above example uses [Lowdb 1.0.0](https://github.com/typicode/lowdb), 
 if you have large JavaScript objects (~10-100MB) you may hit some performance issues.

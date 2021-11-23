@@ -1,7 +1,7 @@
 const low = require('lowdb');
 const FileSync = require('lowdb/adapters/FileSync');
 
-class CRL {
+class MyCRLManager {
   async setUp() {
     const adapter = new FileSync(process.env.VC19_CRL_DB || 'crldb.json');
     this._db = low(adapter);
@@ -25,6 +25,6 @@ class CRL {
   }
 }
 
-const crlSingleton = new CRL();
+const crlSingleton = new MyCRLManager();
 
 module.exports = crlSingleton;

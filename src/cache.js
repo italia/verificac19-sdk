@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const crl = require(process.env.VC19_CRL_ADAPTER_MODULE || './crl');
+const crl = require('./crl');
 const { addHours } = require('./utils');
 
 const CACHE_FOLDER = process.env.VC19_CACHE_FOLDER || '.cache';
@@ -18,12 +18,13 @@ const SIGNATURES_LIST_FILE_PATH = path.join(CACHE_FOLDER, SIGNATURES_LIST_FILE);
 const UPDATE_WINDOW_HOURS = 24;
 
 class Cache {
-  async setUp() {
+  async setUp(crlManager = crl) {
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
       fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
     }
-    await crl.setUp();
+    this._crlManager = crlManager;
+    await this._crlManager.setUp();
   }
 
   fileNeedsUpdate(filePath) {
@@ -82,20 +83,20 @@ class Cache {
   }
 
   async storeCRLRevokedUVCI(revokedUvci) {
-    await crl.storeRevokedUVCI(revokedUvci);
+    await this._crlManager.storeRevokedUVCI(revokedUvci);
   }
 
   async isUVCIRevoked(uvci) {
-    return crl.isUVCIRevoked(uvci);
+    return this._crlManager.isUVCIRevoked(uvci);
   }
 
   async tearDown() {
-    return crl.tearDown();
+    return this._crlManager.tearDown();
   }
 
   async cleanCRL() {
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
-    return crl.clean();
+    return this._crlManager.clean();
   }
 }
 

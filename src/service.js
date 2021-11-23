@@ -4,8 +4,8 @@ const cache = require('./cache');
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
-const setUp = async () => {
-  await cache.setUp();
+const setUp = async (crlManager) => {
+  await cache.setUp(crlManager);
 };
 
 const checkCRL = async () => {
