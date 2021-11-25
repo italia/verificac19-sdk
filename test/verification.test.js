@@ -172,7 +172,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'),
     );
     dccWithoutRecovery.recoveryStatements = [];
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccWithoutRecovery, false, Validator.codes.NOT_EU_DCC,
     );
     // Not valid greenpass without tests
@@ -180,7 +180,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'),
     );
     dccWithoutTests.tests = [];
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccWithoutTests, false, Validator.codes.NOT_EU_DCC,
     );
     // Not valid greenpass without vaccinations
@@ -188,7 +188,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
     );
     dccWithoutVaccinations.vaccinations = [];
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccWithoutVaccinations, false, Validator.codes.NOT_EU_DCC,
     );
     // Negative vaccination
@@ -196,7 +196,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
     );
     dccWithNegativeVaccinations.vaccinations[1].doseNumber = -1;
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccWithNegativeVaccinations, false, Validator.codes.NOT_VALID,
     );
     // Malformed vaccination
@@ -204,7 +204,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
     );
     dccWithMalformedVaccinations.vaccinations[1].doseNumber = 'a';
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccWithMalformedVaccinations, false, Validator.codes.NOT_VALID,
     );
     mockdate.reset();
@@ -212,7 +212,7 @@ describe('Testing integration between Certificate and Validator', () => {
     const dccSMSputnikVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
     );
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccSMSputnikVaccinations, true, Validator.codes.VALID,
     );
     // Other countries vaccination with Sputnik-V
@@ -220,7 +220,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
     );
     dccITSputnikVaccinations.vaccinations[0].countryOfVaccination = 'IT';
-    verifyRulesFromCertificate(
+    await verifyRulesFromCertificate(
       dccITSputnikVaccinations, false, Validator.codes.NOT_VALID,
     );
   });

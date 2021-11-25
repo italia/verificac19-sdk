@@ -31,7 +31,6 @@ const updateCRL = async () => {
         crlStatus.chunk += 1;
         cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
       } catch (err) {
-        console.log(err);
         break;
       }
     } while (resp.status === 200 && crlStatus.chunk < resp.data.lastChunk);
@@ -84,11 +83,10 @@ const tearDown = async () => {
 };
 
 const updateAll = async () => {
-  await setUp();
   await updateRules();
   await updateSignaturesList();
   await updateSignatures();
-  await tearDown();
+  await updateCRL();
 };
 
 const cleanCRL = async () => {
