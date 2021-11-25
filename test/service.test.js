@@ -5,12 +5,24 @@ const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
 const nock = require('nock');
 const mockdate = require('mockdate');
+const mongoose = require('mongoose');
 
 process.env.VC19_CACHE_FOLDER = path.join('test', 'data', 'tempcache');
 const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
-const { Service } = require('../src');
+const { Service, Certificate, Validator } = require('../src');
+
+let dbModel;
 
 chai.use(chaiAsPromised);
+
+const prepareDB = async () => {
+  const dBConnection = await mongoose.createConnection(
+    process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017/VC19?authSource=admin',
+  );
+  dbModel = dBConnection.model('UVCI', new mongoose.Schema({
+    _id: String,
+  }));
+};
 
 const mockRequests = () => {
   nock('https://get.dgc.gov.it/v1/dgc')
@@ -107,7 +119,40 @@ describe('Testing Service', () => {
   it('checks caching all', async () => {
     mockRequests();
     await Service.updateAll();
+  });
+  it('checks cleaning CRL working', async () => {
+    mockRequests();
+    await prepareDB();
     await Service.cleanCRL();
+    // Check 0 elements
+    chai.expect(await dbModel.count()).to.be.equal(0);
     await Service.updateAll();
+    // Check 8 elements
+    chai.expect(await dbModel.count()).to.be.equal(8);
+    await Service.updateAll();
+    // Check (still) 8 elements
+    chai.expect(await dbModel.count()).to.be.equal(8);
+  });
+  it('checks CRL works with a blacklisted certificate', async () => {
+    mockRequests();
+    await prepareDB();
+    // Prepare blacklisted certificate
+    const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
+    const dcc = await Certificate.fromImage(dccPath);
+    // Check that certificate is valid after CRL cleaning
+    await Service.cleanCRL();
+    chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(true);
+    // Check that certificate is not valid anymore after CRL update
+    await Service.updateAll();
+    const newRevokedUVCI = dcc.vaccinations.map(
+      (vaccination) => ({ _id: vaccination.certificateIdentifier }),
+    );
+    try {
+      await dbModel.insertMany(newRevokedUVCI);
+    } catch {
+      // Some errors on insert
+    }
+    chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
+    await Service.cleanCRL();
   });
 });
