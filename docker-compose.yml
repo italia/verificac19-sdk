@@ -6,7 +6,7 @@ services:
     environment:
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=example
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb-primary
+      - MONGODB_ADVERTISED_HOSTNAME=localhost
       - MONGODB_REPLICA_SET_MODE=primary
       - MONGODB_ROOT_PASSWORD=example
       - MONGODB_REPLICA_SET_KEY=replicasetkey123
@@ -33,6 +33,8 @@ services:
     restart: always
     ports:
       - 8081:8081
+    depends_on:
+      - mongodb-secondary
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example

@@ -223,5 +223,23 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromCertificate(
       dccITSputnikVaccinations, false, Validator.codes.NOT_VALID,
     );
+    // Test fake tests
+    const dccWithFakeTest = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_8.png'),
+    );
+    dccWithFakeTest.tests[0].typeOfTest = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWithFakeTest, false, Validator.codes.NOT_VALID,
+      '^Test type is not valid$',
+    );
+    // Test fake vaccinations
+    const dccFakeVaccination = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
+    );
+    dccFakeVaccination.vaccinations[0].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccFakeVaccination, false, Validator.codes.NOT_VALID,
+      '^Vaccine Type is not in list$',
+    );
   });
 });
