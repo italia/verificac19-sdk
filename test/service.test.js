@@ -60,7 +60,7 @@ const mockRequests = () => {
     .reply(203, {});
 
   // Mock CRL check
-  for (let i = 0; i < 2; i += 1) {
+  for (let i = 0; i < 3; i += 1) {
     nock('https://testaka4.sogei.it/v1/dgc')
       .get(`/drl/check?version=${i}`)
       .reply(200, JSON.parse(
@@ -86,6 +86,11 @@ const mockRequests = () => {
     .get('/drl?chunk=1&version=1')
     .reply(200, JSON.parse(
       fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v2-c1.json')),
+    ));
+  nock('https://testaka4.sogei.it/v1/dgc')
+    .get('/drl?chunk=1&version=2')
+    .reply(200, JSON.parse(
+      fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v3-c1.json')),
     ));
 };
 
