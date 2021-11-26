@@ -11,12 +11,13 @@ process.env.VC19_CACHE_FOLDER = path.join('test', 'data', 'tempcache');
 const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
 const { Service, Certificate, Validator } = require('../src');
 
-let dbModel;
+let dbModel; let
+  dBConnection;
 
 chai.use(chaiAsPromised);
 
 const prepareDB = async () => {
-  const dBConnection = await mongoose.createConnection(
+  dBConnection = await mongoose.createConnection(
     process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017/VC19?authSource=admin',
   );
   dbModel = dBConnection.model('UVCI', new mongoose.Schema({
@@ -136,6 +137,7 @@ describe('Testing Service', () => {
   it('checks CRL works with a blacklisted certificate', async () => {
     mockRequests();
     await prepareDB();
+    await Service.updateAll();
     // Prepare blacklisted certificate
     const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
     const dcc = await Certificate.fromImage(dccPath);
@@ -144,14 +146,13 @@ describe('Testing Service', () => {
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(true);
     // Check that certificate is not valid anymore after CRL update
     await Service.updateAll();
-    const newRevokedUVCI = dcc.vaccinations.map(
-      (vaccination) => ({ _id: vaccination.certificateIdentifier }),
+    const newRevokedUVCI = dcc.vaccinations
+      .map(
+        (vaccination) => (vaccination.certificateIdentifier),
+      );
+    dbModel.insertMany(
+      [...new Set(newRevokedUVCI)].map((uvci) => ({ _id: uvci })),
     );
-    try {
-      await dbModel.insertMany(newRevokedUVCI);
-    } catch {
-      // Some errors on insert
-    }
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
     await Service.cleanCRL();
   });

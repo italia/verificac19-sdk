@@ -14,7 +14,7 @@ class CRL {
     const session = await this._dbModel.startSession();
     await session.withTransaction(() => {
       const revokedUvciForDb = revokedUvci.map((uvci) => ({ _id: uvci }));
-      return this._dbModel.insertMany(revokedUvciForDb, {session});
+      return this._dbModel.insertMany(revokedUvciForDb, { session });
     });
     session.endSession();
   }
