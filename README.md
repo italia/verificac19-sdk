@@ -106,11 +106,32 @@ you can compare the resulting `code` with `Validator.codes` values
 for example 
 
 ```js
-const rulesSummary = await Validator.validate(dccTest);
-console.log(rulesSummary.code === Validator.codes.NOT_VALID);
+const validationResult = await Validator.validate(dccTest);
+console.log(validationResult.code === Validator.codes.NOT_VALID);
 ```
 
 👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
+
+
+### Verification mode
+
+If you want to change verification mode and verify whether a certificate is a 
+Super Green Pass or not, you need to pass `Validator.mode.SUPER_DGP` to 
+`Validator.validate` method.
+
+```js
+const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
+```
+
+| Code           | Description                              |
+| -------------- | ---------------------------------------- |
+| NORMAL_DGP     | Normal verification (default value)      |
+| SUPER_DGP      | Super Green Pass verification            | 
+
+***Super Green Pass, which will come into force from 6 December to 15 January 2021, 
+will be a certificate valid only for people who have been vaccinated against 
+or who have recovered from Covid19, and will prevent all the others from 
+entering bars, restaurants, cinemas, gyms, theatres, discos and stadiums.***
 
 ### Alternative methods
 
