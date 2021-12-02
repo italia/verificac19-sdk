@@ -116,7 +116,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_8.png'), false,
       Validator.codes.NOT_VALID,
       '^Not valid. Super DGP required.$',
-      Validator.mode.SUPER_DGP
+      Validator.mode.SUPER_DGP,
     );
     // Doses 1/2 valid only in Italy
     mockdate.set('2021-06-24T00:00:00.000Z');
