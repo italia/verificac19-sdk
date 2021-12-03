@@ -83,8 +83,8 @@ describe('Testing integration between Certificate and Validator', () => {
     );
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), true,
-      Validator.codes.VALID,
-      '^Recovery statement is valid .*$',
+      Validator.codes.PARTIALLY_VALID,
+      '^Recovery statement is partially valid. .*$',
     );
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
