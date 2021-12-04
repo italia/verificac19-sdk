@@ -271,7 +271,9 @@ const checkRecovery = (certificate, rules) => {
       Date.parse(clearExtraTime(last.certificateValidUntil)),
     );
 
-    if (addDays(startDate, recoveryCertStartDay.value) > now) {
+    const startDateValidation = addDays(startDate, recoveryCertStartDay.value);
+
+    if (startDateValidation > now) {
       return {
         code: NOT_VALID_YET,
         message:
@@ -280,7 +282,7 @@ const checkRecovery = (certificate, rules) => {
       };
     }
 
-    if (now > addDays(endDate, recoveryCertEndDay.value)) {
+    if (now > addDays(startDateValidation, recoveryCertEndDay.value)) {
       return {
         code: NOT_VALID,
         message: `Recovery statement is expired at : ${endDate.toISOString()}`,
