@@ -264,17 +264,16 @@ const checkRecovery = (certificate, rules) => {
     const last = certificate.recoveryStatements[certificate.recoveryStatements.length - 1];
 
     const now = new Date(Date.now());
-    let startDate = new Date(
+    const startDate = new Date(
       Date.parse(clearExtraTime(last.certificateValidFrom)),
     );
-    let endDate = new Date(
+    const endDate = new Date(
       Date.parse(clearExtraTime(last.certificateValidUntil)),
     );
 
-    startDate = addDays(startDate, recoveryCertStartDay.value);
-    endDate = addDays(endDate, recoveryCertEndDay.value);
+    const startDateValidation = addDays(startDate, recoveryCertStartDay.value);
 
-    if (startDate > now) {
+    if (startDateValidation > now) {
       return {
         code: NOT_VALID_YET,
         message:
@@ -283,10 +282,17 @@ const checkRecovery = (certificate, rules) => {
       };
     }
 
-    if (now > endDate) {
+    if (now > addDays(startDateValidation, recoveryCertEndDay.value)) {
       return {
         code: NOT_VALID,
         message: `Recovery statement is expired at : ${endDate.toISOString()}`,
+      };
+    }
+
+    if (now > endDate) {
+      return {
+        code: PARTIALLY_VALID,
+        message: `Recovery statement is partially valid. It will be expired at : ${endDate.toISOString()}`,
       };
     }
 

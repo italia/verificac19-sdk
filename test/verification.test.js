@@ -82,9 +82,9 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Doses 1/1 - Vaccination is valid .*$',
     );
     await verifyRulesFromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), true,
-      Validator.codes.VALID,
-      '^Recovery statement is valid .*$',
+      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Recovery statement is expired .*$',
     );
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
