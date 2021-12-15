@@ -16,7 +16,6 @@ const NOT_EU_DCC = 'NOT_EU_DCC';
 const NOT_VALID = 'NOT_VALID';
 const NOT_VALID_YET = 'NOT_VALID_YET';
 const VALID = 'VALID';
-const PARTIALLY_VALID = 'PARTIALLY_VALID'; // only in Italy
 
 // Validation mode
 
@@ -25,7 +24,6 @@ const NORMAL_DGP = '3G';
 
 const codes = {
   VALID,
-  PARTIALLY_VALID,
   NOT_VALID,
   NOT_VALID_YET,
   NOT_EU_DCC,
@@ -134,10 +132,10 @@ const checkVaccinations = (certificate, rules) => {
       }
 
       return {
-        code: PARTIALLY_VALID,
+        code: VALID,
         message:
           `${doses
-          } - Vaccination is valid (only in Italy) [ ${
+          } - Vaccination is valid [ ${
             startDate.toISOString()
           } - ${
             endDate.toISOString()
@@ -289,13 +287,6 @@ const checkRecovery = (certificate, rules) => {
       };
     }
 
-    if (now > endDate) {
-      return {
-        code: PARTIALLY_VALID,
-        message: `Recovery statement is partially valid. It will be expired at : ${endDate.toISOString()}`,
-      };
-    }
-
     return {
       code: VALID,
       message:
@@ -362,7 +353,7 @@ const checkRules = (certificate, mode = NORMAL_DGP) => {
   }
 
   return {
-    result: result.code === VALID || result.code === PARTIALLY_VALID,
+    result: result.code === VALID,
     code: result.code,
     message: result.message,
   };

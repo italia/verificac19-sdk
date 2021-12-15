@@ -7,7 +7,6 @@ declare module Validator {
 
   enum codes {
     VALID = "VALID",
-    PARTIALLY_VALID = "PARTIALLY_VALID",
     NOT_VALID = "NOT_VALID",
     NOT_VALID_YET = "NOT_VALID_YET",
     NOT_EU_DCC = "NOT_EU_DCC"

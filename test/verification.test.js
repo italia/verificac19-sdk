@@ -122,7 +122,7 @@ describe('Testing integration between Certificate and Validator', () => {
     mockdate.set('2021-06-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), true,
-      Validator.codes.PARTIALLY_VALID,
+      Validator.codes.VALID,
       '^Doses 1/2 - Vaccination is valid .*$',
     );
     // Test result not valid yet

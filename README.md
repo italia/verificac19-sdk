@@ -97,8 +97,7 @@ you can compare the resulting `code` with `Validator.codes` values
 
 | | Code            | Description                              |
 |-| --------------- | ---------------------------------------- |
-|✅| VALID           | Certificate is valid in Italy and Europe |
-|✅| PARTIALLY_VALID | Certificate is valid only in Italy       | 
+|✅| VALID           | Certificate is valid                     |
 |❌| NOT_VALID       | Certificate is not valid                 | 
 |❌| NOT_VALID_YET   | Certificate is not valid yet             | 
 |❌| NOT_EU_DCC      | Certificate is not an EU DCC             | 
