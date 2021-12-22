@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const chai = require('chai');
 const chaiAsPromised = require('chai-as-promised');
@@ -136,10 +137,13 @@ describe('Testing Service', () => {
     chai.expect(await dbModel.count()).to.be.equal(0);
     await Service.updateAll();
     // Check 8 elements
-    chai.expect(await dbModel.count()).to.be.equal(8);
+    chai.expect(await dbModel.count()).to.be.equal(9);
     await Service.updateAll();
-    // Check (still) 8 elements
-    chai.expect(await dbModel.count()).to.be.equal(8);
+    // Check 12 elements
+    chai.expect(await dbModel.count()).to.be.equal(12);
+    await Service.updateAll();
+    // Check 11 elements
+    chai.expect(await dbModel.count()).to.be.equal(11);
   });
   it('checks CRL works with a blacklisted certificate', async () => {
     mockRequests();
@@ -155,7 +159,7 @@ describe('Testing Service', () => {
     await Service.updateAll();
     const newRevokedUVCI = dcc.vaccinations
       .map(
-        (vaccination) => (vaccination.certificateIdentifier),
+        (vaccination) => (crypto.createHash('sha256').update(vaccination.certificateIdentifier).digest('base64')),
       );
     dbModel.insertMany(
       [...new Set(newRevokedUVCI)].map((uvci) => ({ _id: uvci })),

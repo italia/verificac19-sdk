@@ -1,7 +1,7 @@
 {
   "id": "619cb579676ca211606c3316",
   "fromVersion": 1,
-  "version": 1,
+  "version": 2,
   "chunk": 1,
   "numDiAdd": 1000000,
   "totalSizeInByte": 51000000,

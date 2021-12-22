@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const crl = require('./crl');
 const { addHours } = require('./utils');
@@ -82,12 +83,13 @@ class Cache {
     return JSON.parse(fs.readFileSync(SIGNATURES_FILE_PATH));
   }
 
-  async storeCRLRevokedUVCI(revokedUvci) {
-    await this._crlManager.storeRevokedUVCI(revokedUvci);
+  async storeCRLRevokedUVCI(revokedUvci, deletedRevokedUvci) {
+    await this._crlManager.storeRevokedUVCI(revokedUvci, deletedRevokedUvci);
   }
 
   async isUVCIRevoked(uvci) {
-    return this._crlManager.isUVCIRevoked(uvci);
+    const transformedUVCI = crypto.createHash('sha256').update(uvci).digest('base64');
+    return this._crlManager.isUVCIRevoked(transformedUVCI);
   }
 
   async tearDown() {

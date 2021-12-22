@@ -10,13 +10,20 @@ class CRL {
     }));
   }
 
-  async storeRevokedUVCI(revokedUvci) {
-    const session = await this._dbModel.startSession();
-    await session.withTransaction(() => {
-      const revokedUvciForDb = revokedUvci.map((uvci) => ({ _id: uvci }));
-      return this._dbModel.insertMany(revokedUvciForDb, { session });
-    });
-    session.endSession();
+  async storeRevokedUVCI(revokedUvci = [], deletedRevokedUvci = []) {
+    if (revokedUvci.length > 0) {
+      const sessionInsert = await this._dbModel.startSession();
+      await sessionInsert.withTransaction(() => {
+        const revokedUvciForDb = revokedUvci.map((uvci) => ({ _id: uvci }));
+        return this._dbModel.insertMany(revokedUvciForDb, { sessionInsert });
+      });
+      sessionInsert.endSession();
+    }
+    if (deletedRevokedUvci.length > 0) {
+      for (const uvciToRemove of deletedRevokedUvci) {
+        await this._dbModel.deleteOne({ _id: uvciToRemove });
+      }
+    }
   }
 
   async isUVCIRevoked(uvci) {

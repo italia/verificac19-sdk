@@ -13,7 +13,10 @@ const checkCRL = async () => {
   try {
     const resp = await axios
       .get(`${API_URL}/drl/check?version=${crlStatus.version}`);
-    return resp.status === 200;
+    if (resp.status === 200 && (resp.data.numDiAdd > 0 || resp.data.numDiDelete > 0)) {
+      return resp.data;
+    }
+    return false;
   } catch {
     return false;
   }
@@ -21,21 +24,27 @@ const checkCRL = async () => {
 
 const updateCRL = async () => {
   let resp;
-  while (await checkCRL()) {
-    const crlStatus = cache.getCRLStatus();
-    do {
-      try {
-        resp = await axios
-          .get(`${API_URL}/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
-        await cache.storeCRLRevokedUVCI(resp.data.revokedUvci || resp.data.revokedUcvi);
-        crlStatus.chunk += 1;
-        cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
-      } catch (err) {
-        break;
-      }
-    } while (resp.status === 200 && crlStatus.chunk < resp.data.lastChunk);
-    cache.storeCRLStatus(1, crlStatus.version + 1);
+  const checkData = await checkCRL();
+  if (!checkData) {
+    return;
   }
+  const crlStatus = cache.getCRLStatus();
+  do {
+    try {
+      resp = await axios
+        .get(`${API_URL}/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
+      if (resp.data.delta) {
+        await cache.storeCRLRevokedUVCI(resp.data.delta.insertions, resp.data.delta.deletions);
+      } else {
+        await cache.storeCRLRevokedUVCI(resp.data.revokedUcvi);
+      }
+      crlStatus.chunk += 1;
+      cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
+    } catch (err) {
+      break;
+    }
+  } while (resp.status === 200 && crlStatus.chunk <= resp.data.lastChunk);
+  cache.storeCRLStatus(1, checkData.version);
 };
 
 const updateRules = async () => {
