@@ -136,14 +136,18 @@ describe('Testing Service', () => {
     // Check 0 elements
     chai.expect(await dbModel.count()).to.be.equal(0);
     await Service.updateAll();
-    // Check 8 elements
+    // Check 9 elements
     chai.expect(await dbModel.count()).to.be.equal(9);
+    mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
     await Service.updateAll();
     // Check 12 elements
     chai.expect(await dbModel.count()).to.be.equal(12);
+    mockdate.reset();
+    mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
     await Service.updateAll();
     // Check 11 elements
     chai.expect(await dbModel.count()).to.be.equal(11);
+    mockdate.reset();
   });
   it('checks CRL works with a blacklisted certificate', async () => {
     mockRequests();

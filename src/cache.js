@@ -28,9 +28,9 @@ class Cache {
     await this._crlManager.setUp();
   }
 
-  fileNeedsUpdate(filePath) {
+  fileNeedsUpdate(filePath, hours = UPDATE_WINDOW_HOURS) {
     try {
-      if (addHours(fs.statSync(filePath).mtime, UPDATE_WINDOW_HOURS) > new Date(Date.now())) {
+      if (addHours(fs.statSync(filePath).mtime, hours) > new Date(Date.now())) {
         return false;
       }
     } catch (err) {
@@ -53,6 +53,11 @@ class Cache {
 
   storeSignatures(data) {
     fs.writeFileSync(SIGNATURES_FILE_PATH, data);
+  }
+
+  needCRLUpdate() {
+    if (this.getCRLStatus().version === 0) return true;
+    return this.fileNeedsUpdate(CRL_FILE_PATH, UPDATE_WINDOW_HOURS / 4);
   }
 
   needRulesUpdate() {

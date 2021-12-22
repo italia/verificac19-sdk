@@ -23,6 +23,7 @@ const checkCRL = async () => {
 };
 
 const updateCRL = async () => {
+  if (!cache.needCRLUpdate()) return;
   let resp;
   const checkData = await checkCRL();
   if (checkData) {
