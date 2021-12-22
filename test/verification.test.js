@@ -6,8 +6,8 @@ const { Certificate, Validator } = require('../src');
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-match'));
 
-const verifyRulesFromCertificate = async (dcc, expectedResult, expectedCode, expectedMessageReg = null) => {
-  const rulesReport = await Validator.checkRules(dcc);
+const verifyRulesFromCertificate = async (dcc, expectedResult, expectedCode, expectedMessageReg = null, mode = Validator.mode.NORMAL_DGP) => {
+  const rulesReport = await Validator.checkRules(dcc, mode);
   chai.expect(rulesReport.result).to.be.equal(expectedResult);
   chai.expect(rulesReport.code).to.be.equal(expectedCode);
   if (expectedMessageReg) {
@@ -15,23 +15,23 @@ const verifyRulesFromCertificate = async (dcc, expectedResult, expectedCode, exp
   }
 };
 
-const verifyRulesFromImage = async (imagePath, expectedResult, expectedCode, expectedMessageReg = null) => {
+const verifyRulesFromImage = async (imagePath, expectedResult, expectedCode, expectedMessageReg = null, mode = Validator.mode.NORMAL_DGP) => {
   const dcc = await Certificate.fromImage(imagePath);
-  return verifyRulesFromCertificate(dcc, expectedResult, expectedCode, expectedMessageReg);
+  return verifyRulesFromCertificate(dcc, expectedResult, expectedCode, expectedMessageReg, mode);
 };
 
-const verifyRulesAndSignature = async (imagePath, expectedRules, expectedSignature) => {
+const verifyRulesAndSignature = async (imagePath, expectedRules, expectedSignature, mode = Validator.mode.NORMAL_DGP) => {
   const dcc = await Certificate.fromImage(imagePath);
-  const areRulesOk = (await Validator.checkRules(dcc)).result;
+  const areRulesOk = (await Validator.checkRules(dcc, mode)).result;
   chai.expect(areRulesOk).to.be.equal(expectedRules);
   const isSignatureVerified = await Validator.checkSignature(dcc);
   chai.expect(isSignatureVerified).to.be.equal(expectedSignature);
   return areRulesOk && isSignatureVerified;
 };
 
-const verifyRulesAndSignatureWithVerify = async (imagePath, expectedRules, expectedSignature) => {
+const verifyRulesAndSignatureWithVerify = async (imagePath, expectedRules, expectedSignature, mode = Validator.mode.NORMAL_DGP) => {
   const dcc = await Certificate.fromImage(imagePath);
-  const certificateResult = await Validator.validate(dcc);
+  const certificateResult = await Validator.validate(dcc, mode);
   chai.expect(certificateResult.result).to.be.equal(expectedRules && expectedSignature);
   return certificateResult.result;
 };
@@ -82,9 +82,9 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Doses 1/1 - Vaccination is valid .*$',
     );
     await verifyRulesFromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), true,
-      Validator.codes.VALID,
-      '^Recovery statement is valid .*$',
+      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Recovery statement is expired .*$',
     );
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
@@ -111,11 +111,18 @@ describe('Testing integration between Certificate and Validator', () => {
       Validator.codes.VALID,
       '^Test Result is valid .*$',
     );
+    // Verify with Super Green Pass
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_8.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Not valid. Super DGP required.$',
+      Validator.mode.SUPER_DGP,
+    );
     // Doses 1/2 valid only in Italy
     mockdate.set('2021-06-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), true,
-      Validator.codes.PARTIALLY_VALID,
+      Validator.codes.VALID,
       '^Doses 1/2 - Vaccination is valid .*$',
     );
     // Test result not valid yet

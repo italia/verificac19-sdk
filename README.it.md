@@ -4,7 +4,7 @@
 <img src="https://github.com/italia/verificac19-sdk/actions/workflows/ci.yml/badge.svg" />
 <a href="https://codecov.io/gh/italia/verificac19-sdk"><img src="https://codecov.io/gh/italia/verificac19-sdk/branch/master/graph/badge.svg?token=SZ7lyP073V"/></a>
 
-Implementazione per Node.js di VerificaC19 SDK.
+Implementazione ufficiale per Node.js di VerificaC19 SDK ([lista degli SDK ufficiali](https://github.com/ministero-salute/it-dgc-verificac19-sdk-onboarding#lista-librerie)).
 
 ## Requisiti
 
@@ -102,8 +102,7 @@ Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
 
 | | Code            | Description                                   |
 |-| --------------- | --------------------------------------------- |
-|✅| VALID           | Il certificato è valido in Italia e in Europa |
-|✅| PARTIALLY_VALID | Il certificato è valido solo in Italia        | 
+|✅| VALID           | Il certificato è valido                       |
 |❌| NOT_VALID       | Il certificato non è valido                   | 
 |❌| NOT_VALID_YET   | Il certificato non è ancora valido            | 
 |❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | 
@@ -111,11 +110,31 @@ Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
 per esempio 
 
 ```js
-const rulesSummary = Validator.validate(dccTest);
-console.log(rulesSummary.code === Validator.codes.NOT_VALID);
+const validationResult = await Validator.validate(dccTest);
+console.log(validationResult.code === Validator.codes.NOT_VALID);
 ```
 
 👉🏻  Vedi l'esempio [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
+
+### Modalità di verifica
+
+Se vuoi cambiare la modalità di verifica e verificare se il certificato è un 
+Super Green Pass o meno, devi passare il valore `Validator.mode.SUPER_DGP` al
+metodo `Validator.validate`.
+
+```js
+const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
+```
+
+| Codice         | Descrizione                              |
+| -------------- | ---------------------------------------- |
+| NORMAL_DGP     | Verifica normale (valore di default)     |
+| SUPER_DGP      | Verifica Super Green Pass                | 
+
+***Il Super Green Pass, che entrerà in vigore dal 6 dicembre al 15 gennaio 2021,
+sarà un certificato valido solo per le persone che sono state vaccinate 
+o che sono guarite dal Covid19, e impedirà a tutti gli altri di entrare nei bar,
+ristoranti, cinema, palestre, teatri, discoteche e stadi.***
 
 ### Metodi alternativi
 
