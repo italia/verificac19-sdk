@@ -22,7 +22,18 @@ npm i verificac19-sdk
 
 ## Utilizzo
 
-### Scarica e salva regole e DSC
+### Setup CRL environment
+
+La CRL viene memorizzata su un database MongoDB. Questo repository fornisce un 
+file `docker-compose.yml` (come istanza di sviluppo) con un replica set.
+Di default la stringa di connessione è
+`mongodb://root:example@localhost:27017/VC19?authSource=admin`, ed è possibile 
+cambiarla settando la variabile di ambiente `VC19_MONGODB_URL`.
+
+⚠️ Se non vuoi utilizzare MongoDB per gestire la CRL, 
+leggi [come scrivere il proprio CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+
+### Scarica e salva regole, CRL e DSC
 
 Puoi scaricare e salvare regole e DSC utilizzando il modulo `Service`.
 
@@ -36,9 +47,6 @@ const main = async () => {
 
 ⚠️ Regole e DSC vengono salvati di default nella cartella `.cache`, 
 per cambiare questa impostazione occorre settare la variabile di ambiente `VC19_CACHE_FOLDER`.
-
-⚠️ Se non vuoi usare MongoDB per la CRL, 
-leggi [come costruire il tuo sistema di gestione CRL](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 👉🏻  Vedi l'esempio [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 

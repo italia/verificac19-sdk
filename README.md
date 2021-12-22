@@ -24,9 +24,19 @@ npm i verificac19-sdk
 
 ## Usage
 
-### Download and cache rules, CRL and DSCs
+### Setup CRL environment
 
-You can download and cache rules and DSCs using `Service` module.
+CRL data will be stored in a MongoDB database. This repository provides a simple 
+`docker-compose.yml` file (dev instance) with a replica set. By default the
+connection string is `mongodb://root:example@localhost:27017/VC19?authSource=admin`,
+if you want to change it, set `VC19_MONGODB_URL` env variable.
+
+⚠️ If you don't want to use MongoDB to store CRL, 
+read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+
+### Download and cache rules, CRL data and DSCs
+
+You can download and cache rules, CRL data and DSCs using `Service` module.
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -37,10 +47,7 @@ const main = async () => {
 ```
 
 ⚠️ By default rules and DSCs will be cached in a folder called `.cache`, 
-to change it please set `VC19_CACHE_FOLDER` env variable.
-
-⚠️ If you don't want to use MongoDB to store CRL, 
-read [how to write your own CRL management system]().
+to change it, set `VC19_CACHE_FOLDER` env variable.
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 
@@ -117,7 +124,6 @@ console.log(validationResult.code === Validator.codes.NOT_VALID);
 ```
 
 👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
-
 
 ### Verification mode
 
