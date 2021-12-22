@@ -11,6 +11,8 @@ process.env.VC19_CACHE_FOLDER = path.join('test', 'data', 'tempcache');
 const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
 const { Service, Certificate, Validator } = require('../src');
 
+const API_BASE_URL = 'https://get.dgc.gov.it/v1/dgc';
+
 let dbModel; let
   dBConnection;
 
@@ -26,23 +28,23 @@ const prepareDB = async () => {
 };
 
 const mockRequests = () => {
-  nock('https://get.dgc.gov.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/settings')
     .replyWithFile(200, path.join('test', 'mock', 'settings.json'), {
       'Content-Type': 'application/json',
     });
   const xkids = JSON.parse(fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'DSC-validation.json'))).map((el) => el.kid);
-  nock('https://get.dgc.gov.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/signercertificate/status')
     .reply(200, xkids);
 
   const signatures = JSON.parse(fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'DSC-validation.json'))).map((el) => el.raw_data);
-  nock('https://get.dgc.gov.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/signercertificate/update')
     .reply(200, signatures[0], { 'X-RESUME-TOKEN': '1', 'X-KID': xkids[0] });
 
   for (let i = 1; i < signatures.length; i += 1) {
-    nock('https://get.dgc.gov.it/v1/dgc', {
+    nock(API_BASE_URL, {
       reqheaders: {
         'X-RESUME-TOKEN': i,
       },
@@ -51,7 +53,7 @@ const mockRequests = () => {
       .reply(200, signatures[i], { 'X-RESUME-TOKEN': `${i + 1}`, 'X-KID': xkids[i] });
   }
 
-  nock('https://get.dgc.gov.it/v1/dgc', {
+  nock(API_BASE_URL, {
     reqheaders: {
       'X-RESUME-TOKEN': signatures.length,
     },
@@ -61,33 +63,33 @@ const mockRequests = () => {
 
   // Mock CRL check
   for (let i = 0; i < 3; i += 1) {
-    nock('https://testaka4.sogei.it/v1/dgc')
+    nock(API_BASE_URL)
       .get(`/drl/check?version=${i}`)
       .reply(200, JSON.parse(
         fs.readFileSync(path.join(MOCK_REQUESTS_PATH, `CRL-check-v${i + 1}.json`)),
       ));
   }
-  nock('https://testaka4.sogei.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/drl/check?version=2')
     .reply(400, {});
 
   // Mock CRL download
-  nock('https://testaka4.sogei.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/drl?chunk=1&version=0')
     .reply(200, JSON.parse(
       fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c1.json')),
     ));
-  nock('https://testaka4.sogei.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/drl?chunk=2&version=0')
     .reply(200, JSON.parse(
       fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c2.json')),
     ));
-  nock('https://testaka4.sogei.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/drl?chunk=1&version=1')
     .reply(200, JSON.parse(
       fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v2-c1.json')),
     ));
-  nock('https://testaka4.sogei.it/v1/dgc')
+  nock(API_BASE_URL)
     .get('/drl?chunk=1&version=2')
     .reply(200, JSON.parse(
       fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v3-c1.json')),

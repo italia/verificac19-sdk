@@ -12,7 +12,7 @@ const checkCRL = async () => {
   const crlStatus = cache.getCRLStatus();
   try {
     const resp = await axios
-      .get(`https://testaka4.sogei.it/v1/dgc/drl/check?version=${crlStatus.version}`);
+      .get(`${API_URL}/drl/check?version=${crlStatus.version}`);
     return resp.status === 200;
   } catch {
     return false;
@@ -26,7 +26,7 @@ const updateCRL = async () => {
     do {
       try {
         resp = await axios
-          .get(`https://testaka4.sogei.it/v1/dgc/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
+          .get(`${API_URL}/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
         await cache.storeCRLRevokedUVCI(resp.data.revokedUvci || resp.data.revokedUcvi);
         crlStatus.chunk += 1;
         cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
