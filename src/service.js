@@ -25,12 +25,9 @@ const checkCRL = async () => {
 const updateCRL = async () => {
   let resp;
   const checkData = await checkCRL();
-  if (!checkData) {
-    return;
-  }
-  const crlStatus = cache.getCRLStatus();
-  do {
-    try {
+  if (checkData) {
+    const crlStatus = cache.getCRLStatus();
+    do {
       resp = await axios
         .get(`${API_URL}/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
       if (resp.data.delta) {
@@ -40,11 +37,9 @@ const updateCRL = async () => {
       }
       crlStatus.chunk += 1;
       cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
-    } catch (err) {
-      break;
-    }
-  } while (resp.status === 200 && crlStatus.chunk <= resp.data.lastChunk);
-  cache.storeCRLStatus(1, checkData.version);
+    } while (resp.status === 200 && crlStatus.chunk <= resp.data.lastChunk);
+    cache.storeCRLStatus(1, checkData.version);
+  }
 };
 
 const updateRules = async () => {
