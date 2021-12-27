@@ -12,7 +12,7 @@ Implementazione ufficiale per Node.js di VerificaC19 SDK ([lista degli SDK uffic
 - MongoDB versione >= 5.x (usato per memorizzare la CRL)
 
 ⚠️ Se non vuoi usare MongoDB per la CRL, 
-leggi [come costruire il tuo sistema di gestione CRL](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+leggi [come scrivere il proprio sistema di gestione CRL](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 ## Installazione
 
@@ -31,7 +31,7 @@ Di default la stringa di connessione è
 cambiarla settando la variabile di ambiente `VC19_MONGODB_URL`.
 
 ⚠️ Se non vuoi utilizzare MongoDB per gestire la CRL, 
-leggi [come scrivere il proprio CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+leggi [come scrivere il proprio sistema di gestione CRL](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 ### Scarica e salva regole, CRL e DSC
 
@@ -41,7 +41,9 @@ Puoi scaricare e salvare regole e DSC utilizzando il modulo `Service`.
 const {Service} = require('verificac19-sdk');
 
 const main = async () => {
+  await Service.setUp();
   await Service.updateAll();
+  await Service.tearDown();
 }
 ```
 

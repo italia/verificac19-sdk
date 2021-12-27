@@ -42,7 +42,9 @@ You can download and cache rules, CRL data and DSCs using `Service` module.
 const {Service} = require('verificac19-sdk');
 
 const main = async () => {
+  await Service.setUp();
   await Service.updateAll();
+  await Service.tearDown();
 }
 ```
 

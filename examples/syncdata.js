@@ -1,7 +1,9 @@
 const { Service } = require('../src');
 
 const main = async () => {
+  await Service.setUp();
   await Service.updateAll();
+  await Service.tearDown();
 };
 
 main();
