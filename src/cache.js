@@ -61,7 +61,7 @@ class Cache {
 
   needCRLUpdate() {
     if (this.getCRLStatus().version === 0) return true;
-    return this.fileNeedsUpdate(CRL_FILE_PATH, UPDATE_WINDOW_HOURS / 4);
+    return this.fileNeedsUpdate(CRL_FILE_PATH, UPDATE_WINDOW_HOURS);
   }
 
   needRulesUpdate() {
