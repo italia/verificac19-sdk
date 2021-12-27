@@ -28,7 +28,7 @@ const prepareDB = async () => {
   }));
 };
 
-const mockRequests = () => {
+const mockSettingsRequests = () => {
   nock(API_BASE_URL)
     .get('/settings')
     .replyWithFile(200, path.join('test', 'mock', 'settings.json'), {
@@ -61,7 +61,9 @@ const mockRequests = () => {
   })
     .get('/signercertificate/update')
     .reply(203, {});
+};
 
+const mockCRLRequests = () => {
   // Mock CRL check
   for (let i = 0; i < 3; i += 1) {
     nock(API_BASE_URL)
@@ -97,6 +99,11 @@ const mockRequests = () => {
     ));
 };
 
+const mockRequests = () => {
+  mockSettingsRequests();
+  mockCRLRequests();
+};
+
 describe('Testing Service', () => {
   it('checks caching individually', async () => {
     mockRequests();
@@ -124,30 +131,80 @@ describe('Testing Service', () => {
     result = await Service.updateSignatures();
     chai.expect(result).not.to.be.equal(false);
     mockdate.reset();
+    nock.cleanAll();
   });
   it('checks caching all', async () => {
     mockRequests();
     await Service.updateAll();
+    nock.cleanAll();
   });
-  it('checks cleaning CRL working', async () => {
+  it('checks clean CRL working', async () => {
     mockRequests();
     await prepareDB();
     await Service.cleanCRL();
     // Check 0 elements
     chai.expect(await dbModel.count()).to.be.equal(0);
+    mockRequests();
     await Service.updateAll();
     // Check 9 elements
     chai.expect(await dbModel.count()).to.be.equal(9);
     mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    mockRequests();
     await Service.updateAll();
     // Check 12 elements
     chai.expect(await dbModel.count()).to.be.equal(12);
     mockdate.reset();
     mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    mockRequests();
     await Service.updateAll();
     // Check 11 elements
     chai.expect(await dbModel.count()).to.be.equal(11);
     mockdate.reset();
+    nock.cleanAll();
+  });
+  it('checks CRL download restore', async () => {
+    mockSettingsRequests();
+    await prepareDB();
+    await Service.cleanCRL();
+
+    nock(API_BASE_URL)
+      .get('/drl/check?version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-check-v1.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=1&version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c1.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=2&version=0')
+      .reply(400, {});
+    await Service.updateAll();
+    // Check 5 elements
+    chai.expect(await dbModel.count()).to.be.equal(5);
+    nock.cleanAll();
+    mockSettingsRequests();
+    nock(API_BASE_URL)
+      .get('/drl/check?version=0')
+      .times(2) // Check CRL 2 times
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-check-v2.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=1&version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c1.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=2&version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c2.json')),
+      ));
+    await Service.updateAll();
+    // Check 9 elements
+    chai.expect(await dbModel.count()).to.be.equal(9);
+    nock.cleanAll();
   });
   it('checks CRL works with a blacklisted certificate', async () => {
     mockRequests();
@@ -170,5 +227,6 @@ describe('Testing Service', () => {
     );
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
     await Service.cleanCRL();
+    nock.cleanAll();
   });
 });

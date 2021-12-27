@@ -22,7 +22,9 @@ class Cache {
   async setUp(crlManager = crl) {
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
-      fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
+      fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
+        chunk: 0, totalChunk: 0, version: 0, targetVersion: 0,
+      }));
     }
     this._crlManager = crlManager;
     await this._crlManager.setUp();
@@ -39,8 +41,10 @@ class Cache {
     return true;
   }
 
-  storeCRLStatus(chunk = 1, version = 0) {
-    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk, version }));
+  storeCRLStatus(chunk = 0, totalChunk = 0, version = 0, targetVersion = 0) {
+    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
+      chunk, totalChunk, version, targetVersion,
+    }));
   }
 
   storeRules(data) {
@@ -73,7 +77,9 @@ class Cache {
   }
 
   getCRLStatus() {
-    return JSON.parse(fs.readFileSync(CRL_FILE_PATH));
+    const crlStatus = JSON.parse(fs.readFileSync(CRL_FILE_PATH));
+    crlStatus.completed = (crlStatus.chunk - crlStatus.totalChunk) === 0;
+    return crlStatus;
   }
 
   getRules() {
@@ -102,7 +108,9 @@ class Cache {
   }
 
   async cleanCRL() {
-    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({ chunk: 1, version: 0 }));
+    fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
+      chunk: 0, totalChunk: 0, version: 0, targetVersion: 0,
+    }));
     return this._crlManager.clean();
   }
 }

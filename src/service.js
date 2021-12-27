@@ -1,4 +1,3 @@
-// Update procedures
 const axios = require('axios');
 const cache = require('./cache');
 
@@ -13,8 +12,14 @@ const checkCRL = async () => {
   try {
     const resp = await axios
       .get(`${API_URL}/drl/check?version=${crlStatus.version}`);
-    if (resp.status === 200 && (resp.data.numDiAdd > 0 || resp.data.numDiDelete > 0)) {
-      return resp.data;
+    if (resp.status === 200) {
+      if (!crlStatus.completed && crlStatus.targetVersion !== resp.data.version) {
+        await cache.cleanCRL();
+        return await checkCRL();
+      }
+      if (resp.data.numDiAdd > 0 || resp.data.numDiDelete > 0) {
+        return resp.data;
+      }
     }
     return false;
   } catch {
@@ -29,17 +34,30 @@ const updateCRL = async () => {
   if (checkData) {
     const crlStatus = cache.getCRLStatus();
     do {
-      resp = await axios
-        .get(`${API_URL}/drl?chunk=${crlStatus.chunk}&version=${crlStatus.version}`);
-      if (resp.data.delta) {
-        await cache.storeCRLRevokedUVCI(resp.data.delta.insertions, resp.data.delta.deletions);
-      } else {
-        await cache.storeCRLRevokedUVCI(resp.data.revokedUcvi);
+      try {
+        resp = await axios
+          .get(`${API_URL}/drl?chunk=${crlStatus.chunk + 1}&version=${crlStatus.version}`);
+      } catch {
+        break;
       }
-      crlStatus.chunk += 1;
-      cache.storeCRLStatus(crlStatus.chunk, crlStatus.version);
-    } while (resp.status === 200 && crlStatus.chunk <= resp.data.lastChunk);
-    cache.storeCRLStatus(1, checkData.version);
+      if (resp.status === 200) {
+        // Check delta or full version
+        if (resp.data.delta) {
+          await cache.storeCRLRevokedUVCI(resp.data.delta.insertions, resp.data.delta.deletions);
+        } else {
+          await cache.storeCRLRevokedUVCI(resp.data.revokedUcvi);
+        }
+        crlStatus.chunk += 1;
+        if (crlStatus.chunk < resp.data.lastChunk) { // Download in progress
+          cache.storeCRLStatus(crlStatus.chunk, resp.data.lastChunk, crlStatus.version, checkData.version);
+        } else { // Download completed
+          cache.storeCRLStatus(0, 0, checkData.version, checkData.version);
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
   }
 };
 
@@ -104,7 +122,6 @@ module.exports = {
   updateRules,
   updateAll,
   updateCRL,
-  checkCRL,
   setUp,
   tearDown,
   cleanCRL,
