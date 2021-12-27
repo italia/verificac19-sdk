@@ -1,10 +1,65 @@
-// Update procedures
 const axios = require('axios');
 const cache = require('./cache');
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
-cache.setUp();
+const setUp = async (crlManager) => {
+  await cache.setUp(crlManager);
+};
+
+const checkCRL = async () => {
+  const crlStatus = cache.getCRLStatus();
+  try {
+    const resp = await axios
+      .get(`${API_URL}/drl/check?version=${crlStatus.version}`);
+    if (resp.status === 200) {
+      if (!crlStatus.completed && crlStatus.targetVersion !== resp.data.version) {
+        await cache.cleanCRL();
+        return await checkCRL();
+      }
+      if (resp.data.numDiAdd > 0 || resp.data.numDiDelete > 0) {
+        return resp.data;
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+};
+
+const updateCRL = async () => {
+  if (!cache.needCRLUpdate()) return;
+  let resp;
+  const checkData = await checkCRL();
+  if (checkData) {
+    const crlStatus = cache.getCRLStatus();
+    do {
+      try {
+        resp = await axios
+          .get(`${API_URL}/drl?chunk=${crlStatus.chunk + 1}&version=${crlStatus.version}`);
+      } catch {
+        break;
+      }
+      if (resp.status === 200) {
+        // Check delta or full version
+        if (resp.data.delta) {
+          await cache.storeCRLRevokedUVCI(resp.data.delta.insertions, resp.data.delta.deletions);
+        } else {
+          await cache.storeCRLRevokedUVCI(resp.data.revokedUcvi);
+        }
+        crlStatus.chunk += 1;
+        if (crlStatus.chunk < resp.data.lastChunk) { // Download in progress
+          cache.storeCRLStatus(crlStatus.chunk, resp.data.lastChunk, crlStatus.version, checkData.version);
+        } else { // Download completed
+          cache.storeCRLStatus(0, 0, checkData.version, checkData.version);
+          break;
+        }
+      } else {
+        break;
+      }
+    } while (true);
+  }
+};
 
 const updateRules = async () => {
   if (!cache.needRulesUpdate()) return false;
@@ -46,12 +101,28 @@ const updateSignatures = async () => {
   return signatures;
 };
 
+const tearDown = async () => {
+  await cache.tearDown();
+};
+
 const updateAll = async () => {
   await updateRules();
   await updateSignaturesList();
   await updateSignatures();
+  await updateCRL();
+};
+
+const cleanCRL = async () => {
+  await cache.cleanCRL();
 };
 
 module.exports = {
-  updateSignatures, updateSignaturesList, updateRules, updateAll,
+  updateSignatures,
+  updateSignaturesList,
+  updateRules,
+  updateAll,
+  updateCRL,
+  setUp,
+  tearDown,
+  cleanCRL,
 };

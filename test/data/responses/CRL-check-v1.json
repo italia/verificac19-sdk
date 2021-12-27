@@ -1,0 +1,11 @@
+{
+  "id": "619cb579676ca211606c3316",
+  "fromVersion": 0,
+  "version": 1,
+  "chunk": 2,
+  "numDiAdd": 1000000,
+  "totalSizeInByte": 51000000,
+  "sizeSingleChunkInByte": 510000,
+  "totalChunk": 100,
+  "totalNumberUCVI": 1000000
+}

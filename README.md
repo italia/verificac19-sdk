@@ -11,6 +11,10 @@ Official VerificaC19 SDK implementation for Node.js ([official SDKs list](https:
 ## Requirements
 
 - Node.js version >= 12.x
+- MongoDB version >= 5.x (used to store CRL)
+
+⚠️ If you don't want to use MongoDB to store CRL, 
+read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
 
 ## Installation
 
@@ -20,9 +24,19 @@ npm i verificac19-sdk
 
 ## Usage
 
-### Download and cache rules and DSCs
+### Setup CRL environment
 
-You can download and cache rules and DSCs using `Service` module.
+CRL data will be stored in a MongoDB database. This repository provides a simple 
+`docker-compose.yml` file (dev instance) with a replica set. By default the
+connection string is `mongodb://root:example@localhost:27017/VC19?authSource=admin`,
+if you want to change it, set `VC19_MONGODB_URL` env variable.
+
+⚠️ If you don't want to use MongoDB to store CRL, 
+read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+
+### Download and cache rules, CRL data and DSCs
+
+You can download and cache rules, CRL data and DSCs using `Service` module.
 
 ```js
 const {Service} = require('verificac19-sdk');
@@ -33,7 +47,7 @@ const main = async () => {
 ```
 
 ⚠️ By default rules and DSCs will be cached in a folder called `.cache`, 
-to change it please set `VC19_CACHE_FOLDER` env variable.
+to change it, set `VC19_CACHE_FOLDER` env variable.
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 
@@ -111,7 +125,6 @@ console.log(validationResult.code === Validator.codes.NOT_VALID);
 
 👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 
-
 ### Verification mode
 
 If you want to change verification mode and verify whether a certificate is a 
@@ -141,9 +154,12 @@ To update rules and DSCs you can also use `updateRules`,
 const {Service} = require('verificac19-sdk');
 
 const main = async () => {
+  await Service.setUp();
   await Service.updateRules();
   await Service.updateSignaturesList();
   await Service.updateSignatures();
+  await Service.updateCRL();
+  await Service.tearDown();
 }
 ```
 
@@ -155,20 +171,28 @@ const {Certificate, Validator} = require('verificac19-sdk');
 
 const main = async () => {
   const myDCC = await Certificate.fromImage('./data/myDCC.png');
-  const rulesOk = Validator.checkRules(myDCC).result;
+  const rulesOk = await Validator.checkRules(myDCC).result;
   const signatureOk = await Validator.checkSignature(myDCC);
 }
 ```
 
 ## Development
 
-Install dependencies
+### Install dependencies
 
 ```sh
 npm i
 ```
 
-Run tests
+### Run tests
+
+Run mongodb services using Docker
+
+```sh
+docker-compose up
+```
+
+Set `VC19_CACHE_FOLDER` and run tests
 
 ```sh
 npm run test

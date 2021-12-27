@@ -304,10 +304,13 @@ const checkRecovery = (certificate, rules) => {
   }
 };
 
-const checkUVCI = (r, UVCIList) => {
+const checkUVCI = async (r, UVCIList) => {
   if (r) {
     for (const op of r) {
       if (UVCIList.includes(op.certificateIdentifier)) {
+        return false;
+      }
+      if (await cache.isUVCIRevoked(op.certificateIdentifier)) {
         return false;
       }
     }
@@ -315,7 +318,7 @@ const checkUVCI = (r, UVCIList) => {
   return true;
 };
 
-const checkRules = (certificate, mode = NORMAL_DGP) => {
+const checkRules = async (certificate, mode = NORMAL_DGP) => {
   const rules = cache.getRules();
   const UVCIList = findProperty(
     rules,
@@ -325,11 +328,11 @@ const checkRules = (certificate, mode = NORMAL_DGP) => {
 
   let result;
 
-  if (certificate.vaccinations && checkUVCI(certificate.vaccinations, UVCIList)) {
+  if (certificate.vaccinations && await checkUVCI(certificate.vaccinations, UVCIList)) {
     result = checkVaccinations(certificate, rules);
   }
 
-  if (certificate.tests && checkUVCI(certificate.tests, UVCIList)) {
+  if (certificate.tests && await checkUVCI(certificate.tests, UVCIList)) {
     if (mode === SUPER_DGP) {
       return {
         result: false,
@@ -340,7 +343,7 @@ const checkRules = (certificate, mode = NORMAL_DGP) => {
     result = checkTests(certificate, rules);
   }
 
-  if (certificate.recoveryStatements && checkUVCI(certificate.recoveryStatements, UVCIList)) {
+  if (certificate.recoveryStatements && await checkUVCI(certificate.recoveryStatements, UVCIList)) {
     result = checkRecovery(certificate, rules);
   }
 
@@ -391,7 +394,7 @@ const buildResponse = (certificate, rulesResult, signatureOk) => {
 };
 
 async function validate(certificate, mode = NORMAL_DGP) {
-  const rulesResult = checkRules(certificate, mode);
+  const rulesResult = await checkRules(certificate, mode);
   const signatureOk = await checkSignature(certificate);
   return buildResponse(certificate, rulesResult, signatureOk);
 }

@@ -18,3 +18,5 @@ coverage/
 
 # Cache
 .cache
+/db-data
+/crldb.json

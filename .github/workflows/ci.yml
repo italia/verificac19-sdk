@@ -6,11 +6,10 @@ on:
     branches: [ master ]
 jobs:
   build:
-    runs-on: ${{matrix.os}}
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 24
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
         node-version: [12.x, 14.x, 16.x]
     steps:
       - uses: actions/checkout@v2
@@ -18,9 +17,19 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.7.0
+        with:
+          mongodb-version: '4.4'
+          mongodb-replica-set: test-rs
+          mongodb-username: root
+          mongodb-password: example
+          mongodb-db: admin
       - run: npm install
       - run: npm run lint
       - run: npm run test
+        env:
+          VC19_MONGODB_URL: mongodb://127.0.0.1:27017/VC19
       - run: npm run report-coverage
       - name: Upload coverage
         uses: codecov/codecov-action@v2

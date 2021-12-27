@@ -1,0 +1,17 @@
+{
+  "id": "619cb579676ca211606c3317",
+  "version": 2,
+  "chunk": 2,
+  "lastChunk": 2,
+  "revokedUcvi": [
+    "KeLlTy7MdDp+h4kRPUtQTzrsIPKyyLnq9u88Dm8jVMQ=",
+    "w4xC/a0qtDlISWyDyie8kvf4KkhRWdjhORf2E5pWiig=",
+    "rqF9Ct5iTAOM0JlYpRUfY6WoUuZ6wph+YKzVXSqAIlU=",
+    "Ht3HJcVhFbjWv5Hs/zKocW7Bqpj63ne1O4mcvL7HIng="
+  ],
+  "creationDate": "2021-11-23T09:33:45.312+00:00",
+  "firstElementInChunk": "KeLlTy7MdDp+h4kRPUtQTzrsIPKyyLnq9u88Dm8jVMQ=",
+  "lastElementInChunk": "Ht3HJcVhFbjWv5Hs/zKocW7Bqpj63ne1O4mcvL7HIng=",
+  "sizeSingleChunkInByte": 510000,
+  "totalNumberUCVI": 8
+}

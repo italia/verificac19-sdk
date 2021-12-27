@@ -1,0 +1,18 @@
+{
+  "id": "619cb579676ca211606c3317",
+  "version": 4,
+  "chunk": 1,
+  "lastChunk": 1,
+  "delta": {
+    "insertions": [],
+    "deletions": [
+      "wr0K52gHWU7JJvy2KSCqKAxMHtYOcugrwIEUdUIB3Mo=",
+      "wr0K96gHWU7JJvy2KSCqKzxMHtYOziirwIEUdUIB3Mo="
+    ]
+  },
+  "creationDate": "2021-11-23T09:33:45.312+00:00",
+  "firstElementInChunk": "SdFQv70OPzcloeTy2wgDq7x5kU+VIwV3/WRLVEJ81LQ=",
+  "lastElementInChunk": "wr0K96gHWU7JJvy2KSCqKzxMHtYOziirwIEUdUIB3Mo=",
+  "sizeSingleChunkInByte": 510000,
+  "totalNumberUCVI": 3
+}

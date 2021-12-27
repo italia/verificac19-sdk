@@ -9,7 +9,7 @@ chai.use(chaiAsPromised);
 describe('Testing Validator', () => {
   it('checks rules verification', async () => {
     const dcc = await Certificate.fromImage(path.join('test', 'data', 'shit.png'));
-    chai.expect(Validator.checkRules(dcc).result).to.be.equal(false);
+    chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
   });
 
   it('checks signature verification false', async () => {
