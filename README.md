@@ -141,11 +141,20 @@ const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 | -------------- | ---------------------------------------- |
 | NORMAL_DGP     | Normal verification (default value)      |
 | SUPER_DGP      | Super Green Pass verification            | 
+| BOOSTER_DGP    | Booster verification mode                | 
 
-***Super Green Pass, which will come into force from 6 December 2021 to 15 January 2022, 
-will be a certificate valid only for people who have been vaccinated against 
-or who have recovered from Covid19, and will prevent all the others from 
-entering bars, restaurants, cinemas, gyms, theatres, discos and stadiums.***
+Details
+
+- `SUPER_DGP Mode`: VerificaC19 SDK considers a green certificate valid only for
+people who have been vaccinated against or who have recovered from Covid19, 
+and will prevent all the others from 
+entering bars, restaurants, cinemas, gyms, theatres, discos and stadiums.
+
+- `BOOSTER_DGP Mode`: VerificaC19 SDK considers green certificates generated after a 
+booster dose to be valid. Furthermore, green certificates generated after the 
+first vaccination cycle or recovery with the simultaneous presentation of a 
+digital document certifying the negative result of a SARS-CoV-2 test 
+are considered valid.
 
 ### Alternative methods
 

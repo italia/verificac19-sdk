@@ -11,27 +11,44 @@ const TEST_DETECTED = '260373001';
 const TEST_RAPID = 'LP217198-3';
 const TEST_MOLECULAR = 'LP6464-4';
 
+// Vaccine Types
+const JOHNSON = 'EU/1/20/1525';
+const SPUTNIK = 'Sputnik-V';
+
+// OID Recovery Types
+// const OID_RECOVERY = '1.3.6.1.4.1.1847.2021.1.3';
+// const OID_ALT_RECOVERY = '1.3.6.1.4.1.0.1847.2021.1.3';
+
+// Countries
+// const ITALY = 'IT';
+const SAN_MARINO = 'SM';
+
 // Certificate Status
 const NOT_EU_DCC = 'NOT_EU_DCC';
 const NOT_VALID = 'NOT_VALID';
 const NOT_VALID_YET = 'NOT_VALID_YET';
 const VALID = 'VALID';
+const REVOKED = 'REVOKED';
+const TEST_NEEDED = 'TEST_NEEDED';
 
 // Validation mode
-
 const SUPER_DGP = '2G';
 const NORMAL_DGP = '3G';
+const BOOSTER_DGP = 'BOOSTER';
 
 const codes = {
   VALID,
   NOT_VALID,
   NOT_VALID_YET,
   NOT_EU_DCC,
+  REVOKED,
+  TEST_NEEDED,
 };
 
 const modalities = {
   SUPER_DGP,
   NORMAL_DGP,
+  BOOSTER_DGP,
 };
 
 const findProperty = (rules, name, type) => rules.find((element) => {
@@ -50,7 +67,7 @@ const clearExtraTime = (strDateTime) => {
   }
 };
 
-const checkVaccinations = (certificate, rules) => {
+const checkVaccinations = (certificate, rules, mode) => {
   try {
     const last = certificate.vaccinations[certificate.vaccinations.length - 1];
     const type = last.medicinalProduct;
@@ -76,13 +93,14 @@ const checkVaccinations = (certificate, rules) => {
       type,
     );
 
-    // Check vaccine type is in list
-    if (type === 'Sputnik-V' && last.countryOfVaccination !== 'SM') {
+    // Check San Marino case
+    if (type === SPUTNIK && last.countryOfVaccination !== SAN_MARINO) {
       return {
         code: NOT_VALID,
         message: 'Vaccine Sputnik-V is valid only in San Marino',
       };
     }
+    // Check vaccine type is in list
     if (!type || !vaccineEndDayComplete) {
       return {
         code: NOT_VALID,
@@ -112,6 +130,13 @@ const checkVaccinations = (certificate, rules) => {
     if (last.doseNumber < last.totalSeriesOfDoses) {
       startDate = addDays(startDate, vaccineStartDayNotComplete.value);
       endDate = addDays(endDate, vaccineEndDayNotComplete.value);
+
+      if (mode === BOOSTER_DGP) {
+        return {
+          code: NOT_VALID,
+          message: 'Vaccine is not valid in Booster mode',
+        };
+      }
 
       if (startDate > endNow) {
         return {
@@ -147,6 +172,12 @@ const checkVaccinations = (certificate, rules) => {
       startDate = addDays(startDate, vaccineStartDayComplete.value);
       endDate = addDays(endDate, vaccineEndDayComplete.value);
 
+      if ((type === JOHNSON) && ((last.doseNumber > last.totalSeriesOfDoses) || (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber >= 2))) {
+        startDate = new Date(
+          Date.parse(clearExtraTime(last.dateOfVaccination)),
+        );
+      }
+
       if (startDate > endNow) {
         return {
           code: NOT_VALID_YET,
@@ -172,7 +203,22 @@ const checkVaccinations = (certificate, rules) => {
               endDate.toISOString()}`,
         };
       }
-
+      // Check completed cycle without booster
+      if (mode === BOOSTER_DGP) {
+        if (type === JOHNSON) {
+          if (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber < 2) {
+            return {
+              code: TEST_NEEDED,
+              message: 'Test needed',
+            };
+          }
+        } else if (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber < 3) {
+          return {
+            code: TEST_NEEDED,
+            message: 'Test needed',
+          };
+        }
+      }
       return {
         code: VALID,
         message:
@@ -195,7 +241,14 @@ const checkVaccinations = (certificate, rules) => {
   }
 };
 
-const checkTests = (certificate, rules) => {
+const checkTests = (certificate, rules, mode) => {
+  if (mode !== NORMAL_DGP) {
+    return {
+      result: false,
+      code: NOT_VALID,
+      message: 'Not valid. Super DGP or Booster required.',
+    };
+  }
   try {
     let testStartHours;
     let testEndHours;
@@ -254,7 +307,7 @@ const checkTests = (certificate, rules) => {
   }
 };
 
-const checkRecovery = (certificate, rules) => {
+const checkRecovery = (certificate, rules, mode) => {
   try {
     const recoveryCertStartDay = findProperty(rules, 'recovery_cert_start_day');
     const recoveryCertEndDay = findProperty(rules, 'recovery_cert_end_day');
@@ -284,6 +337,13 @@ const checkRecovery = (certificate, rules) => {
       return {
         code: NOT_VALID,
         message: `Recovery statement is expired at : ${endDate.toISOString()}`,
+      };
+    }
+
+    if (mode === BOOSTER_DGP) {
+      return {
+        code: TEST_NEEDED,
+        message: 'Test needed',
       };
     }
 
@@ -326,32 +386,29 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
     'black_list_uvci',
   ).value.split(';').filter((uvci) => uvci !== '');
 
+  const isRevoked = !await checkUVCI(certificate.vaccinations || certificate.tests || certificate.recoveryStatements, UVCIList);
+
+  if (isRevoked) {
+    return {
+      result: false,
+      code: REVOKED,
+      message: 'UVCI is in blacklist',
+    };
+  }
+
   let result;
 
-  if (certificate.vaccinations && await checkUVCI(certificate.vaccinations, UVCIList)) {
-    result = checkVaccinations(certificate, rules);
-  }
-
-  if (certificate.tests && await checkUVCI(certificate.tests, UVCIList)) {
-    if (mode === SUPER_DGP) {
-      return {
-        result: false,
-        code: NOT_VALID,
-        message: 'Not valid. Super DGP required.',
-      };
-    }
-    result = checkTests(certificate, rules);
-  }
-
-  if (certificate.recoveryStatements && await checkUVCI(certificate.recoveryStatements, UVCIList)) {
-    result = checkRecovery(certificate, rules);
-  }
-
-  if (!result) {
+  if (certificate.vaccinations) {
+    result = checkVaccinations(certificate, rules, mode);
+  } else if (certificate.tests) {
+    result = checkTests(certificate, rules, mode);
+  } else if (certificate.recoveryStatements) {
+    result = checkRecovery(certificate, rules, mode);
+  } else {
     return {
       result: false,
       code: NOT_EU_DCC,
-      message: 'No vaccination, test or recovery statement found in payload or UVCI is in blacklist',
+      message: 'No vaccination, test or recovery statement found in payload',
     };
   }
 

@@ -115,7 +115,7 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_8.png'), false,
       Validator.codes.NOT_VALID,
-      '^Not valid. Super DGP required.$',
+      '^Not valid. Super DGP or Booster required.$',
       Validator.mode.SUPER_DGP,
     );
     // Doses 1/2 valid only in Italy
