@@ -141,7 +141,7 @@ const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 | NORMAL_DGP     | Verifica normale (valore di default)     |
 | SUPER_DGP      | Verifica Super Green Pass                | 
 
-***Il Super Green Pass, che entrerà in vigore dal 6 dicembre al 15 gennaio 2021,
+***Il Super Green Pass, che entrerà in vigore dal 6 dicembre 2021 al 15 gennaio 2022,
 sarà un certificato valido solo per le persone che sono state vaccinate 
 o che sono guarite dal Covid19, e impedirà a tutti gli altri di entrare nei bar,
 ristoranti, cinema, palestre, teatri, discoteche e stadi.***
