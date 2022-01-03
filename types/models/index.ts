@@ -1,3 +1,4 @@
+export * from './crl.models';
 export * from './dcc.models';
 export * from './person.models';
 export * from './recovery.models';
