@@ -79,7 +79,7 @@ const getInfoFromCertificate = (certificate) => {
     const extendedKeyUsage = country === ITALY ? x509.getExtExtKeyUsageName() : null;
     info.country = country;
     info.oid = extendedKeyUsage ? extendedKeyUsage[0] : null;
-  } catch (err) {
+  } catch {
     // Possible error parsing certificate
   }
   return info;
@@ -146,15 +146,15 @@ const checkVaccinations = (certificate, rules, mode) => {
     }
 
     if (last.doseNumber < last.totalSeriesOfDoses) {
-      startDate = addDays(startDate, vaccineStartDayNotComplete.value);
-      endDate = addDays(endDate, vaccineEndDayNotComplete.value);
-
       if (mode === BOOSTER_DGP) {
         return {
           code: NOT_VALID,
           message: 'Vaccine is not valid in Booster mode',
         };
       }
+
+      startDate = addDays(startDate, vaccineStartDayNotComplete.value);
+      endDate = addDays(endDate, vaccineEndDayNotComplete.value);
 
       if (startDate > endNow) {
         return {
@@ -189,7 +189,6 @@ const checkVaccinations = (certificate, rules, mode) => {
     if (last.doseNumber >= last.totalSeriesOfDoses) {
       startDate = addDays(startDate, vaccineStartDayComplete.value);
       endDate = addDays(endDate, vaccineEndDayComplete.value);
-
       if ((type === JOHNSON) && ((last.doseNumber > last.totalSeriesOfDoses) || (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber >= 2))) {
         startDate = new Date(
           Date.parse(clearExtraTime(last.dateOfVaccination)),
@@ -335,10 +334,9 @@ const checkRecovery = (certificate, rules, mode) => {
     }
 
     const certificateInfo = getInfoFromCertificate(certificate);
-    const isRecoveryBis = (certificateInfo.country === ITALY && [OID_RECOVERY, OID_ALT_RECOVERY].includes(certificateInfo.oid));
-
-    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_cert_pv_start_day' : 'recovery_cert_start_day');
-    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_cert_pv_end_day' : 'recovery_cert_end_day');
+    const isRecoveryBis = certificateInfo.country === ITALY && [OID_RECOVERY, OID_ALT_RECOVERY].includes(certificateInfo.oid);
+    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_start_day' : 'recovery_cert_start_day');
+    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_end_day' : 'recovery_cert_end_day');
 
     const last = certificate.recoveryStatements[certificate.recoveryStatements.length - 1];
 

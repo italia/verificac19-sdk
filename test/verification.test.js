@@ -98,6 +98,55 @@ describe('Testing integration between Certificate and Validator', () => {
     );
   });
 
+  it('makes rules verification on booster cases and recovery bis', async () => {
+    // Vaccine not completed not valid in booster mode
+    mockdate.set('2021-06-24T00:00:00.000Z');
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Vaccine is not valid in Booster mode$',
+      Validator.mode.BOOSTER_DGP
+    );
+    mockdate.reset();
+    // Vaccine completed not valid in booster mode (test needed)
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'), false,
+      Validator.codes.TEST_NEEDED,
+      '^Test needed$',
+      Validator.mode.BOOSTER_DGP
+    );
+    // Test not valid in booster mode
+    mockdate.set('2021-05-22T12:34:56.000Z');
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Not valid. Super DGP or Booster required.$',
+      Validator.mode.BOOSTER_DGP
+    );
+    mockdate.reset();
+    // Recovery statement not valid in booster mode (test needed)
+    mockdate.set('2021-10-20T00:00:00.000Z');
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
+      Validator.codes.TEST_NEEDED,
+      '^Test needed$',
+      Validator.mode.BOOSTER_DGP
+    );
+    mockdate.reset();
+    // Recovery statement is valid
+    mockdate.set('2021-10-20T00:00:00.000Z');
+    const dccFakeRecovery = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'),
+    );
+    dccFakeRecovery.kid = "jnFYIu1y3ic="
+    await verifyRulesFromCertificate(
+      dccFakeRecovery, true,
+      Validator.codes.VALID,
+      '^Recovery statement is valid .*$',
+    );
+    mockdate.reset();
+  });
+
   it('makes rules verification on special cases', async () => {
     // Valid test results
     mockdate.set('2021-05-22T12:34:56.000Z');
@@ -247,6 +296,12 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromCertificate(
       dccFakeVaccination, false, Validator.codes.NOT_VALID,
       '^Vaccine Type is not in list$',
+    );
+    // Not EU DGC
+    delete dccFakeVaccination.vaccinations;
+    await verifyRulesFromCertificate(
+      dccFakeVaccination, false, Validator.codes.NOT_EU_DCC,
+      '^No vaccination, test or recovery statement found in payload$',
     );
   });
 });
