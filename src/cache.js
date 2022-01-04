@@ -73,7 +73,8 @@ class Cache {
   }
 
   needCRLUpdate() {
-    if (this.getCRLStatus().version === 0) return true;
+    const crlStatus = this.getCRLStatus();
+    if (crlStatus.version === 0 || !crlStatus.completed) return true;
     return this.fileNeedsUpdate(CRL_FILE_PATH, UPDATE_WINDOW_HOURS);
   }
 
@@ -91,7 +92,7 @@ class Cache {
 
   getCRLStatus() {
     const crlStatus = JSON.parse(fs.readFileSync(CRL_FILE_PATH));
-    crlStatus.completed = (crlStatus.chunk - crlStatus.totalChunk) === 0;
+    crlStatus.completed = crlStatus.totalChunk === crlStatus.chunk;
     return crlStatus;
   }
 
@@ -114,6 +115,10 @@ class Cache {
   }
 
   async isUVCIRevoked(uvci) {
+    const crlStatus = this.getCRLStatus();
+    if (crlStatus.version === 0 || !crlStatus.completed) {
+      throw new Error("CRL is not complete")
+    }
     await this.checkCrlManagerSetUp();
     const transformedUVCI = crypto.createHash('sha256').update(uvci).digest('base64');
     const isRevoked = await this._crlManager.isUVCIRevoked(transformedUVCI);

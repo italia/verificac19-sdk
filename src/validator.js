@@ -63,7 +63,7 @@ const clearExtraTime = (strDateTime) => {
       return strDateTime.substring(0, strDateTime.indexOf('T'));
     }
     return strDateTime;
-  } catch (e) {
+  } catch {
     return strDateTime;
   }
 };
