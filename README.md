@@ -14,7 +14,7 @@ Official VerificaC19 SDK implementation for Node.js ([official SDKs list](https:
 - MongoDB version >= 5.x (used to store CRL)
 
 ⚠️ If you don't want to use MongoDB to store CRL, 
-read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/docs/en/CUSTOM_CRL.md).
 
 ## Installation
 
@@ -32,7 +32,7 @@ connection string is `mongodb://root:example@localhost:27017/VC19?authSource=adm
 if you want to change it, set `VC19_MONGODB_URL` env variable.
 
 ⚠️ If you don't want to use MongoDB to store CRL, 
-read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/CUSTOM_CRL.md).
+read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/docs/en/CUSTOM_CRL.md).
 
 ### Download and cache rules, CRL data and DSCs
 

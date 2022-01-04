@@ -9,7 +9,7 @@ following this interface.
 ```js
 class MyCRLManager {
   async setUp() {
-    // Setup your deatabase
+    // Setup your database
   }
 
   async storeRevokedUVCI(revokedUvci = [], deletedRevokedUvci = []) {
@@ -17,7 +17,7 @@ class MyCRLManager {
   }
 
   async isUVCIRevoked(uvci) {
-    // Return true if `uvci` is present (UVCI revoked), false otherwise
+    // Return `true` if `uvci` is present (UVCI revoked), false otherwise
   }
 
   async clean() {
@@ -30,7 +30,7 @@ class MyCRLManager {
 }
 ```
 
-Then export your custom CRL as a singleton.
+Then export an instance as singleton.
 
 ```js
 const crlManager = new MyCRLManager();
