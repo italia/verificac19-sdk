@@ -1,10 +1,12 @@
-import { Rule, Signatures, SignaturesList } from "./models";
+import { Rule, Signatures, SignaturesList, CRL } from "./models";
 
 declare module Service {
   function updateSignatures(): Promise<Signatures>;
   function updateSignaturesList(): Promise<SignaturesList>;
   function updateRules(): Promise<Rule[]>;
   function updateAll(): Promise<void>;
+  function setUp(crl?: CRL): Promise<void>;
+  function tearDown(): Promise<void>;
 }
 
 export { Service }

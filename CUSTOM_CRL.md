@@ -12,8 +12,8 @@ class MyCRLManager {
     // Setup your deatabase
   }
 
-  async storeRevokedUVCI(revokedUvci) {
-    // Store `revokedUvci` elements
+  async storeRevokedUVCI(revokedUvci = [], deletedRevokedUvci = []) {
+    // Store `revokedUvci` elements and remove `deletedRevokedUvci` elements
   }
 
   async isUVCIRevoked(uvci) {

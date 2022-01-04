@@ -9,12 +9,16 @@ declare module Validator {
     VALID = "VALID",
     NOT_VALID = "NOT_VALID",
     NOT_VALID_YET = "NOT_VALID_YET",
-    NOT_EU_DCC = "NOT_EU_DCC"
+    NOT_EU_DCC = "NOT_EU_DCC",
+    REVOKED = 'REVOKED',
+    TEST_NEEDED = 'TEST_NEEDED'
+    
   }
 
   enum mode {
     SUPER_DGP = '2G',
-    NORMAL_DGP = '3G'
+    NORMAL_DGP = '3G',
+    BOOSTER_DGP = 'BOOSTER'
   }
 }
 
