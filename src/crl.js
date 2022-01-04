@@ -12,11 +12,15 @@ class CRL {
 
   async storeRevokedUVCI(revokedUvci = [], deletedRevokedUvci = []) {
     if (revokedUvci.length > 0) {
-      for (const uvciToInsert of revokedUvci) {
-        try {
-          await new this._dbModel({ _id: uvciToInsert }).save();
-        } catch {
-          // Insertion error (duplicate)
+      try {
+        await this._dbModel.insertMany(revokedUvci.map((uvci) => ({ _id: uvci })));
+      } catch {
+        for (const uvciToInsert of revokedUvci) {
+          try {
+            await new this._dbModel({ _id: uvciToInsert }).save();
+          } catch {
+            // Insertion error (duplicate)
+          }
         }
       }
     }
