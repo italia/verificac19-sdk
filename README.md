@@ -116,6 +116,8 @@ you can compare the resulting `code` with `Validator.codes` values
 |✅| VALID           | Certificate is valid                     |
 |❌| NOT_VALID       | Certificate is not valid                 | 
 |❌| NOT_VALID_YET   | Certificate is not valid yet             | 
+|❌| TEST_NEEDED     | Test needed if verification mode is BOOSTER_DGP | 
+|❌| REVOKED   | Certificate is revoked           | 
 |❌| NOT_EU_DCC      | Certificate is not an EU DCC             | 
 
 for example 

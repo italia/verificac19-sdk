@@ -115,6 +115,8 @@ Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
 |✅| VALID           | Il certificato è valido                       |
 |❌| NOT_VALID       | Il certificato non è valido                   | 
 |❌| NOT_VALID_YET   | Il certificato non è ancora valido            | 
+|❌| TEST_NEEDED     | In modalità BOOSTER_DGP si necessita di test  | 
+|❌| REVOKED         | Il certificato è stato revocato               | 
 |❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | 
 
 per esempio 
@@ -140,6 +142,7 @@ const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 | -------------- | ---------------------------------------- |
 | NORMAL_DGP     | Verifica normale (valore di default)     |
 | SUPER_DGP      | Verifica Super Green Pass                | 
+| BOOSTER_DGP    | Verifica modalità Booster                | 
 
 ***Il Super Green Pass, che entrerà in vigore dal 6 dicembre 2021 al 15 gennaio 2022,
 sarà un certificato valido solo per le persone che sono state vaccinate 
