@@ -20,10 +20,10 @@ const UPDATE_WINDOW_HOURS = 24;
 
 class Cache {
   async setUp(crlManager = crl) {
-    if (this._setup === true) {
+    if (this._isCRLSetUp === true) {
       return;
     }
-    this._setup = true;
+    this._isCRLSetUp = true;
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
       fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
@@ -32,6 +32,13 @@ class Cache {
     }
     this._crlManager = crlManager;
     await this._crlManager.setUp();
+  }
+
+  async checkCrlManagerSetUp() {
+    if (this._crlManager && !this._isCRLSetUp) {
+      await this._crlManager.setUp();
+      this._isCRLSetUp = true;
+    }
   }
 
   fileNeedsUpdate(filePath, hours = UPDATE_WINDOW_HOURS) {
@@ -99,21 +106,24 @@ class Cache {
   }
 
   async storeCRLRevokedUVCI(revokedUvci, deletedRevokedUvci) {
+    await this.checkCrlManagerSetUp();
     await this._crlManager.storeRevokedUVCI(revokedUvci, deletedRevokedUvci);
   }
 
   async isUVCIRevoked(uvci) {
+    await this.checkCrlManagerSetUp();
     const transformedUVCI = crypto.createHash('sha256').update(uvci).digest('base64');
     return this._crlManager.isUVCIRevoked(transformedUVCI);
   }
 
   async tearDown() {
     const td = await this._crlManager.tearDown();
-    this._setup = false;
+    this._isCRLSetUp = false;
     return td;
   }
 
   async cleanCRL() {
+    await this.checkCrlManagerSetUp();
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
       chunk: 0, totalChunk: 0, version: 0, targetVersion: 0,
     }));
