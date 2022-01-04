@@ -20,25 +20,27 @@ const UPDATE_WINDOW_HOURS = 24;
 
 class Cache {
   async setUp(crlManager = crl) {
-    if (this._isCRLSetUp === true) {
-      return;
-    }
-    this._isCRLSetUp = true;
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
       fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
         chunk: 0, totalChunk: 0, version: 0, targetVersion: 0,
       }));
     }
-    this._crlManager = crlManager;
-    await this._crlManager.setUp();
+    if (this._crlManager) {
+      await this._crlManager.tearDown();
+    }
+    if (crlManager) {
+      this._crlManager = crlManager;
+      await this._crlManager.setUp();
+    }
   }
 
   async checkCrlManagerSetUp() {
-    if (this._crlManager && !this._isCRLSetUp) {
-      await this._crlManager.setUp();
-      this._isCRLSetUp = true;
+    if (this._crlManager) {
+      await this._crlManager.tearDown();
+      return this._crlManager.setUp();
     }
+    return this.setUp();
   }
 
   fileNeedsUpdate(filePath, hours = UPDATE_WINDOW_HOURS) {
@@ -46,7 +48,7 @@ class Cache {
       if (addHours(fs.statSync(filePath).mtime, hours) > new Date(Date.now())) {
         return false;
       }
-    } catch (err) {
+    } catch {
       // Needs update
     }
     return true;
@@ -113,13 +115,14 @@ class Cache {
   async isUVCIRevoked(uvci) {
     await this.checkCrlManagerSetUp();
     const transformedUVCI = crypto.createHash('sha256').update(uvci).digest('base64');
-    return this._crlManager.isUVCIRevoked(transformedUVCI);
+    const isRevoked = await this._crlManager.isUVCIRevoked(transformedUVCI);
+    return isRevoked;
   }
 
   async tearDown() {
-    const td = await this._crlManager.tearDown();
-    this._isCRLSetUp = false;
-    return td;
+    if (this._crlManager) {
+      await this._crlManager.tearDown();
+    }
   }
 
   async cleanCRL() {
@@ -127,7 +130,8 @@ class Cache {
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
       chunk: 0, totalChunk: 0, version: 0, targetVersion: 0,
     }));
-    return this._crlManager.clean();
+    const cleanResult = await this._crlManager.clean();
+    return cleanResult;
   }
 }
 

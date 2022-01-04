@@ -232,4 +232,10 @@ describe('Testing Service', () => {
     await Service.cleanCRL();
     nock.cleanAll();
   });
+  it('checks Service auto connection', async () => {
+    await Service.setUp();
+    await Service.setUp();
+    await Service.tearDown();
+    await Service.cleanCRL();
+  });
 });

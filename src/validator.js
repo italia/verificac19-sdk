@@ -469,10 +469,8 @@ const buildResponse = (certificate, rulesResult, signatureOk) => {
 };
 
 async function validate(certificate, mode = NORMAL_DGP) {
-  await cache.setUp();
   const signatureOk = await checkSignature(certificate);
   const rulesResult = await checkRules(certificate, mode);
-  await cache.tearDown();
   return buildResponse(certificate, rulesResult, signatureOk);
 }
 
