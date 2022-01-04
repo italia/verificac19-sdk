@@ -144,10 +144,17 @@ const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 | SUPER_DGP      | Verifica Super Green Pass                | 
 | BOOSTER_DGP    | Verifica modalità Booster                | 
 
-***Il Super Green Pass, che entrerà in vigore dal 6 dicembre 2021 al 15 gennaio 2022,
-sarà un certificato valido solo per le persone che sono state vaccinate 
-o che sono guarite dal Covid19, e impedirà a tutti gli altri di entrare nei bar,
-ristoranti, cinema, palestre, teatri, discoteche e stadi.***
+- `Modalità SUPER_DGP`: VerificaC19 SDK considera un certificato valido solo per 
+le persone che sono state vaccinate o che sono guarite dal Covid19, 
+e impedirà a tutti gli altri di entrare nei bar,
+ristoranti, cinema, palestre, teatri, discoteche e stadi.
+
+- `Modalità BOOSTER_DGP`: VerificaC19 SDK considera valide le certificazioni 
+verdi generate dopo la dose booster di richiamo vaccinale. Considera valide, inoltre, 
+le certificazioni verdi generate dopo ciclo vaccinale primario o guarigione con 
+la contestuale presentazione di un documento, cartaceo o digitale, che attesti 
+l’esito negativo di un test al SARS-CoV-2.
+
 
 ### Metodi alternativi
 
