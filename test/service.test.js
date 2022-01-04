@@ -8,16 +8,15 @@ const nock = require('nock');
 const mockdate = require('mockdate');
 const mongoose = require('mongoose');
 
-process.env.VC19_CACHE_FOLDER = path.join('test', 'data', 'tempcache');
-const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
 const { Service, Certificate, Validator } = require('../src');
 
+const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
 const API_BASE_URL = 'https://get.dgc.gov.it/v1/dgc';
+
+chai.use(chaiAsPromised);
 
 let dbModel; let
   dBConnection;
-
-chai.use(chaiAsPromised);
 
 const prepareDB = async () => {
   dBConnection = await mongoose.createConnection(
@@ -29,11 +28,10 @@ const prepareDB = async () => {
 };
 
 const mockSettingsRequests = () => {
+  const settings = JSON.parse(fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'settings.json')));
   nock(API_BASE_URL)
     .get('/settings')
-    .replyWithFile(200, path.join('test', 'mock', 'settings.json'), {
-      'Content-Type': 'application/json',
-    });
+    .reply(200, settings);
   const xkids = JSON.parse(fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'DSC-validation.json'))).map((el) => el.kid);
   nock(API_BASE_URL)
     .get('/signercertificate/status')
