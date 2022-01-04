@@ -35,7 +35,6 @@ class CRL {
     if (this._dbConnection) {
       await this._dbConnection.close();
     }
-    await mongoose.disconnect();
   }
 
   async clean() {

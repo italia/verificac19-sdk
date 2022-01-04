@@ -4,7 +4,7 @@ declare module Service {
   function updateSignatures(): Promise<Signatures>;
   function updateSignaturesList(): Promise<SignaturesList>;
   function updateRules(): Promise<Rule[]>;
-  function updateAll(): Promise<void>;
+  function updateAll(crl?: CRL): Promise<void>;
   function setUp(crl?: CRL): Promise<void>;
   function tearDown(): Promise<void>;
 }

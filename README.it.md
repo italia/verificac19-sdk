@@ -41,9 +41,7 @@ Puoi scaricare e salvare regole e DSC utilizzando il modulo `Service`.
 const {Service} = require('verificac19-sdk');
 
 const main = async () => {
-  await Service.setUp();
   await Service.updateAll();
-  await Service.tearDown();
 }
 ```
 

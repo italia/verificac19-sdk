@@ -44,10 +44,11 @@ In order to make SDK using your custom CRL manager.
 const { Service } = require('verificac19-sdk');
 const crlManager = require('./crlmanager');
 
-await Service.setUp(crlManager);
+await Service.updateAll(crlManager);
 ```
 
-👉🏻  See an example [examples/crlmanager.js](https://github.com/italia/verificac19-sdk/blob/master/examples/crlmanager.js).
+👉🏻 You can also set CRL manager using `Service.setUp` method, 
+see [examples/crlmanager.js](https://github.com/italia/verificac19-sdk/blob/master/examples/crlmanager.js).
 
 ⚠️ The above example uses [Lowdb 1.0.0](https://github.com/typicode/lowdb), 
 if you have large JavaScript objects (~10-100MB) you may hit some performance issues.

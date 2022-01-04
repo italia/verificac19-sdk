@@ -103,6 +103,11 @@ const mockRequests = () => {
 };
 
 describe('Testing Service', () => {
+  afterEach(async () => {
+    if (dBConnection) {
+      await dBConnection.close();
+    }
+  });
   it('checks caching individually', async () => {
     mockRequests();
     let result;
@@ -139,6 +144,7 @@ describe('Testing Service', () => {
   it('checks clean CRL working', async () => {
     mockRequests();
     await prepareDB();
+    await Service.setUp();
     await Service.cleanCRL();
     // Check 0 elements
     chai.expect(await dbModel.count()).to.be.equal(0);
@@ -163,6 +169,7 @@ describe('Testing Service', () => {
   it('checks CRL download restore', async () => {
     mockSettingsRequests();
     await prepareDB();
+    await Service.setUp();
     await Service.cleanCRL();
 
     nock(API_BASE_URL)
@@ -212,6 +219,7 @@ describe('Testing Service', () => {
     const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
     const dcc = await Certificate.fromImage(dccPath);
     // Check that certificate is valid after CRL cleaning
+    await Service.setUp();
     await Service.cleanCRL();
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(true);
     // Check that certificate is not valid anymore after CRL update
@@ -223,7 +231,9 @@ describe('Testing Service', () => {
     dbModel.insertMany(
       [...new Set(newRevokedUVCI)].map((uvci) => ({ _id: uvci })),
     );
+    await Service.setUp();
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
+    await Service.setUp();
     await Service.cleanCRL();
     nock.cleanAll();
   });

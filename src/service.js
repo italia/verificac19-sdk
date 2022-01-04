@@ -105,11 +105,13 @@ const tearDown = async () => {
   await cache.tearDown();
 };
 
-const updateAll = async () => {
+const updateAll = async (crlManager) => {
+  await setUp(crlManager);
   await updateRules();
   await updateSignaturesList();
   await updateSignatures();
   await updateCRL();
+  await tearDown();
 };
 
 const cleanCRL = async () => {

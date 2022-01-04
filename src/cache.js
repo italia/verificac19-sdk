@@ -20,6 +20,10 @@ const UPDATE_WINDOW_HOURS = 24;
 
 class Cache {
   async setUp(crlManager = crl) {
+    if (this._setup === true) {
+      return;
+    }
+    this._setup = true;
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
       fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
@@ -104,7 +108,9 @@ class Cache {
   }
 
   async tearDown() {
-    return this._crlManager.tearDown();
+    const td = await this._crlManager.tearDown();
+    this._setup = false;
+    return td;
   }
 
   async cleanCRL() {
