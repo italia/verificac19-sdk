@@ -105,7 +105,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), false,
       Validator.codes.NOT_VALID,
       '^Vaccine is not valid in Booster mode$',
-      Validator.mode.BOOSTER_DGP
+      Validator.mode.BOOSTER_DGP,
     );
     mockdate.reset();
     // Vaccine completed not valid in booster mode (test needed)
@@ -113,7 +113,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'), false,
       Validator.codes.TEST_NEEDED,
       '^Test needed$',
-      Validator.mode.BOOSTER_DGP
+      Validator.mode.BOOSTER_DGP,
     );
     // Test not valid in booster mode
     mockdate.set('2021-05-22T12:34:56.000Z');
@@ -121,7 +121,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
       Validator.codes.NOT_VALID,
       '^Not valid. Super DGP or Booster required.$',
-      Validator.mode.BOOSTER_DGP
+      Validator.mode.BOOSTER_DGP,
     );
     mockdate.reset();
     // Recovery statement not valid in booster mode (test needed)
@@ -130,7 +130,7 @@ describe('Testing integration between Certificate and Validator', () => {
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
       Validator.codes.TEST_NEEDED,
       '^Test needed$',
-      Validator.mode.BOOSTER_DGP
+      Validator.mode.BOOSTER_DGP,
     );
     mockdate.reset();
     // Recovery statement is valid
@@ -138,7 +138,7 @@ describe('Testing integration between Certificate and Validator', () => {
     const dccFakeRecovery = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'),
     );
-    dccFakeRecovery.kid = "jnFYIu1y3ic="
+    dccFakeRecovery.kid = 'jnFYIu1y3ic=';
     await verifyRulesFromCertificate(
       dccFakeRecovery, true,
       Validator.codes.VALID,
