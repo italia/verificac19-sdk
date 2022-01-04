@@ -108,14 +108,14 @@ const main = async () => {
 
 Puoi comparare `code` con i valori di `Validator.codes` riportati nella tabella
 
-| | Code            | Description                                   |
-|-| --------------- | --------------------------------------------- |
-|✅| VALID           | Il certificato è valido                       |
-|❌| NOT_VALID       | Il certificato non è valido                   | 
-|❌| NOT_VALID_YET   | Il certificato non è ancora valido            | 
-|❌| TEST_NEEDED     | In modalità BOOSTER_DGP si necessita di test  | 
-|❌| REVOKED         | Il certificato è stato revocato               | 
-|❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | 
+| | Codice          | Descrizione                                   | Risultato |
+|-| --------------- | --------------------------------------------- | --------- |
+|✅| VALID           | Il certificato è valido                       | `true` |
+|⚠️| TEST_NEEDED     | In modalità BOOSTER_DGP si necessita di test  | `false` |
+|❌| NOT_VALID       | Il certificato non è valido                   | `false` |
+|❌| NOT_VALID_YET   | Il certificato non è ancora valido            | `false` | 
+|❌| REVOKED         | Il certificato è stato revocato               | `false` |
+|❌| NOT_EU_DCC      | Il certificato non è un EU DCC                | `false` |
 
 per esempio 
 
