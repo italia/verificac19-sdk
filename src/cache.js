@@ -110,12 +110,14 @@ class Cache {
   async storeCRLRevokedUVCI(revokedUvci, deletedRevokedUvci) {
     await this.checkCrlManagerSetUp();
     await this._crlManager.storeRevokedUVCI(revokedUvci, deletedRevokedUvci);
+    await this._crlManager.tearDown();
   }
 
   async isUVCIRevoked(uvci) {
     await this.checkCrlManagerSetUp();
     const transformedUVCI = crypto.createHash('sha256').update(uvci).digest('base64');
     const isRevoked = await this._crlManager.isUVCIRevoked(transformedUVCI);
+    await this._crlManager.tearDown();
     return isRevoked;
   }
 
@@ -131,6 +133,7 @@ class Cache {
       chunk: 0, totalChunk: 0, version: 0, targetVersion: 0,
     }));
     const cleanResult = await this._crlManager.clean();
+    await this._crlManager.tearDown();
     return cleanResult;
   }
 }
