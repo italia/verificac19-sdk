@@ -1,3 +1,4 @@
+const rs = require('jsrsasign');
 const cache = require('./cache');
 const { addHours, addDays } = require('./utils');
 
@@ -16,11 +17,11 @@ const JOHNSON = 'EU/1/20/1525';
 const SPUTNIK = 'Sputnik-V';
 
 // OID Recovery Types
-// const OID_RECOVERY = '1.3.6.1.4.1.1847.2021.1.3';
-// const OID_ALT_RECOVERY = '1.3.6.1.4.1.0.1847.2021.1.3';
+const OID_RECOVERY = '1.3.6.1.4.1.1847.2021.1.3';
+const OID_ALT_RECOVERY = '1.3.6.1.4.1.0.1847.2021.1.3';
 
 // Countries
-// const ITALY = 'IT';
+const ITALY = 'IT';
 const SAN_MARINO = 'SM';
 
 // Certificate Status
@@ -65,6 +66,23 @@ const clearExtraTime = (strDateTime) => {
   } catch (e) {
     return strDateTime;
   }
+};
+
+const getInfoFromCertificate = (certificate) => {
+  const signatures = cache.getSignatures();
+  const info = { country: null, oid: null };
+  try {
+    const x509 = new rs.X509();
+    x509.readCertPEM(signatures[certificate.kid]);
+    const certIssuer = x509.getIssuer().array[0].find((el) => el.type === 'C');
+    const country = certIssuer ? certIssuer.value : null;
+    const extendedKeyUsage = country === ITALY ? x509.getExtExtKeyUsageName() : null;
+    info.country = country;
+    info.oid = extendedKeyUsage ? extendedKeyUsage[0] : null;
+  } catch (err) {
+    // Possible error parsing certificate
+  }
+  return info;
 };
 
 const checkVaccinations = (certificate, rules, mode) => {
@@ -309,8 +327,18 @@ const checkTests = (certificate, rules, mode) => {
 
 const checkRecovery = (certificate, rules, mode) => {
   try {
-    const recoveryCertStartDay = findProperty(rules, 'recovery_cert_start_day');
-    const recoveryCertEndDay = findProperty(rules, 'recovery_cert_end_day');
+    if (mode === BOOSTER_DGP) {
+      return {
+        code: TEST_NEEDED,
+        message: 'Test needed',
+      };
+    }
+
+    const certificateInfo = getInfoFromCertificate(certificate);
+    const isRecoveryBis = (certificateInfo.country === ITALY && [OID_RECOVERY, OID_ALT_RECOVERY].includes(certificateInfo.oid));
+
+    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_cert_pv_start_day' : 'recovery_cert_start_day');
+    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_cert_pv_end_day' : 'recovery_cert_end_day');
 
     const last = certificate.recoveryStatements[certificate.recoveryStatements.length - 1];
 
@@ -337,13 +365,6 @@ const checkRecovery = (certificate, rules, mode) => {
       return {
         code: NOT_VALID,
         message: `Recovery statement is expired at : ${endDate.toISOString()}`,
-      };
-    }
-
-    if (mode === BOOSTER_DGP) {
-      return {
-        code: TEST_NEEDED,
-        message: 'Test needed',
       };
     }
 
@@ -419,20 +440,19 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
   };
 };
 
-async function checkSignature(certificate) {
+const checkSignature = async (certificate) => {
   const signaturesList = cache.getSignatureList();
   const signatures = cache.getSignatures();
   let verified = false;
   if (certificate.kid && signaturesList.includes(certificate.kid)) {
     try {
       verified = await certificate.dcc.checkSignatureWithCertificate(signatures[certificate.kid]);
-    } catch (err) {
+    } catch {
       // invalid signature or key, return false
     }
   }
-
   return !!verified;
-}
+};
 
 const buildResponse = (certificate, rulesResult, signatureOk) => {
   let motivation = rulesResult;
@@ -451,8 +471,10 @@ const buildResponse = (certificate, rulesResult, signatureOk) => {
 };
 
 async function validate(certificate, mode = NORMAL_DGP) {
-  const rulesResult = await checkRules(certificate, mode);
+  await cache.setUp();
   const signatureOk = await checkSignature(certificate);
+  const rulesResult = await checkRules(certificate, mode);
+  await cache.tearDown();
   return buildResponse(certificate, rulesResult, signatureOk);
 }
 
