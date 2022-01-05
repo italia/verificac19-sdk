@@ -1,6 +1,7 @@
 const rs = require('jsrsasign');
 const cache = require('./cache');
 const { addHours, addDays } = require('./utils');
+const { CertificateVerificationError } = require('./errors');
 
 // Generic Type parameter
 const GENERIC_TYPE = 'GENERIC';
@@ -397,7 +398,14 @@ const checkUVCI = async (r, UVCIList) => {
   return true;
 };
 
+const checkCacheIsReady = () => {
+  if (!cache.isReady()) {
+    throw new CertificateVerificationError('Cache is not ready!');
+  }
+};
+
 const checkRules = async (certificate, mode = NORMAL_DGP) => {
+  checkCacheIsReady();
   const rules = cache.getRules();
   const UVCIList = findProperty(
     rules,
@@ -439,6 +447,7 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
 };
 
 const checkSignature = async (certificate) => {
+  checkCacheIsReady();
   const signaturesList = cache.getSignatureList();
   const signatures = cache.getSignatures();
   let verified = false;

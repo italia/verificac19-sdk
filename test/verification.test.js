@@ -2,7 +2,9 @@ const path = require('path');
 const chai = require('chai');
 const mockdate = require('mockdate');
 const { Certificate, Validator } = require('../src');
+const cache = require('../src/cache');
 
+const oldIsReady = cache.isReady;
 chai.use(require('chai-as-promised'));
 chai.use(require('chai-match'));
 
@@ -37,6 +39,12 @@ const verifyRulesAndSignatureWithVerify = async (imagePath, expectedRules, expec
 };
 
 describe('Testing integration between Certificate and Validator', () => {
+  beforeEach(() => {
+    cache.isReady = () => true;
+  });
+  afterEach(() => {
+    cache.isReady = oldIsReady;
+  });
   it('makes rules verification with individual methods', async () => {
     await verifyRulesAndSignature(path.join('test', 'data', 'shit.png'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', '2.png'), false, false);

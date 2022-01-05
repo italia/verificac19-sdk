@@ -8,6 +8,8 @@ const nock = require('nock');
 const mockdate = require('mockdate');
 const mongoose = require('mongoose');
 
+const { CertificateVerificationError } = require('../src/errors');
+
 const { Service, Certificate, Validator } = require('../src');
 
 const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
@@ -110,6 +112,11 @@ describe('Testing Service', () => {
   });
   it('checks caching individually', async () => {
     mockRequests();
+    // Validation without files throws CertificateVerificationError
+    const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
+    const dcc = await Certificate.fromImage(dccPath);
+    await chai.expect(Validator.checkRules(dcc)).to.be.rejectedWith(CertificateVerificationError);
+    // Update cache
     let result;
     result = await Service.updateRules();
     chai.expect(result).not.to.be.equal(false);
@@ -169,6 +176,8 @@ describe('Testing Service', () => {
     mockSettingsRequests();
     await prepareDB();
     await Service.cleanCRL();
+    const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
+    const dcc = await Certificate.fromImage(dccPath);
 
     nock(API_BASE_URL)
       .get('/drl/check?version=0')
@@ -188,6 +197,8 @@ describe('Testing Service', () => {
     chai.expect(await dbModel.count()).to.be.equal(5);
     nock.cleanAll();
     mockSettingsRequests();
+    // Check cache not ready
+    await chai.expect(Validator.checkRules(dcc)).to.be.rejectedWith(CertificateVerificationError);
     nock(API_BASE_URL)
       .get('/drl/check?version=0')
       .times(2) // Check CRL 2 times
@@ -207,6 +218,8 @@ describe('Testing Service', () => {
     await Service.updateAll();
     // Check 9 elements
     chai.expect(await dbModel.count()).to.be.equal(9);
+    // Check cache is ready
+    await Validator.checkRules(dcc);
     nock.cleanAll();
   });
   it('checks CRL works with a blacklisted certificate', async () => {
@@ -216,8 +229,6 @@ describe('Testing Service', () => {
     // Prepare blacklisted certificate
     const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
     const dcc = await Certificate.fromImage(dccPath);
-    // Check that certificate is valid after CRL cleaning
-    await Service.cleanCRL();
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(true);
     // Check that certificate is not valid anymore after CRL update
     await Service.updateAll();

@@ -13,7 +13,15 @@ class CertificateParsingError extends GenericError {
   }
 }
 
+class CertificateVerificationError extends GenericError {
+  constructor(error) {
+    super(`certificate can't be verified, ${error.message}`);
+    this.data = { error };
+  }
+}
+
 module.exports = {
   GenericError,
+  CertificateVerificationError,
   CertificateParsingError,
 };

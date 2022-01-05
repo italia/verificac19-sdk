@@ -35,6 +35,16 @@ class Cache {
     }
   }
 
+  isReady() {
+    for (const file of [CRL_FILE_PATH, SIGNATURES_FILE_PATH, RULES_FILE_PATH, SIGNATURES_LIST_FILE_PATH]) {
+      if (!fs.existsSync(file)) {
+        return false;
+      }
+    }
+    const crlStatus = this.getCRLStatus();
+    return crlStatus.version !== 0 && crlStatus.completed;
+  }
+
   async checkCrlManagerSetUp() {
     if (this._crlManager) {
       await this._crlManager.tearDown();
@@ -115,10 +125,6 @@ class Cache {
   }
 
   async isUVCIRevoked(uvci) {
-    const crlStatus = this.getCRLStatus();
-    if (crlStatus.version === 0 || !crlStatus.completed) {
-      throw new Error("CRL is not complete")
-    }
     await this.checkCrlManagerSetUp();
     const transformedUVCI = crypto.createHash('sha256').update(uvci).digest('base64');
     const isRevoked = await this._crlManager.isUVCIRevoked(transformedUVCI);
