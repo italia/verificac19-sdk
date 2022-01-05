@@ -82,6 +82,9 @@ Il contenuto del DCC caricato sarà il seguente:
 }
 ```
 
+👉🏻 I metodi `fromImage` e `fromRaw` potrebbero sollevare l'eccezione 
+`CertificateParsingError`.
+
 Puoi verificare un DCC utilizzando il modulo `Validator`.
 
 ```js
@@ -123,6 +126,9 @@ per esempio
 const validationResult = await Validator.validate(dccTest);
 console.log(validationResult.code === Validator.codes.NOT_VALID);
 ```
+
+👉🏻 `validate` potrebbe sollevare l'eccezione `CertificateVerificationError` (ad
+esempio quando la cache non è ancora pronta).
 
 👉🏻  Vedi l'esempio [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 

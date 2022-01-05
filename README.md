@@ -83,6 +83,8 @@ Loaded DCC has the following structure:
 }
 ```
 
+👉🏻 `fromImage` and `fromRaw` methods may rise `CertificateParsingError`.
+
 You can verify a DCC using `Validator` module.
 
 ```js
@@ -124,6 +126,9 @@ for example
 const validationResult = await Validator.validate(dccTest);
 console.log(validationResult.code === Validator.codes.NOT_VALID);
 ```
+
+👉🏻 `validate` method may rise `CertificateVerificationError` (e.g. when cache is
+not ready yet).
 
 👉🏻  See an example [examples/verifydccs.js](https://github.com/italia/verificac19-sdk/blob/master/examples/verifydccs.js).
 
