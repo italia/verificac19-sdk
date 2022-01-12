@@ -13,9 +13,6 @@ Official VerificaC19 SDK implementation for Node.js ([official SDKs list](https:
 - Node.js version >= 12.x
 - MongoDB version >= 5.x (used to store CRL)
 
-⚠️ If you don't want to use MongoDB to store CRL, 
-read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/docs/en/CUSTOM_CRL.md).
-
 ## Installation
 
 ```sh
@@ -29,7 +26,15 @@ npm i verificac19-sdk
 CRL data will be stored in a MongoDB database. This repository provides a simple 
 `docker-compose.yml` file (dev instance) with a replica set. By default the
 connection string is `mongodb://root:example@localhost:27017/VC19?authSource=admin`,
-if you want to change it, set `VC19_MONGODB_URL` env variable.
+if you want to change it as [dotenv](https://www.npmjs.com/package/dotenv) is used for environment variables managment,
+you can must create a .env file in your root folder and set `VC19_MONGODB_URL` value.
+
+**.env** file example
+
+```
+#MongoDB Connection String
+VC19_MONGODB_URL=mongodb://root:block@localhost:27017/VC19?authSource=admin
+```
 
 ⚠️ If you don't want to use MongoDB to store CRL, 
 read [how to write your own CRL management system](https://github.com/italia/verificac19-sdk/blob/master/docs/en/CUSTOM_CRL.md).
