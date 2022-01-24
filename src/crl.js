@@ -13,7 +13,11 @@ class CRL {
   }
 
   async storeRevokedUVCI(revokedUvci = [], deletedRevokedUvci = []) {
-    deletedRevokedUvci.length > 50000 ?
+
+    let env = process.env.VC19_MONGODB_CLEAN_THRESHOLD || '50000'
+    let threshold = parseInt(env, 10);
+
+    deletedRevokedUvci.length > threshold ?
       await this.clean().then(() => this.#insertRevokedUvci(revokedUvci)) :
       await this.#insertRevokedUvci(revokedUvci).then(() => this.#deleteRevokedUvci(deletedRevokedUvci))
   }
