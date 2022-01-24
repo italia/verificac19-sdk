@@ -13,28 +13,45 @@ class CRL {
   }
 
   async storeRevokedUVCI(revokedUvci = [], deletedRevokedUvci = []) {
+    deletedRevokedUvci.length > 50000 ?
+      await this.clean().then(() => this.#insertRevokedUvci(revokedUvci)) :
+      await this.#insertRevokedUvci(revokedUvci).then(() => this.#deleteRevokedUvci(deletedRevokedUvci))
+  }
+
+  async #insertRevokedUvci(revokedUvci = []) {
     if (revokedUvci.length > 0) {
       try {
-        await this._dbModel.insertMany(revokedUvci.map((uvci) => ({ _id: uvci })));
+        await this._dbModel.insertMany(revokedUvci.map((uvci) => ({
+          _id: uvci
+        })));
       } catch {
         for (const uvciToInsert of revokedUvci) {
           try {
-            await new this._dbModel({ _id: uvciToInsert }).save();
+            await new this._dbModel({
+              _id: uvciToInsert
+            }).save();
           } catch {
             // Insertion error (duplicate)
           }
         }
       }
     }
+  }
+
+  async #deleteRevokedUvci(deletedRevokedUvci = []) {
     if (deletedRevokedUvci.length > 0) {
       for (const uvciToRemove of deletedRevokedUvci) {
-        await this._dbModel.deleteOne({ _id: uvciToRemove });
+        await this._dbModel.deleteOne({
+          _id: uvciToRemove
+        });
       }
     }
   }
 
   async isUVCIRevoked(uvci) {
-    return !!await this._dbModel.findOne({ _id: uvci });
+    return !!await this._dbModel.findOne({
+      _id: uvci
+    });
   }
 
   async tearDown() {
