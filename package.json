@@ -5,7 +5,8 @@
   "dependencies": {
     "axios": "^0.24.0",
     "dcc-utils": "^0.4.0",
-    "mongoose": "^6.1.6"
+    "mongoose": "^6.1.6",
+    "dotenv": "^11.0.0"
   },
   "devDependencies": {
     "chai": "^4.3.4",
