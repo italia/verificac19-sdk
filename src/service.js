@@ -57,6 +57,7 @@ const updateCRL = async () => {
       } else {
         break;
       }
+    // eslint-disable-next-line no-constant-condition
     } while (true);
   }
 };
