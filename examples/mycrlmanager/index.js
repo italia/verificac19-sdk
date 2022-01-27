@@ -13,7 +13,7 @@ class MyCRLManager {
   }
 
   async isUVCIRevoked(uvci) {
-    return !!await this._db.get('uvcis').find(uvci);
+    return !await this._db.get('uvcis').find(uvci);
   }
 
   async tearDown() {
