@@ -16,7 +16,7 @@ const SIGNATURES_FILE_PATH = path.join(CACHE_FOLDER, SIGNATURES_FILE);
 const RULES_FILE_PATH = path.join(CACHE_FOLDER, RULES_FILE);
 const SIGNATURES_LIST_FILE_PATH = path.join(CACHE_FOLDER, SIGNATURES_LIST_FILE);
 
-const UPDATE_WINDOW_HOURS = 24;
+const UPDATE_WINDOW_HOURS = Number.parseInt(process.env.VC19_UPDATE_HOURS || '24', 10);
 
 class Cache {
   async setUp(crlManager = crl) {
