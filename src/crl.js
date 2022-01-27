@@ -35,7 +35,7 @@ class CRL {
 
     async function deleteUvci(db) {
       if (deletedRevokedUvci.length > 0) {
-        await db.deleteMany({ id: { $in: deletedRevokedUvci } });
+        await db.deleteMany({ _id: { $in: deletedRevokedUvci } });
       }
     }
 
