@@ -26,8 +26,8 @@ npm i verificac19-sdk
 CRL data will be stored in a MongoDB database. This repository provides a simple 
 `docker-compose.yml` file (dev instance) with a replica set. By default the
 connection string is `mongodb://root:example@localhost:27017/VC19?authSource=admin`.
-if you want to change it as [dotenv](https://www.npmjs.com/package/dotenv) is used for environment variables managment,
-you must create a .env file in your root folder and set `VC19_MONGODB_URL` value.
+
+If you want to change it as [dotenv](https://www.npmjs.com/package/dotenv) is used for environment variables managment, you must create a `.env` file in your root folder and set `VC19_MONGODB_URL` value.
 
 👉🏻  See an example [examples/.env](https://github.com/italia/verificac19-sdk/blob/master/examples/.env).
 
@@ -47,7 +47,10 @@ const main = async () => {
 ```
 
 ⚠️ By default rules and DSCs will be cached in a folder called `.cache`, 
-to change it, set `VC19_CACHE_FOLDER` env variable.
+to change it, set `VC19_CACHE_FOLDER` inside your `.env` file.
+
+⏱ By default `updateAll` is allowed to fetch new data every 24 hours.
+To change this value, set `VC19_UPDATE_HOURS` inside your `.env` file.
 
 👉🏻  See an example [examples/syncdata.js](https://github.com/italia/verificac19-sdk/blob/master/examples/syncdata.js).
 
