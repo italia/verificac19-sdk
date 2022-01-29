@@ -79,6 +79,7 @@ Loaded DCC has the following structure:
   },
   dateOfBirth: '1964-08-12',
   kid: 'TH15154F4k3K1D=',
+  exemptions: [ ... ],         // Array of exemptions (if any)
   vaccinations: [ ... ],       // Array of vaccinations (if any)
   tests: [ ... ],              // Array of tests (if any)
   recoveryStatements: [ ... ], // Array of recovery statements (if any)
