@@ -1,7 +1,10 @@
 const path = require('path');
 const chai = require('chai');
+const rewire = require('rewire');
 const mockdate = require('mockdate');
 const { Certificate, Validator } = require('../src');
+
+const dccToModel = rewire('../src/certificate.js').__get__('dccToModel');
 const cache = require('../src/cache');
 
 const oldIsReady = cache.isReady;
@@ -151,6 +154,48 @@ describe('Testing integration between Certificate and Validator', () => {
       dccFakeRecovery, true,
       Validator.codes.VALID,
       '^Recovery statement is valid .*$',
+    );
+    mockdate.reset();
+  });
+
+  it('checks exemption certificates', async () => {
+    const exemptionPayload = {
+      e: [{
+        df: '2021-02-15',
+        du: '2021-12-15',
+        co: 'IT',
+        ci: 'TESTIDFAKEEXEMPTION#2',
+        is: '',
+        tg: '',
+      }],
+      nam: {
+        fnt: 'UTENTE',
+        fn: 'UTENTE',
+        gnt: 'TEST',
+        gn: 'TEST',
+      },
+      dob: '1955-01-20',
+    };
+    const dcc = dccToModel({ payload: exemptionPayload });
+    mockdate.set('2021-02-14T12:34:56.000Z');
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_VALID_YET,
+    );
+    mockdate.set('2021-02-16T12:34:56.000Z');
+    await verifyRulesFromCertificate(
+      dcc, true, Validator.codes.VALID,
+    );
+    mockdate.set('2021-12-16T12:34:56.000Z');
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_VALID,
+    );
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.TEST_NEEDED, null,
+      Validator.mode.BOOSTER_DGP,
+    );
+    dcc.exemptions = [];
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_EU_DCC,
     );
     mockdate.reset();
   });
@@ -309,7 +354,7 @@ describe('Testing integration between Certificate and Validator', () => {
     delete dccFakeVaccination.vaccinations;
     await verifyRulesFromCertificate(
       dccFakeVaccination, false, Validator.codes.NOT_EU_DCC,
-      '^No vaccination, test or recovery statement found in payload$',
+      '^No vaccination, test, exemption or recovery statement found in payload$',
     );
   });
 });

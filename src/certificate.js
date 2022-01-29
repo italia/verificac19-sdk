@@ -16,6 +16,23 @@ const dccToModel = (dcc) => {
   const vList = payload.v;
   const rList = payload.r;
   const tList = payload.t;
+  const eList = payload.e;
+
+  let exemptions;
+  if (eList && eList.length > 0) {
+    exemptions = [];
+    for (const e of eList) {
+      const object = {
+        disease: e.tg,
+        certificateValidFrom: e.df,
+        certificateValidUntil: e.du,
+        countryOfVaccination: e.co,
+        certificateIssuer: e.is,
+        certificateIdentifier: e.ci,
+      };
+      exemptions.push(object);
+    }
+  }
 
   let vaccinations;
   if (vList && vList.length > 0) {
@@ -81,6 +98,7 @@ const dccToModel = (dcc) => {
     vaccinations,
     tests,
     recoveryStatements,
+    exemptions,
     dcc,
     kid,
   };

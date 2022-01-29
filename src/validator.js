@@ -384,6 +384,54 @@ const checkRecovery = (certificate, rules, mode) => {
   }
 };
 
+const checkExemption = (certificate, rules, mode) => {
+  try {
+    if (mode === BOOSTER_DGP) {
+      return {
+        code: TEST_NEEDED,
+        message: 'Test needed',
+      };
+    }
+    const last = certificate.exemptions[certificate.exemptions.length - 1];
+
+    const now = new Date(Date.now());
+    const startDate = new Date(
+      Date.parse(clearExtraTime(last.certificateValidFrom)),
+    );
+    const endDate = new Date(
+      Date.parse(clearExtraTime(last.certificateValidUntil)),
+    );
+    if (startDate > now) {
+      return {
+        code: NOT_VALID_YET,
+        message:
+          `Exemption is not valid yet, starts at : ${
+            startDate.toISOString()}`,
+      };
+    }
+    if (now > endDate) {
+      return {
+        code: NOT_VALID,
+        message: `Exemption is expired at : ${endDate.toISOString()}`,
+      };
+    }
+    return {
+      code: VALID,
+      message:
+        `Exemption is valid [ ${
+          startDate.toISOString()
+        } - ${
+          endDate.toISOString()
+        } ] `,
+    };
+  } catch (err) {
+    return {
+      code: NOT_EU_DCC,
+      message: `Exemption is not present or is not a green pass : ${err.toString()}`,
+    };
+  }
+};
+
 const checkUVCI = async (r, UVCIList) => {
   if (r) {
     for (const op of r) {
@@ -413,7 +461,7 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
     'black_list_uvci',
   ).value.split(';').filter((uvci) => uvci !== '');
 
-  const isRevoked = !await checkUVCI(certificate.vaccinations || certificate.tests || certificate.recoveryStatements, UVCIList);
+  const isRevoked = !await checkUVCI(certificate.vaccinations || certificate.exemptions || certificate.tests || certificate.recoveryStatements, UVCIList);
 
   if (isRevoked) {
     return {
@@ -431,11 +479,13 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
     result = checkTests(certificate, rules, mode);
   } else if (certificate.recoveryStatements) {
     result = checkRecovery(certificate, rules, mode);
+  } else if (certificate.exemptions) {
+    result = checkExemption(certificate, rules, mode);
   } else {
     return {
       result: false,
       code: NOT_EU_DCC,
-      message: 'No vaccination, test or recovery statement found in payload',
+      message: 'No vaccination, test, exemption or recovery statement found in payload',
     };
   }
 
