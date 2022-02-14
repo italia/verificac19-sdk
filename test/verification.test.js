@@ -49,24 +49,29 @@ describe('Testing integration between Certificate and Validator', () => {
     cache.isReady = oldIsReady;
   });
   it('makes rules verification with individual methods', async () => {
+    mockdate.set('2021-09-24T00:00:00.000Z');
     await verifyRulesAndSignature(path.join('test', 'data', 'shit.png'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', '2.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'example_qr_vaccine_recovery.png'), true, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'mouse.jpeg'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', 'signed_cert.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'uk_qr_vaccine_dose1.png'), false, false);
+    mockdate.reset();
   });
 
   it('makes rules verification with verify', async () => {
+    mockdate.set('2021-09-24T00:00:00.000Z');
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'shit.png'), false, true);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', '2.png'), false, false);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'example_qr_vaccine_recovery.png'), false, false);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'mouse.jpeg'), false, true);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'signed_cert.png'), false, false);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'uk_qr_vaccine_dose1.png'), false, false);
+    mockdate.reset();
   });
 
   it('makes rules verification on SK testing certificates', async () => {
+    mockdate.set('2021-07-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), false,
       Validator.codes.NOT_VALID,
@@ -92,6 +97,8 @@ describe('Testing integration between Certificate and Validator', () => {
       Validator.codes.VALID,
       '^Doses 1/1 - Vaccination is valid .*$',
     );
+    mockdate.reset();
+    mockdate.set('2021-11-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
       Validator.codes.NOT_VALID,
@@ -107,6 +114,7 @@ describe('Testing integration between Certificate and Validator', () => {
       Validator.codes.NOT_VALID,
       '^Test Result is expired at .*$',
     );
+    mockdate.reset();
   });
 
   it('makes rules verification on booster cases and recovery bis', async () => {
@@ -120,12 +128,14 @@ describe('Testing integration between Certificate and Validator', () => {
     );
     mockdate.reset();
     // Vaccine completed not valid in booster mode (test needed)
+    mockdate.set('2021-06-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'), false,
       Validator.codes.TEST_NEEDED,
       '^Test needed$',
       Validator.mode.BOOSTER_DGP,
     );
+    mockdate.reset();
     // Test not valid in booster mode
     mockdate.set('2021-05-22T12:34:56.000Z');
     await verifyRulesFromImage(
