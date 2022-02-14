@@ -146,11 +146,13 @@ Super Green Pass or not, you need to pass `Validator.mode.SUPER_DGP` to
 const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 ```
 
-| Code           | Description                              |
-| -------------- | ---------------------------------------- |
-| NORMAL_DGP     | Normal verification (default value)      |
-| SUPER_DGP      | Super Green Pass verification            | 
-| BOOSTER_DGP    | Booster verification mode                | 
+| Code             | Description                              |
+| ---------------- | ---------------------------------------- |
+| NORMAL_DGP       | Normal verification (default value)      |
+| SUPER_DGP        | Super Green Pass verification            | 
+| VISITORS_RSA_DGP | RSA Visitors (ex BOOSTER_DGP verification mode) | 
+| WORK_DGP | Work places verification | 
+| ENTRY_IT_DGP | Entry in Italy verification | 
 
 Details
 
