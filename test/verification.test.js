@@ -203,6 +203,10 @@ describe('Testing integration between Certificate and Validator', () => {
       dcc, false, Validator.codes.TEST_NEEDED, null,
       Validator.mode.BOOSTER_DGP,
     );
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_VALID, null,
+      Validator.mode.ENTRY_IT_DGP,
+    );
     dcc.exemptions = [];
     await verifyRulesFromCertificate(
       dcc, false, Validator.codes.NOT_EU_DCC,

@@ -16,6 +16,14 @@ const TEST_MOLECULAR = 'LP6464-4';
 // Vaccine Types
 const JOHNSON = 'EU/1/20/1525';
 const SPUTNIK = 'Sputnik-V';
+const MODERNA = 'EU/1/20/1507';
+const PFIZER = 'EU/1/20/1528';
+const ASTRAZENECA = 'EU/1/21/1529';
+const COVISHIELD = 'Covishield';
+const R_COVI = 'R-COVI';
+const COVID19_RECOMBINANT = 'Covid-19-recombinant';
+
+const VACCINES_EMA_LIST = [JOHNSON, MODERNA, PFIZER, ASTRAZENECA, COVISHIELD, R_COVI, COVID19_RECOMBINANT];
 
 // OID Recovery Types
 const OID_RECOVERY = '1.3.6.1.4.1.1847.2021.1.3';
@@ -37,6 +45,9 @@ const TEST_NEEDED = 'TEST_NEEDED';
 const SUPER_DGP = '2G';
 const NORMAL_DGP = '3G';
 const BOOSTER_DGP = 'BOOSTER';
+const VISITORS_RSA_DGP = BOOSTER_DGP
+const WORK_DGP = 'WORK' ;
+const ENTRY_IT_DGP = 'ENTRY_IT';
 
 const codes = {
   VALID,
@@ -51,7 +62,12 @@ const modalities = {
   SUPER_DGP,
   NORMAL_DGP,
   BOOSTER_DGP,
+  VISITORS_RSA_DGP,
+  WORK_DGP,
+  ENTRY_IT_DGP
 };
+
+const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
 
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
@@ -90,6 +106,7 @@ const checkVaccinations = (certificate, rules, mode) => {
   try {
     const last = certificate.vaccinations[certificate.vaccinations.length - 1];
     const type = last.medicinalProduct;
+    const isEMA = isVaccineInEmaList(type) || type === SPUTNIK && last.countryOfVaccination === SAN_MARINO
 
     const vaccineStartDayNotComplete = findProperty(
       rules,
@@ -112,18 +129,18 @@ const checkVaccinations = (certificate, rules, mode) => {
       type,
     );
 
-    // Check San Marino case
-    if (type === SPUTNIK && last.countryOfVaccination !== SAN_MARINO) {
-      return {
-        code: NOT_VALID,
-        message: 'Vaccine Sputnik-V is valid only in San Marino',
-      };
-    }
     // Check vaccine type is in list
     if (!type || !vaccineEndDayComplete) {
       return {
         code: NOT_VALID,
         message: 'Vaccine Type is not in list',
+      };
+    }
+    // Check not EMA case
+    if (!isEMA) {
+      return {
+        code: NOT_VALID,
+        message: 'Vaccine is not EMA',
       };
     }
     const startNow = new Date(Date.now());
@@ -390,6 +407,12 @@ const checkExemption = (certificate, rules, mode) => {
       return {
         code: TEST_NEEDED,
         message: 'Test needed',
+      };
+    }
+    if (mode === ENTRY_IT_DGP) {
+      return {
+        code: NOT_VALID,
+        message: `Exemption is not valid`,
       };
     }
     const last = certificate.exemptions[certificate.exemptions.length - 1];
