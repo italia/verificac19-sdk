@@ -115,6 +115,27 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Test Result is expired at .*$',
     );
     mockdate.reset();
+    // More than 50 years at work
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Not valid for workers with age >= 50 years.',
+      Validator.mode.WORK_DGP,
+    );
+    // Less than 50 years at work
+    mockdate.set('2021-05-22T12:34:56.000Z');
+    const dcc = await Certificate.fromImage(path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'));
+    dcc.dateOfBirth = '1971-05-22';
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_VALID, null,
+      Validator.mode.WORK_DGP,
+    );
+    dcc.dateOfBirth = '1971-05-23';
+    await verifyRulesFromCertificate(
+      dcc, true, Validator.codes.VALID, null,
+      Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
   });
 
   it('makes rules verification on booster cases and recovery bis', async () => {

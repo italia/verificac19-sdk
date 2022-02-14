@@ -45,8 +45,8 @@ const TEST_NEEDED = 'TEST_NEEDED';
 const SUPER_DGP = '2G';
 const NORMAL_DGP = '3G';
 const BOOSTER_DGP = 'BOOSTER';
-const VISITORS_RSA_DGP = BOOSTER_DGP
-const WORK_DGP = 'WORK' ;
+const VISITORS_RSA_DGP = BOOSTER_DGP;
+const WORK_DGP = 'WORK';
 const ENTRY_IT_DGP = 'ENTRY_IT';
 
 const codes = {
@@ -64,10 +64,12 @@ const modalities = {
   BOOSTER_DGP,
   VISITORS_RSA_DGP,
   WORK_DGP,
-  ENTRY_IT_DGP
+  ENTRY_IT_DGP,
 };
 
 const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
+
+const hasOwner50years = (certificate, scanDate) => (new Date(new Date(scanDate).setHours(0, 0, 0, 0) - new Date(certificate.dateOfBirth))).getUTCFullYear() - 1970 >= 50;
 
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
@@ -106,7 +108,7 @@ const checkVaccinations = (certificate, rules, mode) => {
   try {
     const last = certificate.vaccinations[certificate.vaccinations.length - 1];
     const type = last.medicinalProduct;
-    const isEMA = isVaccineInEmaList(type) || type === SPUTNIK && last.countryOfVaccination === SAN_MARINO
+    const isEMA = isVaccineInEmaList(type) || (type === SPUTNIK && last.countryOfVaccination === SAN_MARINO);
 
     const vaccineStartDayNotComplete = findProperty(
       rules,
@@ -277,11 +279,19 @@ const checkVaccinations = (certificate, rules, mode) => {
 };
 
 const checkTests = (certificate, rules, mode) => {
-  if (mode !== NORMAL_DGP) {
+  const now = new Date(Date.now());
+  if (mode === BOOSTER_DGP || mode === SUPER_DGP) {
     return {
       result: false,
       code: NOT_VALID,
       message: 'Not valid. Super DGP or Booster required.',
+    };
+  }
+  if (mode === WORK_DGP && hasOwner50years(certificate, now)) {
+    return {
+      result: false,
+      code: NOT_VALID,
+      message: 'Not valid for workers with age >= 50 years.',
     };
   }
   try {
@@ -299,7 +309,6 @@ const checkTests = (certificate, rules, mode) => {
       return { code: NOT_VALID, message: 'Test type is not valid' };
     }
 
-    const now = new Date(Date.now());
     let startDate = new Date(Date.parse(last.dateTimeOfCollection));
     let endDate = new Date(Date.parse(last.dateTimeOfCollection));
 
@@ -412,7 +421,7 @@ const checkExemption = (certificate, rules, mode) => {
     if (mode === ENTRY_IT_DGP) {
       return {
         code: NOT_VALID,
-        message: `Exemption is not valid`,
+        message: 'Exemption is not valid',
       };
     }
     const last = certificate.exemptions[certificate.exemptions.length - 1];
