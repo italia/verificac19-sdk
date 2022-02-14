@@ -327,6 +327,7 @@ describe('Testing integration between Certificate and Validator', () => {
       dccWithMalformedVaccinations, false, Validator.codes.NOT_VALID,
     );
     mockdate.reset();
+    mockdate.set('2021-08-15T12:34:56.000Z');
     // SM vaccination (Sputnik-V)
     const dccSMSputnikVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
@@ -334,6 +335,7 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromCertificate(
       dccSMSputnikVaccinations, true, Validator.codes.VALID,
     );
+    mockdate.reset();
     // Other countries vaccination with Sputnik-V
     const dccITSputnikVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
