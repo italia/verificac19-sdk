@@ -353,7 +353,6 @@ const checkTests = (certificate, rules, mode) => {
 
 const checkRecovery = (certificate, rules, mode) => {
   try {
-
     const certificateInfo = getInfoFromCertificate(certificate);
     const settingStartRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_start_day_NOT_IT' : 'recovery_cert_start_day_IT';
     const settingEndRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_end_day_NOT_IT' : 'recovery_cert_end_day_IT';
