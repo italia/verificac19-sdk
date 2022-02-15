@@ -122,7 +122,7 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Not valid for workers with age >= 50 years.',
       Validator.mode.WORK_DGP,
     );
-    // Less than 50 years at work
+    // 50 years at work
     mockdate.set('2021-05-22T12:34:56.000Z');
     const dcc = await Certificate.fromImage(path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'));
     dcc.dateOfBirth = '1971-05-22';
@@ -130,6 +130,7 @@ describe('Testing integration between Certificate and Validator', () => {
       dcc, false, Validator.codes.NOT_VALID, null,
       Validator.mode.WORK_DGP,
     );
+    // 49 years at work
     dcc.dateOfBirth = '1971-05-23';
     await verifyRulesFromCertificate(
       dcc, true, Validator.codes.VALID, null,

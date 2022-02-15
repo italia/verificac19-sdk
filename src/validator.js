@@ -69,7 +69,13 @@ const modalities = {
 
 const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
 
-const hasOwner50years = (certificate, scanDate) => (new Date(new Date(scanDate).setHours(0, 0, 0, 0) - new Date(certificate.dateOfBirth))).getUTCFullYear() - 1970 >= 50;
+const hasOwner50years = (certificate, scanDate) => {
+  const now = new Date(scanDate);
+  now.setUTCHours(0, 0, 0, 0);
+  const dob = new Date(certificate.dateOfBirth);
+  dob.setUTCHours(0, 0, 0, 1);
+  return (new Date(new Date(now) - dob)).getUTCFullYear() - 1970 >= 50;
+};
 
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
