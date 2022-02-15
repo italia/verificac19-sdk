@@ -3,17 +3,18 @@ const Database = require('better-sqlite3');
 class SqliteCrlManager {
   async setUp() {
     this._db = new Database('crl.db');
-    await this._db.exec("CREATE TABLE IF NOT EXISTS ucvi (revokedUcvi VARCHAR PRIMARY KEY)");
+    await this._db.exec('CREATE TABLE IF NOT EXISTS ucvi (revokedUcvi VARCHAR PRIMARY KEY)');
   }
 
   async storeRevokedUVCI(revokedUvci) {
-    const stmt = this._db.prepare('INSERT OR IGNORE INTO ucvi(revokedUcvi) VALUES ' + revokedUvci.map((uvci) => '(?)').join(','));
+    const stmt = this._db.prepare(`INSERT OR IGNORE INTO ucvi(revokedUcvi) VALUES ${revokedUvci.map(() => '(?)').join(',')}`);
     await stmt.run(revokedUvci);
   }
 
   async isUVCIRevoked(uvci) {
     const stmt = this._db.prepare('SELECT revokedUcvi FROM ucvi WHERE revokedUcvi = ?');
-    return await stmt.get(uvci);
+    const result = await stmt.get(uvci);
+    return !!(result);
   }
 
   async tearDown() {
