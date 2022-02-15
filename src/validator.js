@@ -353,17 +353,13 @@ const checkTests = (certificate, rules, mode) => {
 
 const checkRecovery = (certificate, rules, mode) => {
   try {
-    if (mode === BOOSTER_DGP) {
-      return {
-        code: TEST_NEEDED,
-        message: 'Test needed',
-      };
-    }
 
     const certificateInfo = getInfoFromCertificate(certificate);
+    const settingStartRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_start_day_NOT_IT' : 'recovery_cert_start_day_IT';
+    const settingEndRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_end_day_NOT_IT' : 'recovery_cert_end_day_IT';
     const isRecoveryBis = certificateInfo.country === ITALY && [OID_RECOVERY, OID_ALT_RECOVERY].includes(certificateInfo.oid);
-    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_start_day' : 'recovery_cert_start_day');
-    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_end_day' : 'recovery_cert_end_day');
+    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_start_day' : settingStartRecovery);
+    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_end_day' : settingEndRecovery);
 
     const last = certificate.recoveryStatements[certificate.recoveryStatements.length - 1];
 
@@ -390,6 +386,13 @@ const checkRecovery = (certificate, rules, mode) => {
       return {
         code: NOT_VALID,
         message: `Recovery statement is expired at : ${endDate.toISOString()}`,
+      };
+    }
+
+    if (mode === BOOSTER_DGP && !isRecoveryBis) {
+      return {
+        code: TEST_NEEDED,
+        message: 'Test needed',
       };
     }
 
