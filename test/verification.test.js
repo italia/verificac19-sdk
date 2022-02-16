@@ -459,4 +459,74 @@ describe('Testing integration between Certificate and Validator', () => {
     );
     mockdate.reset();
   });
+
+  it('makes rules verification for super DGP mode (IT DL 4 Feb)', async () => {
+    // Test Not Completed in super DGP VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotCompleted.vaccinations[1].doseNumber = 1;
+    await verifyRulesFromCertificate(
+      dccNotCompleted, true, Validator.codes.VALID,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Not Completed in super DGP VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 1;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Booster not EMA in super DGP TEST_NEED
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 3;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Completed not IT and not EMA in super DGP TEST_NEED
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 2;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Completed IT in super DGP VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 2;
+    dccNotCompleted.vaccinations[1].countryOfVaccination = 'IT';
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'EU/1/20/1507';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, true, Validator.codes.VALID,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+  });
+
+  it('makes rules verification for RSA Visitors (IT DL 4 Feb)', async () => {
+    // Test Booster not EMA in super DGP TEST_NEED
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotCompleted.vaccinations[1].doseNumber = 3;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.VISITORS_RSA_DGP,
+    );
+    mockdate.reset();
+  });
 });

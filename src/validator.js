@@ -250,7 +250,7 @@ const checkVaccinations = (certificate, rules, mode) => {
           'vaccine_end_day_booster_NOT_IT',
         );
       }
-    } else if (mode === SUPER_DGP) { // SUPER DGP // TODO: tests
+    } else if (mode === SUPER_DGP) { // SUPER DGP
       if (!isEMA && vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
         return {
           code: NOT_VALID,
@@ -284,7 +284,7 @@ const checkVaccinations = (certificate, rules, mode) => {
             'vaccine_end_day_complete_extended_EMA',
           );
         }
-        if (!isEMA && !isItalian) {
+        if (!isEMA) {
           testRequired = true;
         }
       } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
@@ -319,7 +319,7 @@ const checkVaccinations = (certificate, rules, mode) => {
         );
         // Force TEST
         testRequired = true;
-      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) { // TODO: tests
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
         vaccineStartDay = findProperty(
           rules,
           'vaccine_start_day_booster_IT',
