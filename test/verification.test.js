@@ -145,7 +145,7 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), false,
       Validator.codes.NOT_VALID,
-      '^Vaccine is not valid in Booster mode$',
+      '^Required complete vaccination$',
       Validator.mode.BOOSTER_DGP,
     );
     mockdate.reset();
@@ -348,7 +348,7 @@ describe('Testing integration between Certificate and Validator', () => {
     const dccWithMalformedVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
     );
-    dccWithMalformedVaccinations.vaccinations[1].doseNumber = 'a';
+    dccWithMalformedVaccinations.vaccinations[1].doseNumber = -1;
     await verifyRulesFromCertificate(
       dccWithMalformedVaccinations, false, Validator.codes.NOT_VALID,
     );
@@ -386,7 +386,12 @@ describe('Testing integration between Certificate and Validator', () => {
     dccFakeVaccination.vaccinations[0].medicinalProduct = 'Fake';
     await verifyRulesFromCertificate(
       dccFakeVaccination, false, Validator.codes.NOT_VALID,
-      '^Vaccine Type is not in list$',
+      '^Vaccine is not EMA$',
+    );
+    dccFakeVaccination.vaccinations[0].medicinalProduct = undefined;
+    await verifyRulesFromCertificate(
+      dccFakeVaccination, false, Validator.codes.NOT_VALID,
+      '^Vaccine Type is empty$',
     );
     // Not EU DGC
     delete dccFakeVaccination.vaccinations;
