@@ -208,7 +208,7 @@ const checkVaccinations = (certificate, rules, mode) => {
           rules,
           'vaccine_end_day_complete_IT',
         );
-      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) { // TODO: tests
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
         vaccineStartDay = findProperty(
           rules,
           'vaccine_start_day_booster_IT',
@@ -218,7 +218,7 @@ const checkVaccinations = (certificate, rules, mode) => {
           'vaccine_end_day_booster_IT',
         );
       }
-    } else if (mode === ENTRY_IT_DGP) { // ENTRY ITALY DGP // TODO: tests
+    } else if (mode === ENTRY_IT_DGP) { // ENTRY ITALY DGP
       if (!isEMA) {
         return {
           code: NOT_VALID,

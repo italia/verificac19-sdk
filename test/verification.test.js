@@ -399,5 +399,64 @@ describe('Testing integration between Certificate and Validator', () => {
       dccFakeVaccination, false, Validator.codes.NOT_EU_DCC,
       '^No vaccination, test, exemption or recovery statement found in payload$',
     );
+    // Test booster in NORMAL_DGP mode
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccWithBooster = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWithBooster.vaccinations[1].doseNumber = 3;
+    await verifyRulesFromCertificate(
+      dccWithBooster, true, Validator.codes.VALID,
+    );
+    mockdate.reset();
+  });
+
+  it('makes rules verification to travel to Italy (IT DL 4 Feb)', async () => {
+    // Test not EMA in Entry Italy INVALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotEma = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotEma.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotEma, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
+    // Test Booster in Entry Italy VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccWithBoosterEntry = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWithBoosterEntry.vaccinations[1].doseNumber = 3;
+    await verifyRulesFromCertificate(
+      dccWithBoosterEntry, true, Validator.codes.VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
+    // Test Completed in Entry Italy VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    await verifyRulesFromCertificate(
+      dccCompleted, true, Validator.codes.VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
+    // Test Not Completed in Entry Italy NOT VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotCompleted.vaccinations[1].doseNumber = 1;
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
   });
 });
