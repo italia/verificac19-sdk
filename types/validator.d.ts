@@ -1,4 +1,4 @@
-import { RulesResult, DCCCertificate, ValidateGP } from "./models";
+import { DCCCertificate, RulesResult, ValidateGP } from "./models";
 
 declare module Validator {
   function checkSignature(certificate: DCCCertificate): Promise<boolean>;
@@ -16,10 +16,14 @@ declare module Validator {
   }
 
   enum mode {
-    SUPER_DGP = '2G',
-    NORMAL_DGP = '3G',
-    BOOSTER_DGP = 'BOOSTER'
+    SUPER_DGP = "2G",
+    NORMAL_DGP = "3G",
+    BOOSTER_DGP = "BOOSTER",
+    VISITORS_RSA_DGP = BOOSTER_DGP,
+    WORK_DGP = "WORK",
+    ENTRY_IT_DGP = "ENTRY_IT",
   }
 }
 
-export { Validator }
+export { Validator };
+
