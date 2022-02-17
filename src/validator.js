@@ -447,7 +447,6 @@ const checkVaccinations = (certificate, rules, mode) => {
           `${doses} - Vaccination is expired at : ${endDate.toISOString()}`,
       };
     }
-
     return { code: NOT_VALID, message: 'Vaccination format is invalid' };
   } catch (err) {
     return {

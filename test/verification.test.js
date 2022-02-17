@@ -621,5 +621,16 @@ describe('Testing integration between Certificate and Validator', () => {
       null, Validator.mode.WORK_DGP,
     );
     mockdate.reset();
+    // Test If hasOwner50years && !isEMA Not Valid extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
+    mockdate.set('2022-01-18T00:00:00.000Z');
+    dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
   });
 });
