@@ -529,4 +529,97 @@ describe('Testing integration between Certificate and Validator', () => {
     );
     mockdate.reset();
   });
+
+  it('makes rules verification for Work (IT DL 4 Feb)', async () => {
+    // Test Italian EMA not completed in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    let dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.vaccinations[1].doseNumber = 1;
+    dccWork.vaccinations[1].countryOfVaccination = 'IT';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test Italian EMA completed in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 2;
+    dccWork.vaccinations[1].countryOfVaccination = 'IT';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test Italian EMA booster in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 3;
+    dccWork.vaccinations[1].countryOfVaccination = 'IT';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test not EMA not completed in Work NOT_VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 1;
+    dccWork.vaccinations[1].countryOfVaccination = 'SK';
+    dccWork.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test EMA and not Italian completed, worker < 50 years in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.vaccinations[1].doseNumber = 2;
+    dccWork.vaccinations[1].countryOfVaccination = 'SK';
+    dccWork.dateOfBirth = '1987-05-22';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test EMA and not Italian completed, worker > 50 years in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 2;
+    dccWork.vaccinations[1].countryOfVaccination = 'SK';
+    dccWork.dateOfBirth = '1947-05-22';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test EMA and not Italian completed, worker > 50 years extended in Work TEST_NEEDED
+    mockdate.set('2022-01-18T00:00:00.000Z');
+    dccWork.dateOfBirth = '1947-05-22';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test not EMA and worker < 50 years in Work is NOT VALID
+    mockdate.set('2022-01-18T00:00:00.000Z');
+    dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.dateOfBirth = '1987-05-22';
+    dccWork.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+  });
 });
