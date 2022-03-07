@@ -1,6 +1,6 @@
 {
   "name": "verificac19-sdk",
-  "version": "0.9.2",
+  "version": "0.9.3",
   "description": "VerificaC19 SDK for Node.js",
   "dependencies": {
     "axios": "^0.24.0",
