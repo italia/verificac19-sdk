@@ -1,7 +1,9 @@
 const rs = require('jsrsasign');
-const cache = require('./cache');
+
 const { addHours, addDays } = require('./utils');
 const { CertificateVerificationError } = require('./errors');
+
+const { cache } = require('./service');
 
 // Generic Type parameter
 const GENERIC_TYPE = 'GENERIC';
@@ -100,8 +102,8 @@ const clearExtraTime = (strDateTime) => {
   }
 };
 
-const getInfoFromCertificate = (certificate) => {
-  const signatures = cache.getSignatures();
+const getInfoFromCertificate = async (certificate) => {
+  const signatures = await cache.getSignatures();
   const info = { country: null, oid: null };
   try {
     const x509 = new rs.X509();
@@ -659,15 +661,16 @@ const checkUVCI = async (r, UVCIList) => {
   return true;
 };
 
-const checkCacheIsReady = () => {
-  if (!cache.isReady()) {
+const checkCacheIsReady = async () => {
+  if (!(await cache.isReady())) {
     throw new CertificateVerificationError('Cache is not ready!');
   }
 };
 
 const checkRules = async (certificate, mode = NORMAL_DGP) => {
-  checkCacheIsReady();
-  const rules = cache.getRules();
+  await cache.checkCacheManagerSetUp();
+  await checkCacheIsReady();
+  const rules = await cache.getRules();
   const UVCIList = findProperty(
     rules,
     'black_list_uvci',
@@ -677,6 +680,7 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
   const isRevoked = !await checkUVCI(certificate.vaccinations || certificate.exemptions || certificate.tests || certificate.recoveryStatements, UVCIList);
 
   if (isRevoked) {
+    await cache.tearDown();
     return {
       result: false,
       code: REVOKED,
@@ -695,13 +699,14 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
   } else if (certificate.exemptions) {
     result = checkExemption(certificate, rules, mode);
   } else {
+    await cache.tearDown();
     return {
       result: false,
       code: NOT_EU_DCC,
       message: 'No vaccination, test, exemption or recovery statement found in payload',
     };
   }
-
+  await cache.tearDown();
   return {
     result: result.code === VALID,
     code: result.code,
@@ -710,9 +715,10 @@ const checkRules = async (certificate, mode = NORMAL_DGP) => {
 };
 
 const checkSignature = async (certificate) => {
-  checkCacheIsReady();
-  const signaturesList = cache.getSignatureList();
-  const signatures = cache.getSignatures();
+  await cache.checkCacheManagerSetUp();
+  await checkCacheIsReady();
+  const signaturesList = await cache.getSignatureList();
+  const signatures = await cache.getSignatures();
   let verified = false;
   if (certificate.kid && signaturesList.includes(certificate.kid)) {
     try {
@@ -721,6 +727,7 @@ const checkSignature = async (certificate) => {
       // invalid signature or key, return false
     }
   }
+  await cache.tearDown();
   return !!verified;
 };
 

@@ -1,18 +1,24 @@
 require('dotenv').config(); // required for MongoDB connection string
 const axios = require('axios');
-const cache = require('./cache');
+const mongocache = require('./mongo_cache');
 const pkg = require('../package.json');
+
+let cache = mongocache;
 
 axios.defaults.headers.common['User-Agent'] = `verificac19-sdk-node/${pkg.version}`;
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
-const setUp = async (crlManager) => {
+const setUp = async (crlManager, cacheManager) => {
+  if (cacheManager) {
+    cache = cacheManager;
+  }
+
   await cache.setUp(crlManager);
 };
 
 const checkCRL = async () => {
-  const crlStatus = cache.getCRLStatus();
+  const crlStatus = await cache.getCRLStatus();
   try {
     const resp = await axios
       .get(`${API_URL}/drl/check?version=${crlStatus.version}`);
@@ -32,11 +38,12 @@ const checkCRL = async () => {
 };
 
 const updateCRL = async () => {
-  if (!cache.needCRLUpdate()) return;
+  const upt = await cache.needCRLUpdate();
+  if (!upt) return;
   let resp;
   const checkData = await checkCRL();
   if (checkData) {
-    const crlStatus = cache.getCRLStatus();
+    const crlStatus = await cache.getCRLStatus();
     do {
       try {
         resp = await axios
@@ -53,9 +60,9 @@ const updateCRL = async () => {
         }
         crlStatus.chunk += 1;
         if (crlStatus.chunk < resp.data.lastChunk) { // Download in progress
-          cache.storeCRLStatus(crlStatus.chunk, resp.data.lastChunk, crlStatus.version, checkData.version);
+          await cache.storeCRLStatus(crlStatus.chunk, resp.data.lastChunk, crlStatus.version, checkData.version);
         } else { // Download completed
-          cache.storeCRLStatus(0, 0, checkData.version, checkData.version);
+          await cache.storeCRLStatus(0, 0, checkData.version, checkData.version);
           break;
         }
       } else {
@@ -67,25 +74,28 @@ const updateCRL = async () => {
 };
 
 const updateRules = async () => {
-  if (!cache.needRulesUpdate()) return false;
+  const upt = await cache.needRulesUpdate();
+  if (!upt) return false;
   const resp = await axios.get(`${API_URL}/settings`);
   const json = JSON.stringify(resp.data, null, 1);
-  cache.storeRules(json);
+  await cache.storeRules(json);
   return resp.data;
 };
 
 const updateSignaturesList = async () => {
-  if (!cache.needSignaturesListUpdate()) return false;
+  const upt = await cache.needSignaturesListUpdate();
+  if (!upt) return false;
   const resp = await axios.get(
     `${API_URL}/signercertificate/status`,
   );
   const json = JSON.stringify(resp.data, null, 1);
-  cache.storeSignaturesList(json);
+  await cache.storeSignaturesList(json);
   return resp.data;
 };
 
 const updateSignatures = async () => {
-  if (!cache.needSignaturesUpdate()) return false;
+  const upt = await cache.needSignaturesUpdate();
+  if (!upt) return false;
   let header;
   let resp;
   const signatures = {};
@@ -102,7 +112,7 @@ const updateSignatures = async () => {
     }
   } while (resp.status === 200);
   const json = JSON.stringify(signatures, null, 1);
-  cache.storeSignatures(json);
+  await cache.storeSignatures(json);
   return signatures;
 };
 
@@ -110,8 +120,8 @@ const tearDown = async () => {
   await cache.tearDown();
 };
 
-const updateAll = async (crlManager) => {
-  await setUp(crlManager);
+const updateAll = async (crlManager, cacheManager) => {
+  await setUp(crlManager, cacheManager);
   await updateRules();
   await updateSignaturesList();
   await updateSignatures();
@@ -132,4 +142,5 @@ module.exports = {
   setUp,
   tearDown,
   cleanCRL,
+  cache,
 };

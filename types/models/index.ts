@@ -6,3 +6,5 @@ export * from './rule.models';
 export * from './test.models';
 export * from './vaccine.models';
 export * from './validator.models';
+export * from './crlstatus.models';
+export * from './cache.models';

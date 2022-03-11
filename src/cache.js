@@ -18,7 +18,7 @@ const SIGNATURES_LIST_FILE_PATH = path.join(CACHE_FOLDER, SIGNATURES_LIST_FILE);
 
 const UPDATE_WINDOW_HOURS = Number.parseInt(process.env.VC19_UPDATE_HOURS || '24', 10);
 
-class Cache {
+class FileCache {
   async setUp(crlManager = crl) {
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
@@ -35,7 +35,7 @@ class Cache {
     }
   }
 
-  isReady() {
+  async isReady() {
     for (const file of [CRL_FILE_PATH, SIGNATURES_FILE_PATH, RULES_FILE_PATH, SIGNATURES_LIST_FILE_PATH]) {
       if (!fs.existsSync(file)) {
         return false;
@@ -43,6 +43,10 @@ class Cache {
     }
     const crlStatus = this.getCRLStatus();
     return crlStatus.version !== 0 && crlStatus.completed;
+  }
+
+  async checkCacheManagerSetUp() {
+    return true;
   }
 
   async checkCrlManagerSetUp() {
@@ -64,21 +68,21 @@ class Cache {
     return true;
   }
 
-  storeCRLStatus(chunk = 0, totalChunk = 0, version = 0, targetVersion = 0) {
+  async storeCRLStatus(chunk = 0, totalChunk = 0, version = 0, targetVersion = 0) {
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
       chunk, totalChunk, version, targetVersion,
     }));
   }
 
-  storeRules(data) {
+  async storeRules(data) {
     fs.writeFileSync(RULES_FILE_PATH, data);
   }
 
-  storeSignaturesList(data) {
+  async storeSignaturesList(data) {
     fs.writeFileSync(SIGNATURES_LIST_FILE_PATH, data);
   }
 
-  storeSignatures(data) {
+  async storeSignatures(data) {
     fs.writeFileSync(SIGNATURES_FILE_PATH, data);
   }
 
@@ -100,21 +104,21 @@ class Cache {
     return this.fileNeedsUpdate(SIGNATURES_LIST_FILE_PATH);
   }
 
-  getCRLStatus() {
+  async getCRLStatus() {
     const crlStatus = JSON.parse(fs.readFileSync(CRL_FILE_PATH));
     crlStatus.completed = crlStatus.totalChunk === crlStatus.chunk;
     return crlStatus;
   }
 
-  getRules() {
+  async getRules() {
     return JSON.parse(fs.readFileSync(RULES_FILE_PATH));
   }
 
-  getSignatureList() {
+  async getSignatureList() {
     return JSON.parse(fs.readFileSync(SIGNATURES_LIST_FILE_PATH));
   }
 
-  getSignatures() {
+  async getSignatures() {
     return JSON.parse(fs.readFileSync(SIGNATURES_FILE_PATH));
   }
 
@@ -149,6 +153,6 @@ class Cache {
   }
 }
 
-const cacheSingleton = new Cache();
+const cacheSingleton = new FileCache();
 
 module.exports = cacheSingleton;

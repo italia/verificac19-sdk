@@ -1,11 +1,11 @@
 {
   "name": "verificac19-sdk",
-  "version": "0.9.3",
+  "version": "0.10.0",
   "description": "VerificaC19 SDK for Node.js",
   "dependencies": {
     "axios": "^0.24.0",
     "dcc-utils": "^0.4.0",
-    "mongoose": "^6.1.6",
+    "mongoose": "^6.2.5",
     "dotenv": "^11.0.0"
   },
   "devDependencies": {
