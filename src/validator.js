@@ -16,6 +16,21 @@ const TEST_MOLECULAR = 'LP6464-4';
 // Vaccine Types
 const JOHNSON = 'EU/1/20/1525';
 const SPUTNIK = 'Sputnik-V';
+const MODERNA = 'EU/1/20/1507';
+const PFIZER = 'EU/1/20/1528';
+const ASTRAZENECA = 'EU/1/21/1529';
+const COVISHIELD = 'Covishield';
+const R_COVI = 'R-COVI';
+const COVID19_RECOMBINANT = 'Covid-19-recombinant';
+
+const VACCINES_EMA_LIST = [JOHNSON, MODERNA, PFIZER, ASTRAZENECA, COVISHIELD, R_COVI, COVID19_RECOMBINANT];
+
+// Vaccination status
+const VACCINATION_STATUS = {
+  NOT_COMPLETE: 'Not complete',
+  COMPLETE: 'Complete',
+  BOOSTER: 'Booster',
+};
 
 // OID Recovery Types
 const OID_RECOVERY = '1.3.6.1.4.1.1847.2021.1.3';
@@ -37,6 +52,9 @@ const TEST_NEEDED = 'TEST_NEEDED';
 const SUPER_DGP = '2G';
 const NORMAL_DGP = '3G';
 const BOOSTER_DGP = 'BOOSTER';
+const VISITORS_RSA_DGP = BOOSTER_DGP;
+const WORK_DGP = 'WORK';
+const ENTRY_IT_DGP = 'ENTRY_IT';
 
 const codes = {
   VALID,
@@ -51,6 +69,19 @@ const modalities = {
   SUPER_DGP,
   NORMAL_DGP,
   BOOSTER_DGP,
+  VISITORS_RSA_DGP,
+  WORK_DGP,
+  ENTRY_IT_DGP,
+};
+
+const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
+
+const hasOwner50years = (certificate, scanDate) => {
+  const now = new Date(scanDate);
+  now.setUTCHours(0, 0, 0, 0);
+  const dob = new Date(certificate.dateOfBirth);
+  dob.setUTCHours(0, 0, 0, 1);
+  return (new Date(new Date(now) - dob)).getUTCFullYear() - 1970 >= 50;
 };
 
 const findProperty = (rules, name, type) => rules.find((element) => {
@@ -90,42 +121,27 @@ const checkVaccinations = (certificate, rules, mode) => {
   try {
     const last = certificate.vaccinations[certificate.vaccinations.length - 1];
     const type = last.medicinalProduct;
+    const isItalian = last.countryOfVaccination === ITALY;
+    const isEMA = isVaccineInEmaList(type) || (type === SPUTNIK && last.countryOfVaccination === SAN_MARINO);
+    let vaccinationStatus;
 
-    const vaccineStartDayNotComplete = findProperty(
-      rules,
-      'vaccine_start_day_not_complete',
-      type,
-    );
-    const vaccineEndDayNotComplete = findProperty(
-      rules,
-      'vaccine_end_day_not_complete',
-      type,
-    );
-    const vaccineStartDayComplete = findProperty(
-      rules,
-      'vaccine_start_day_complete',
-      type,
-    );
-    const vaccineEndDayComplete = findProperty(
-      rules,
-      'vaccine_end_day_complete',
-      type,
-    );
-
-    // Check San Marino case
-    if (type === SPUTNIK && last.countryOfVaccination !== SAN_MARINO) {
+    // Check vaccine type is not empty
+    if (!type) {
       return {
         code: NOT_VALID,
-        message: 'Vaccine Sputnik-V is valid only in San Marino',
+        message: 'Vaccine Type is empty',
       };
     }
-    // Check vaccine type is in list
-    if (!type || !vaccineEndDayComplete) {
+
+    const doses = `Doses ${last.doseNumber}/${last.totalSeriesOfDoses}`;
+
+    if (last.doseNumber <= 0) {
       return {
         code: NOT_VALID,
-        message: 'Vaccine Type is not in list',
+        message: `${doses} - Invalid number of doses`,
       };
     }
+
     const startNow = new Date(Date.now());
     const endNow = new Date(Date.now());
 
@@ -137,118 +153,300 @@ const checkVaccinations = (certificate, rules, mode) => {
     );
     let endDate = new Date(Date.parse(clearExtraTime(last.dateOfVaccination)));
 
-    const doses = `Doses ${last.doseNumber}/${last.totalSeriesOfDoses}`;
-
-    if (last.doseNumber <= 0) {
-      return {
-        code: NOT_VALID,
-        message: `${doses} - Invalid number of doses`,
-      };
-    }
-
+    // Check if Not complete
     if (last.doseNumber < last.totalSeriesOfDoses) {
-      if (mode === BOOSTER_DGP) {
-        return {
-          code: NOT_VALID,
-          message: 'Vaccine is not valid in Booster mode',
-        };
-      }
-
-      startDate = addDays(startDate, vaccineStartDayNotComplete.value);
-      endDate = addDays(endDate, vaccineEndDayNotComplete.value);
-
-      if (startDate > endNow) {
-        return {
-          code: NOT_VALID_YET,
-          message:
-            `${doses
-            } - Vaccination is not valid yet, starts at : ${
-              startDate.toISOString()}`,
-        };
-      }
-
-      if (startNow > endDate) {
-        return {
-          code: NOT_VALID,
-          message:
-            `${doses} - Vaccination is expired at : ${endDate.toISOString()}`,
-        };
-      }
-
-      return {
-        code: VALID,
-        message:
-          `${doses
-          } - Vaccination is valid [ ${
-            startDate.toISOString()
-          } - ${
-            endDate.toISOString()
-          } ] `,
-      };
+      vaccinationStatus = VACCINATION_STATUS.NOT_COMPLETE;
     }
 
+    // Check if Complete
     if (last.doseNumber >= last.totalSeriesOfDoses) {
-      startDate = addDays(startDate, vaccineStartDayComplete.value);
-      endDate = addDays(endDate, vaccineEndDayComplete.value);
       if ((type === JOHNSON) && ((last.doseNumber > last.totalSeriesOfDoses) || (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber >= 2))) {
         startDate = new Date(
           Date.parse(clearExtraTime(last.dateOfVaccination)),
         );
       }
-
-      if (startDate > endNow) {
-        return {
-          code: NOT_VALID_YET,
-          message:
-            `Doses ${
-              last.doseNumber
-            }/${
-              last.totalSeriesOfDoses
-            } - Vaccination is not valid yet, starts at : ${
-              startDate.toISOString()}`,
-        };
+      vaccinationStatus = VACCINATION_STATUS.COMPLETE;
+      // Check if Booster
+      if (type === JOHNSON) {
+        if (last.doseNumber >= last.totalSeriesOfDoses && last.doseNumber >= 2) {
+          vaccinationStatus = VACCINATION_STATUS.BOOSTER;
+        }
+      } else if (last.doseNumber >= last.totalSeriesOfDoses && last.doseNumber >= 3) {
+        vaccinationStatus = VACCINATION_STATUS.BOOSTER;
       }
+    }
 
-      if (startNow > endDate) {
+    // Here I have `mode`, `vaccinationStatus` and `isItalian`
+    let vaccineStartDay; let vaccineEndDay; let
+      vaccineEndDayExtended;
+    let testRequired = false;
+
+    if (mode === NORMAL_DGP) { // NORMAL DGP
+      if (!isEMA) {
         return {
           code: NOT_VALID,
-          message:
-            `Doses ${
-              last.doseNumber
-            }/${
-              last.totalSeriesOfDoses
-            } - Vaccination is expired at : ${
-              endDate.toISOString()}`,
+          message: 'Vaccine is not EMA',
         };
       }
-      // Check completed cycle without booster
-      if (mode === BOOSTER_DGP) {
-        if (type === JOHNSON) {
-          if (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber < 2) {
-            return {
-              code: TEST_NEEDED,
-              message: 'Test needed',
-            };
-          }
-        } else if (last.doseNumber === last.totalSeriesOfDoses && last.doseNumber < 3) {
+      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_not_complete',
+          type,
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_not_complete',
+          type,
+        );
+      } else if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_complete_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_complete_IT',
+        );
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_booster_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_booster_IT',
+        );
+      }
+    } else if (mode === ENTRY_IT_DGP) { // ENTRY ITALY DGP
+      if (!isEMA) {
+        return {
+          code: NOT_VALID,
+          message: 'Vaccine is not EMA',
+        };
+      }
+      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
+        return {
+          code: NOT_VALID,
+          message: 'Required complete vaccination to travel to Italy',
+        };
+      }
+      if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_complete_NOT_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_complete_NOT_IT',
+        );
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_booster_NOT_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_booster_NOT_IT',
+        );
+      }
+    } else if (mode === SUPER_DGP) { // SUPER DGP
+      if (!isEMA && vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
+        return {
+          code: NOT_VALID,
+          message: 'Vaccine not complete and not EMA',
+        };
+      }
+      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_not_complete',
+          type,
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_not_complete',
+          type,
+        );
+      } else if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_complete_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_complete_IT',
+        );
+        // If !isItalian || !isEMA extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
+        if (!isItalian || !isEMA) {
+          vaccineEndDayExtended = findProperty(
+            rules,
+            'vaccine_end_day_complete_extended_EMA',
+          );
+        }
+        if (!isEMA) {
+          testRequired = true;
+        }
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_booster_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_booster_IT',
+        );
+        // If !isEMA force TEST
+        if (!isEMA) {
+          testRequired = true;
+        }
+      }
+    } else if (mode === VISITORS_RSA_DGP) { // VISITORS DGP
+      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
+        return {
+          code: NOT_VALID,
+          message: 'Required complete vaccination',
+        };
+      }
+      if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_complete_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_complete_IT',
+        );
+        // Force TEST
+        testRequired = true;
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_booster_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_booster_IT',
+        );
+        // If !isEMA force TEST
+        if (!isEMA) {
+          testRequired = true;
+        }
+      }
+    } else if (mode === WORK_DGP) { // WORK DGP
+      // If !hasOwner50years && !isEMA Not Valid
+      if (!hasOwner50years(certificate, startDate) && !isEMA) {
+        return {
+          code: NOT_VALID,
+          message: 'Not EMA vaccine is not valid for worker with age < 50 years',
+        };
+      }
+      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
+        if (!isEMA) {
           return {
-            code: TEST_NEEDED,
-            message: 'Test needed',
+            code: NOT_VALID,
+            message: 'Vaccine not complete and not EMA',
           };
         }
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_not_complete',
+          type,
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_not_complete',
+          type,
+        );
+      } else if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_complete_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_complete_IT',
+        );
+
+        // If hasOwner50years && !isItalian extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
+        if (hasOwner50years(certificate, startDate) && !isItalian) {
+          vaccineEndDayExtended = findProperty(
+            rules,
+            'vaccine_end_day_complete_extended_EMA',
+          );
+        }
+        // If hasOwner50years && !isEMA Not Valid extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
+        if (hasOwner50years(certificate, startDate) && !isEMA) {
+          vaccineEndDayExtended = findProperty(
+            rules,
+            'vaccine_end_day_complete_extended_EMA',
+          );
+          testRequired = true;
+        }
+      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
+        vaccineStartDay = findProperty(
+          rules,
+          'vaccine_start_day_booster_IT',
+        );
+        vaccineEndDay = findProperty(
+          rules,
+          'vaccine_end_day_booster_IT',
+        );
+      }
+    }
+
+    // Check validity
+
+    startDate = addDays(startDate, vaccineStartDay.value);
+    endDate = addDays(endDate, vaccineEndDay.value);
+
+    // Not valid yet
+    if (startDate > endNow) {
+      return {
+        code: NOT_VALID_YET,
+        message:
+          `${doses
+          } - Vaccination is not valid yet, starts at : ${
+            startDate.toISOString()}`,
+      };
+    }
+
+    // Valid only if no test is required
+    if (endNow <= endDate) {
+      if (testRequired) {
+        return {
+          code: TEST_NEEDED,
+          message: 'Test needed',
+        };
       }
       return {
         code: VALID,
         message:
-          `${doses
-          } - Vaccination is valid [ ${
-            startDate.toISOString()
-          } - ${
-            endDate.toISOString()
-          } ] `,
+            `${doses
+            } - Vaccination is valid [ ${
+              startDate.toISOString()
+            } - ${
+              endDate.toISOString()
+            } ] `,
       };
     }
 
+    // Test needed in case of extension
+    if (vaccineEndDayExtended && endNow < addDays(endDate, vaccineEndDayExtended.value)) {
+      return {
+        code: TEST_NEEDED,
+        message: 'Test needed',
+      };
+    }
+
+    // Not valid if expired
+    if (startNow > endDate) {
+      return {
+        code: NOT_VALID,
+        message:
+          `${doses} - Vaccination is expired at : ${endDate.toISOString()}`,
+      };
+    }
     return { code: NOT_VALID, message: 'Vaccination format is invalid' };
   } catch (err) {
     return {
@@ -260,11 +458,19 @@ const checkVaccinations = (certificate, rules, mode) => {
 };
 
 const checkTests = (certificate, rules, mode) => {
-  if (mode !== NORMAL_DGP) {
+  const now = new Date(Date.now());
+  if (mode === BOOSTER_DGP || mode === SUPER_DGP) {
     return {
       result: false,
       code: NOT_VALID,
       message: 'Not valid. Super DGP or Booster required.',
+    };
+  }
+  if (mode === WORK_DGP && hasOwner50years(certificate, now)) {
+    return {
+      result: false,
+      code: NOT_VALID,
+      message: 'Not valid for workers with age >= 50 years.',
     };
   }
   try {
@@ -282,7 +488,6 @@ const checkTests = (certificate, rules, mode) => {
       return { code: NOT_VALID, message: 'Test type is not valid' };
     }
 
-    const now = new Date(Date.now());
     let startDate = new Date(Date.parse(last.dateTimeOfCollection));
     let endDate = new Date(Date.parse(last.dateTimeOfCollection));
 
@@ -327,17 +532,12 @@ const checkTests = (certificate, rules, mode) => {
 
 const checkRecovery = (certificate, rules, mode) => {
   try {
-    if (mode === BOOSTER_DGP) {
-      return {
-        code: TEST_NEEDED,
-        message: 'Test needed',
-      };
-    }
-
     const certificateInfo = getInfoFromCertificate(certificate);
+    const settingStartRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_start_day_NOT_IT' : 'recovery_cert_start_day_IT';
+    const settingEndRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_end_day_NOT_IT' : 'recovery_cert_end_day_IT';
     const isRecoveryBis = certificateInfo.country === ITALY && [OID_RECOVERY, OID_ALT_RECOVERY].includes(certificateInfo.oid);
-    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_start_day' : 'recovery_cert_start_day');
-    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_end_day' : 'recovery_cert_end_day');
+    const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_start_day' : settingStartRecovery);
+    const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_end_day' : settingEndRecovery);
 
     const last = certificate.recoveryStatements[certificate.recoveryStatements.length - 1];
 
@@ -367,6 +567,13 @@ const checkRecovery = (certificate, rules, mode) => {
       };
     }
 
+    if (mode === BOOSTER_DGP && !isRecoveryBis) {
+      return {
+        code: TEST_NEEDED,
+        message: 'Test needed',
+      };
+    }
+
     return {
       code: VALID,
       message:
@@ -390,6 +597,12 @@ const checkExemption = (certificate, rules, mode) => {
       return {
         code: TEST_NEEDED,
         message: 'Test needed',
+      };
+    }
+    if (mode === ENTRY_IT_DGP) {
+      return {
+        code: NOT_VALID,
+        message: 'Exemption is not valid',
       };
     }
     const last = certificate.exemptions[certificate.exemptions.length - 1];

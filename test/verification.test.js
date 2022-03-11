@@ -49,24 +49,29 @@ describe('Testing integration between Certificate and Validator', () => {
     cache.isReady = oldIsReady;
   });
   it('makes rules verification with individual methods', async () => {
+    mockdate.set('2021-09-24T00:00:00.000Z');
     await verifyRulesAndSignature(path.join('test', 'data', 'shit.png'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', '2.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'example_qr_vaccine_recovery.png'), true, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'mouse.jpeg'), false, true);
     await verifyRulesAndSignature(path.join('test', 'data', 'signed_cert.png'), false, false);
     await verifyRulesAndSignature(path.join('test', 'data', 'uk_qr_vaccine_dose1.png'), false, false);
+    mockdate.reset();
   });
 
   it('makes rules verification with verify', async () => {
+    mockdate.set('2021-09-24T00:00:00.000Z');
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'shit.png'), false, true);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', '2.png'), false, false);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'example_qr_vaccine_recovery.png'), false, false);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'mouse.jpeg'), false, true);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'signed_cert.png'), false, false);
     await verifyRulesAndSignatureWithVerify(path.join('test', 'data', 'uk_qr_vaccine_dose1.png'), false, false);
+    mockdate.reset();
   });
 
   it('makes rules verification on SK testing certificates', async () => {
+    mockdate.set('2021-07-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), false,
       Validator.codes.NOT_VALID,
@@ -92,6 +97,8 @@ describe('Testing integration between Certificate and Validator', () => {
       Validator.codes.VALID,
       '^Doses 1/1 - Vaccination is valid .*$',
     );
+    mockdate.reset();
+    mockdate.set('2021-11-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_6.png'), false,
       Validator.codes.NOT_VALID,
@@ -107,6 +114,29 @@ describe('Testing integration between Certificate and Validator', () => {
       Validator.codes.NOT_VALID,
       '^Test Result is expired at .*$',
     );
+    mockdate.reset();
+    // More than 50 years at work
+    await verifyRulesFromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
+      Validator.codes.NOT_VALID,
+      '^Not valid for workers with age >= 50 years.',
+      Validator.mode.WORK_DGP,
+    );
+    // 50 years at work
+    mockdate.set('2021-05-22T12:34:56.000Z');
+    const dcc = await Certificate.fromImage(path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'));
+    dcc.dateOfBirth = '1971-05-22';
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_VALID, null,
+      Validator.mode.WORK_DGP,
+    );
+    // 49 years at work
+    dcc.dateOfBirth = '1971-05-23';
+    await verifyRulesFromCertificate(
+      dcc, true, Validator.codes.VALID, null,
+      Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
   });
 
   it('makes rules verification on booster cases and recovery bis', async () => {
@@ -115,17 +145,19 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_1.png'), false,
       Validator.codes.NOT_VALID,
-      '^Vaccine is not valid in Booster mode$',
+      '^Required complete vaccination$',
       Validator.mode.BOOSTER_DGP,
     );
     mockdate.reset();
     // Vaccine completed not valid in booster mode (test needed)
+    mockdate.set('2021-06-24T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'), false,
       Validator.codes.TEST_NEEDED,
       '^Test needed$',
       Validator.mode.BOOSTER_DGP,
     );
+    mockdate.reset();
     // Test not valid in booster mode
     mockdate.set('2021-05-22T12:34:56.000Z');
     await verifyRulesFromImage(
@@ -192,6 +224,10 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromCertificate(
       dcc, false, Validator.codes.TEST_NEEDED, null,
       Validator.mode.BOOSTER_DGP,
+    );
+    await verifyRulesFromCertificate(
+      dcc, false, Validator.codes.NOT_VALID, null,
+      Validator.mode.ENTRY_IT_DGP,
     );
     dcc.exemptions = [];
     await verifyRulesFromCertificate(
@@ -312,11 +348,12 @@ describe('Testing integration between Certificate and Validator', () => {
     const dccWithMalformedVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
     );
-    dccWithMalformedVaccinations.vaccinations[1].doseNumber = 'a';
+    dccWithMalformedVaccinations.vaccinations[1].doseNumber = -1;
     await verifyRulesFromCertificate(
       dccWithMalformedVaccinations, false, Validator.codes.NOT_VALID,
     );
     mockdate.reset();
+    mockdate.set('2021-08-15T12:34:56.000Z');
     // SM vaccination (Sputnik-V)
     const dccSMSputnikVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
@@ -324,6 +361,7 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromCertificate(
       dccSMSputnikVaccinations, true, Validator.codes.VALID,
     );
+    mockdate.reset();
     // Other countries vaccination with Sputnik-V
     const dccITSputnikVaccinations = await Certificate.fromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SM_1.png'),
@@ -348,7 +386,12 @@ describe('Testing integration between Certificate and Validator', () => {
     dccFakeVaccination.vaccinations[0].medicinalProduct = 'Fake';
     await verifyRulesFromCertificate(
       dccFakeVaccination, false, Validator.codes.NOT_VALID,
-      '^Vaccine Type is not in list$',
+      '^Vaccine is not EMA$',
+    );
+    dccFakeVaccination.vaccinations[0].medicinalProduct = undefined;
+    await verifyRulesFromCertificate(
+      dccFakeVaccination, false, Validator.codes.NOT_VALID,
+      '^Vaccine Type is empty$',
     );
     // Not EU DGC
     delete dccFakeVaccination.vaccinations;
@@ -356,5 +399,238 @@ describe('Testing integration between Certificate and Validator', () => {
       dccFakeVaccination, false, Validator.codes.NOT_EU_DCC,
       '^No vaccination, test, exemption or recovery statement found in payload$',
     );
+    // Test booster in NORMAL_DGP mode
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccWithBooster = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWithBooster.vaccinations[1].doseNumber = 3;
+    await verifyRulesFromCertificate(
+      dccWithBooster, true, Validator.codes.VALID,
+    );
+    mockdate.reset();
+  });
+
+  it('makes rules verification to travel to Italy (IT DL 4 Feb)', async () => {
+    // Test not EMA in Entry Italy INVALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotEma = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotEma.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotEma, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
+    // Test Booster in Entry Italy VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccWithBoosterEntry = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWithBoosterEntry.vaccinations[1].doseNumber = 3;
+    await verifyRulesFromCertificate(
+      dccWithBoosterEntry, true, Validator.codes.VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
+    // Test Completed in Entry Italy VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    await verifyRulesFromCertificate(
+      dccCompleted, true, Validator.codes.VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
+    // Test Not Completed in Entry Italy NOT VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotCompleted.vaccinations[1].doseNumber = 1;
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+  });
+
+  it('makes rules verification for super DGP mode (IT DL 4 Feb)', async () => {
+    // Test Not Completed in super DGP VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotCompleted.vaccinations[1].doseNumber = 1;
+    await verifyRulesFromCertificate(
+      dccNotCompleted, true, Validator.codes.VALID,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Not Completed in super DGP VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 1;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Booster not EMA in super DGP TEST_NEED
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 3;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Completed not IT and not EMA in super DGP TEST_NEED
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 2;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+
+    // Test Completed IT in super DGP VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccNotCompleted.vaccinations[1].doseNumber = 2;
+    dccNotCompleted.vaccinations[1].countryOfVaccination = 'IT';
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'EU/1/20/1507';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, true, Validator.codes.VALID,
+      null, Validator.mode.SUPER_DGP,
+    );
+    mockdate.reset();
+  });
+
+  it('makes rules verification for RSA Visitors (IT DL 4 Feb)', async () => {
+    // Test Booster not EMA in super DGP TEST_NEED
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccNotCompleted = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccNotCompleted.vaccinations[1].doseNumber = 3;
+    dccNotCompleted.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccNotCompleted, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.VISITORS_RSA_DGP,
+    );
+    mockdate.reset();
+  });
+
+  it('makes rules verification for Work (IT DL 4 Feb)', async () => {
+    // Test Italian EMA not completed in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    let dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.vaccinations[1].doseNumber = 1;
+    dccWork.vaccinations[1].countryOfVaccination = 'IT';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test Italian EMA completed in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 2;
+    dccWork.vaccinations[1].countryOfVaccination = 'IT';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test Italian EMA booster in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 3;
+    dccWork.vaccinations[1].countryOfVaccination = 'IT';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test not EMA not completed in Work NOT_VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 1;
+    dccWork.vaccinations[1].countryOfVaccination = 'SK';
+    dccWork.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test EMA and not Italian completed, worker < 50 years in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.vaccinations[1].doseNumber = 2;
+    dccWork.vaccinations[1].countryOfVaccination = 'SK';
+    dccWork.dateOfBirth = '1987-05-22';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test EMA and not Italian completed, worker > 50 years in Work VALID
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    dccWork.vaccinations[1].doseNumber = 2;
+    dccWork.vaccinations[1].countryOfVaccination = 'SK';
+    dccWork.dateOfBirth = '1947-05-22';
+    await verifyRulesFromCertificate(
+      dccWork, true, Validator.codes.VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test EMA and not Italian completed, worker > 50 years extended in Work TEST_NEEDED
+    mockdate.set('2022-01-18T00:00:00.000Z');
+    dccWork.dateOfBirth = '1947-05-22';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+
+    // Test not EMA and worker < 50 years in Work is NOT VALID
+    mockdate.set('2022-01-18T00:00:00.000Z');
+    dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.dateOfBirth = '1987-05-22';
+    dccWork.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.NOT_VALID,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
+    // Test If hasOwner50years && !isEMA Not Valid extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
+    mockdate.set('2022-01-18T00:00:00.000Z');
+    dccWork = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccWork.vaccinations[1].medicinalProduct = 'Fake';
+    await verifyRulesFromCertificate(
+      dccWork, false, Validator.codes.TEST_NEEDED,
+      null, Validator.mode.WORK_DGP,
+    );
+    mockdate.reset();
   });
 });

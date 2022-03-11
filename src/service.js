@@ -1,6 +1,9 @@
 require('dotenv').config(); // required for MongoDB connection string
 const axios = require('axios');
 const cache = require('./cache');
+const pkg = require('../package.json');
+
+axios.defaults.headers.common['User-Agent'] = `verificac19-sdk-node/${pkg.version}`;
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 

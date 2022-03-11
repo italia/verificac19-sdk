@@ -229,6 +229,7 @@ describe('Testing Service', () => {
     // Prepare blacklisted certificate
     const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
     const dcc = await Certificate.fromImage(dccPath);
+    mockdate.set('2021-06-19');
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(true);
     // Check that certificate is not valid anymore after CRL update
     await Service.updateAll();
@@ -242,6 +243,7 @@ describe('Testing Service', () => {
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
     await Service.cleanCRL();
     nock.cleanAll();
+    mockdate.reset();
   });
   it('checks Service auto connection', async () => {
     await Service.setUp();

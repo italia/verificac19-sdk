@@ -148,19 +148,11 @@ const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 | -------------- | ---------------------------------------- |
 | NORMAL_DGP     | Verifica normale (valore di default)     |
 | SUPER_DGP      | Verifica Super Green Pass                | 
-| BOOSTER_DGP    | Verifica modalità Booster                | 
+| VISITORS_RSA_DGP | RSA Visitors (ex verifica BOOSTER_DGP) | 
+| WORK_DGP | Verifica lavoro | 
+| ENTRY_IT_DGP | Verifica ingressi in Italia | 
 
-- `Modalità SUPER_DGP`: VerificaC19 SDK considera un certificato valido solo per 
-le persone che sono state vaccinate o che sono guarite dal Covid19, 
-e impedirà a tutti gli altri di entrare nei bar,
-ristoranti, cinema, palestre, teatri, discoteche e stadi.
-
-- `Modalità BOOSTER_DGP`: VerificaC19 SDK considera valide le certificazioni 
-verdi generate dopo la dose booster di richiamo vaccinale. Considera valide, inoltre, 
-le certificazioni verdi generate dopo ciclo vaccinale primario o guarigione con 
-la contestuale presentazione di un documento, cartaceo o digitale, che attesti 
-l’esito negativo di un test al SARS-CoV-2.
-
+[DECRETO-LEGGE 4 febbraio 2022, n. 5](https://www.gazzettaufficiale.it/eli/id/2022/02/04/22G00014/sg)
 
 ### Metodi alternativi
 

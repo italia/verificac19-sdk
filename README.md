@@ -146,24 +146,15 @@ Super Green Pass or not, you need to pass `Validator.mode.SUPER_DGP` to
 const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 ```
 
-| Code           | Description                              |
-| -------------- | ---------------------------------------- |
-| NORMAL_DGP     | Normal verification (default value)      |
-| SUPER_DGP      | Super Green Pass verification            | 
-| BOOSTER_DGP    | Booster verification mode                | 
+| Code             | Description                              |
+| ---------------- | ---------------------------------------- |
+| NORMAL_DGP       | Normal verification (default value)      |
+| SUPER_DGP        | Super Green Pass verification            | 
+| VISITORS_RSA_DGP | RSA Visitors (ex BOOSTER_DGP verification mode) | 
+| WORK_DGP | Work places verification | 
+| ENTRY_IT_DGP | Entry in Italy verification | 
 
-Details
-
-- `SUPER_DGP Mode`: VerificaC19 SDK considers a green certificate valid only for
-people who have been vaccinated against or who have recovered from Covid19, 
-and will prevent all the others from 
-entering bars, restaurants, cinemas, gyms, theatres, discos and stadiums.
-
-- `BOOSTER_DGP Mode`: VerificaC19 SDK considers green certificates generated after a 
-booster dose to be valid. Furthermore, green certificates generated after the 
-first vaccination cycle or recovery with the simultaneous presentation of a 
-digital document certifying the negative result of a SARS-CoV-2 test 
-are considered valid.
+[DECRETO-LEGGE 4 febbraio 2022, n. 5](https://www.gazzettaufficiale.it/eli/id/2022/02/04/22G00014/sg)
 
 ### Alternative methods
 
