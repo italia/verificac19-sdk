@@ -20,3 +20,5 @@ coverage/
 .cache
 /db-data
 /crldb.json
+
+.vscode

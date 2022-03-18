@@ -1,5 +1,6 @@
-const { Service } = require('../src');
-const cache = require('../src/cache');
+const { Service, MongoCache } = require('../src');
+
+const cache = new MongoCache();
 
 const main = async () => {
   console.log('Cleaning CRL...');
