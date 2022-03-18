@@ -20,6 +20,8 @@ const UPDATE_WINDOW_HOURS = Number.parseInt(process.env.VC19_UPDATE_HOURS || '24
 
 class FileCache {
   async setUp(crlManager = crl) {
+    this.identifier = 'filecache';
+
     fs.mkdirSync(CACHE_FOLDER, { recursive: true });
     if (!fs.existsSync(CRL_FILE_PATH)) {
       fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
@@ -41,7 +43,7 @@ class FileCache {
         return false;
       }
     }
-    const crlStatus = this.getCRLStatus();
+    const crlStatus = await this.getCRLStatus();
     return crlStatus.version !== 0 && crlStatus.completed;
   }
 
@@ -142,6 +144,31 @@ class FileCache {
     }
   }
 
+  async cleanAll() {
+    await this.cleanRules();
+    await this.cleanSignatures();
+    await this.cleanSignaturesList();
+    await this.cleanCRL();
+  }
+
+  async cleanRules() {
+    if (fs.existsSync(RULES_FILE_PATH)) {
+      fs.unlinkSync(RULES_FILE_PATH);
+    }
+  }
+
+  async cleanSignatures() {
+    if (fs.existsSync(SIGNATURES_FILE_PATH)) {
+      fs.unlinkSync(SIGNATURES_FILE_PATH);
+    }
+  }
+
+  async cleanSignaturesList() {
+    if (fs.existsSync(SIGNATURES_LIST_FILE_PATH)) {
+      fs.unlinkSync(SIGNATURES_LIST_FILE_PATH);
+    }
+  }
+
   async cleanCRL() {
     await this.checkCrlManagerSetUp();
     fs.writeFileSync(CRL_FILE_PATH, JSON.stringify({
@@ -153,6 +180,4 @@ class FileCache {
   }
 }
 
-const cacheSingleton = new FileCache();
-
-module.exports = cacheSingleton;
+module.exports = FileCache;
