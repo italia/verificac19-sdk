@@ -1,21 +1,29 @@
 require('dotenv').config(); // required for MongoDB connection string
 const axios = require('axios');
-const mongocache = require('./mongo_cache');
+const MongoCache = require('./mongocache');
 const pkg = require('../package.json');
 
-let cache = mongocache;
+let cache;
 
 axios.defaults.headers.common['User-Agent'] = `verificac19-sdk-node/${pkg.version}`;
 
 const API_URL = 'https://get.dgc.gov.it/v1/dgc';
 
 const setUp = async (crlManager, cacheManager) => {
+  if (cache) {
+    await cache.tearDown();
+  }
+
   if (cacheManager) {
     cache = cacheManager;
+  } else {
+    cache = new MongoCache();
   }
 
   await cache.setUp(crlManager);
 };
+
+const getCurrentCacheManager = () => cache;
 
 const checkCRL = async () => {
   const crlStatus = await cache.getCRLStatus();
@@ -121,6 +129,7 @@ const tearDown = async () => {
 };
 
 const updateAll = async (crlManager, cacheManager) => {
+  await tearDown();
   await setUp(crlManager, cacheManager);
   await updateRules();
   await updateSignaturesList();
@@ -133,6 +142,22 @@ const cleanCRL = async () => {
   await cache.cleanCRL();
 };
 
+const cleanRules = async () => {
+  await cache.cleanRules();
+};
+
+const cleanSignatures = async () => {
+  await cache.cleanSignatures();
+};
+
+const cleanSignaturesList = async () => {
+  await cache.cleanSignaturesList();
+};
+
+const cleanAll = async () => {
+  await cache.cleanAll();
+};
+
 module.exports = {
   updateSignatures,
   updateSignaturesList,
@@ -142,5 +167,9 @@ module.exports = {
   setUp,
   tearDown,
   cleanCRL,
-  cache,
+  cleanRules,
+  cleanSignatures,
+  cleanSignaturesList,
+  cleanAll,
+  getCurrentCacheManager,
 };
