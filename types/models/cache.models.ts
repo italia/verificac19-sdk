@@ -97,9 +97,30 @@ export interface Cache {
     tearDown(): Promise<void>;
 
     /**
+     *  Clean Rules
+     */
+    cleanRules(): Promise<void>;
+
+    /**
+     *  Clean Signatures
+     */
+    cleanSignatures(): Promise<void>;
+
+    /**
+    *  Clean Signatures List
+    */
+    cleanSignaturesList(): Promise<void>;
+
+    /**
+    *  Clean the cache
+    */
+    cleanAll(): Promise<void>;
+
+    /**
     * Clean the CRL
     */
     cleanCRL(): Promise<void>;
+
 
 
 }
