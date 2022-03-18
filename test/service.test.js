@@ -10,7 +10,9 @@ const mongoose = require('mongoose');
 
 const { CertificateVerificationError } = require('../src/errors');
 
-const { Service, Certificate, Validator } = require('../src');
+const {
+  Service, Certificate, Validator, FileCache,
+} = require('../src');
 
 const MOCK_REQUESTS_PATH = path.join('test', 'data', 'responses');
 const API_BASE_URL = 'https://get.dgc.gov.it/v1/dgc';
@@ -104,13 +106,179 @@ const mockRequests = () => {
   mockCRLRequests();
 };
 
-describe('Testing Service', () => {
+describe('Testing Service with File Cache', () => {
+  beforeEach(async () => {
+    await Service.setUp(null, new FileCache());
+    await Service.cleanCRL();
+    chai.expect(Service.getCurrentCacheManager().identifier).to.be.equal('filecache');
+  });
   afterEach(async () => {
     if (dBConnection) {
       await dBConnection.close();
     }
+    await Service.tearDown();
   });
   it('checks caching individually', async () => {
+    await Service.cleanAll();
+    mockRequests();
+    // Validation without files throws CertificateVerificationError
+    const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
+    const dcc = await Certificate.fromImage(dccPath);
+    await chai.expect(Validator.checkRules(dcc)).to.be.rejectedWith(CertificateVerificationError);
+    // Update cache
+    let result;
+    result = await Service.updateRules();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignaturesList();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignatures();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateRules();
+    chai.expect(result).to.be.equal(false);
+    result = await Service.updateSignaturesList();
+    chai.expect(result).to.be.equal(false);
+    result = await Service.updateSignatures();
+    chai.expect(result).to.be.equal(false);
+
+    // You can update cache after 24 hours
+    mockRequests();
+    mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    result = await Service.updateRules();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignaturesList();
+    chai.expect(result).not.to.be.equal(false);
+    result = await Service.updateSignatures();
+    chai.expect(result).not.to.be.equal(false);
+    mockdate.reset();
+    nock.cleanAll();
+  });
+  it('checks caching all', async () => {
+    mockRequests();
+    await Service.updateAll(null, new FileCache());
+    nock.cleanAll();
+  });
+  it('checks clean CRL working', async () => {
+    mockRequests();
+    await prepareDB();
+    await Service.cleanCRL();
+    // Check 0 elements
+    chai.expect(await dbModel.count()).to.be.equal(0);
+    mockRequests();
+    await Service.updateAll(null, new FileCache());
+    // Check 9 elements
+    chai.expect(await dbModel.count()).to.be.equal(9);
+    mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    mockRequests();
+    await Service.updateAll(null, new FileCache());
+    // Check 12 elements
+    chai.expect(await dbModel.count()).to.be.equal(12);
+    // mockdate.reset();
+    mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
+    mockRequests();
+    await Service.updateAll(null, new FileCache());
+    // Check 11 elements
+    chai.expect(await dbModel.count()).to.be.equal(11);
+    mockdate.reset();
+    nock.cleanAll();
+  });
+  it('checks CRL download restore', async () => {
+    mockSettingsRequests();
+    await prepareDB();
+    await Service.cleanCRL();
+    const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
+    const dcc = await Certificate.fromImage(dccPath);
+
+    nock(API_BASE_URL)
+      .get('/drl/check?version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-check-v1.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=1&version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c1.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=2&version=0')
+      .reply(400, {});
+    await Service.updateAll(null, new FileCache());
+    // Check 5 elements
+    chai.expect(await dbModel.count()).to.be.equal(5);
+    nock.cleanAll();
+    mockSettingsRequests();
+    // Check cache not ready
+    await chai.expect(Validator.checkRules(dcc)).to.be.rejectedWith(CertificateVerificationError);
+    nock(API_BASE_URL)
+      .get('/drl/check?version=0')
+      .times(2) // Check CRL 2 times
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-check-v2.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=1&version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c1.json')),
+      ));
+    nock(API_BASE_URL)
+      .get('/drl?chunk=2&version=0')
+      .reply(200, JSON.parse(
+        fs.readFileSync(path.join(MOCK_REQUESTS_PATH, 'CRL-v1-c2.json')),
+      ));
+    await Service.tearDown();
+    await Service.updateAll(null, new FileCache());
+    // Check 9 elements
+    chai.expect(await dbModel.count()).to.be.equal(9);
+    // Check cache is ready
+    await Validator.checkRules(dcc);
+    nock.cleanAll();
+  });
+  it('checks CRL works with a blacklisted certificate', async () => {
+    mockRequests();
+    await prepareDB();
+    await Service.updateAll(null, new FileCache());
+    // Prepare blacklisted certificate
+    const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
+    const dcc = await Certificate.fromImage(dccPath);
+    mockdate.set('2021-06-19');
+    chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(true);
+    // Check that certificate is not valid anymore after CRL update
+    await Service.updateAll(null, new FileCache());
+    const newRevokedUVCI = dcc.vaccinations
+      .map(
+        (vaccination) => (crypto.createHash('sha256').update(vaccination.certificateIdentifier).digest('base64')),
+      );
+    dbModel.insertMany(
+      [...new Set(newRevokedUVCI)].map((uvci) => ({ _id: uvci })),
+    );
+    chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
+    await Service.tearDown();
+    await Service.setUp(null, new FileCache());
+    await Service.cleanCRL();
+    nock.cleanAll();
+    mockdate.reset();
+  });
+  it('checks Service auto connection', async () => {
+    await Service.setUp(null, new FileCache());
+    await Service.setUp(null, new FileCache());
+    await Service.tearDown();
+    await Service.cleanCRL();
+  });
+});
+
+describe('Testing Service with Mongo Cache', () => {
+  beforeEach(async () => {
+    await Service.setUp();
+    await Service.cleanCRL();
+    chai.expect(Service.getCurrentCacheManager().identifier).to.be.equal('mongocache');
+  });
+  afterEach(async () => {
+    if (dBConnection) {
+      await dBConnection.close();
+    }
+    await Service.tearDown();
+  });
+  it('checks caching individually', async () => {
+    await Service.cleanAll();
     mockRequests();
     // Validation without files throws CertificateVerificationError
     const dccPath = path.join('test', 'data', 'eu_test_certificates', 'SK_3.png');
@@ -163,7 +331,7 @@ describe('Testing Service', () => {
     await Service.updateAll();
     // Check 12 elements
     chai.expect(await dbModel.count()).to.be.equal(12);
-    mockdate.reset();
+    // mockdate.reset();
     mockdate.set(new Date(Date.now() + 24 * 60 * 60 * 1000));
     mockRequests();
     await Service.updateAll();
@@ -241,6 +409,8 @@ describe('Testing Service', () => {
       [...new Set(newRevokedUVCI)].map((uvci) => ({ _id: uvci })),
     );
     chai.expect((await Validator.checkRules(dcc)).result).to.be.equal(false);
+    await Service.tearDown();
+    await Service.setUp();
     await Service.cleanCRL();
     nock.cleanAll();
     mockdate.reset();
@@ -248,7 +418,7 @@ describe('Testing Service', () => {
   it('checks Service auto connection', async () => {
     await Service.setUp();
     await Service.setUp();
-    await Service.tearDown();
     await Service.cleanCRL();
+    await Service.tearDown();
   });
 });

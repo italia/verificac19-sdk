@@ -43,7 +43,7 @@
   "types": "types/index.d.ts",
   "scripts": {
     "lint": "eslint src test examples",
-    "test": "nyc mocha -t 200000 --file test/global.js test/",
+    "test": "nyc mocha -t 200000 test/",
     "report-coverage": "nyc report --reporter=text-lcov > coverage.lcov"
   },
   "repository": {
