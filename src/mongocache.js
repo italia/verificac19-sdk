@@ -15,6 +15,8 @@ const SIGNATURES_LIST_MODEL = 'SIGNATURELIST';
 
 class MongoCache {
   async setUp(crlManager = crl) {
+    this.identifier = 'mongocache';
+
     // * Stringa di connessione al database
     this._dbConnection = await mongoose.createConnection(
       process.env.VC19_MONGODB_URL || 'mongodb://root:example@localhost:27017/VC19?authSource=admin',
@@ -144,17 +146,26 @@ class MongoCache {
 
   async needRulesUpdate() {
     const data = await this._rulesModel.findOne();
-    return this.collectionNeedsUpdate(data.updated_at);
+    if (data && data.data) {
+      return this.collectionNeedsUpdate(data.updated_at);
+    }
+    return true;
   }
 
   async needSignaturesUpdate() {
     const data = await this._signaturesModel.findOne();
-    return this.collectionNeedsUpdate(data.updated_at);
+    if (data && data.data) {
+      return this.collectionNeedsUpdate(data.updated_at);
+    }
+    return true;
   }
 
   async needSignaturesListUpdate() {
     const data = await this._signaturesListModel.findOne();
-    return this.collectionNeedsUpdate(data.updated_at);
+    if (data && data.data) {
+      return this.collectionNeedsUpdate(data.updated_at);
+    }
+    return true;
   }
 
   async getCRLStatus() {
@@ -213,6 +224,25 @@ class MongoCache {
     }
   }
 
+  async cleanAll() {
+    await this.cleanRules();
+    await this.cleanSignatures();
+    await this.cleanSignaturesList();
+    await this.cleanCRL();
+  }
+
+  async cleanRules() {
+    await this._rulesModel.deleteMany();
+  }
+
+  async cleanSignatures() {
+    await this._signaturesModel.deleteMany();
+  }
+
+  async cleanSignaturesList() {
+    await this._signaturesListModel.deleteMany();
+  }
+
   async cleanCRL() {
     await this.checkCrlManagerSetUp();
     await this.storeCRLStatus();
@@ -222,6 +252,4 @@ class MongoCache {
   }
 }
 
-const cacheSingleton = new MongoCache();
-
-module.exports = cacheSingleton;
+module.exports = MongoCache;
