@@ -54,7 +54,6 @@ const SUPER_DGP = '2G';
 const NORMAL_DGP = '3G';
 const BOOSTER_DGP = 'BOOSTER';
 const VISITORS_RSA_DGP = BOOSTER_DGP;
-const WORK_DGP = 'WORK';
 const ENTRY_IT_DGP = 'ENTRY_IT';
 
 const codes = {
@@ -71,19 +70,10 @@ const modalities = {
   NORMAL_DGP,
   BOOSTER_DGP,
   VISITORS_RSA_DGP,
-  WORK_DGP,
   ENTRY_IT_DGP,
 };
 
 const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
-
-const hasOwner50years = (certificate, scanDate) => {
-  const now = new Date(scanDate);
-  now.setUTCHours(0, 0, 0, 0);
-  const dob = new Date(certificate.dateOfBirth);
-  dob.setUTCHours(0, 0, 0, 1);
-  return (new Date(new Date(now) - dob)).getUTCFullYear() - 1970 >= 50;
-};
 
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
@@ -332,66 +322,6 @@ const checkVaccinations = (certificate, rules, mode) => {
           testRequired = true;
         }
       }
-    } else if (mode === WORK_DGP) { // WORK DGP
-      // If !hasOwner50years && !isEMA Not Valid
-      if (!hasOwner50years(certificate, startDate) && !isEMA) {
-        return {
-          code: NOT_VALID,
-          message: 'Not EMA vaccine is not valid for worker with age < 50 years',
-        };
-      }
-      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
-        if (!isEMA) {
-          return {
-            code: NOT_VALID,
-            message: 'Vaccine not complete and not EMA',
-          };
-        }
-        vaccineStartDay = findProperty(
-          rules,
-          'vaccine_start_day_not_complete',
-          type,
-        );
-        vaccineEndDay = findProperty(
-          rules,
-          'vaccine_end_day_not_complete',
-          type,
-        );
-      } else if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
-        vaccineStartDay = findProperty(
-          rules,
-          'vaccine_start_day_complete_IT',
-        );
-        vaccineEndDay = findProperty(
-          rules,
-          'vaccine_end_day_complete_IT',
-        );
-
-        // If hasOwner50years && !isItalian extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
-        if (hasOwner50years(certificate, startDate) && !isItalian) {
-          vaccineEndDayExtended = findProperty(
-            rules,
-            'vaccine_end_day_complete_extended_EMA',
-          );
-        }
-        // If hasOwner50years && !isEMA Not Valid extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
-        if (hasOwner50years(certificate, startDate) && !isEMA) {
-          vaccineEndDayExtended = findProperty(
-            rules,
-            'vaccine_end_day_complete_extended_EMA',
-          );
-          testRequired = true;
-        }
-      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
-        vaccineStartDay = findProperty(
-          rules,
-          'vaccine_start_day_booster_IT',
-        );
-        vaccineEndDay = findProperty(
-          rules,
-          'vaccine_end_day_booster_IT',
-        );
-      }
     }
 
     // Check validity
@@ -463,13 +393,6 @@ const checkTests = (certificate, rules, mode) => {
       result: false,
       code: NOT_VALID,
       message: 'Not valid. Super DGP or Booster required.',
-    };
-  }
-  if (mode === WORK_DGP && hasOwner50years(certificate, now)) {
-    return {
-      result: false,
-      code: NOT_VALID,
-      message: 'Not valid for workers with age >= 50 years.',
     };
   }
   try {

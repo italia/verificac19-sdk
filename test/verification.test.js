@@ -115,28 +115,6 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Test Result is expired at .*$',
     );
     mockdate.reset();
-    // More than 50 years at work
-    await verifyRulesFromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'), false,
-      Validator.codes.NOT_VALID,
-      '^Not valid for workers with age >= 50 years.',
-      Validator.mode.WORK_DGP,
-    );
-    // 50 years at work
-    mockdate.set('2021-05-22T12:34:56.000Z');
-    const dcc = await Certificate.fromImage(path.join('test', 'data', 'eu_test_certificates', 'SK_7.png'));
-    dcc.dateOfBirth = '1971-05-22';
-    await verifyRulesFromCertificate(
-      dcc, false, Validator.codes.NOT_VALID, null,
-      Validator.mode.WORK_DGP,
-    );
-    // 49 years at work
-    dcc.dateOfBirth = '1971-05-23';
-    await verifyRulesFromCertificate(
-      dcc, true, Validator.codes.VALID, null,
-      Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
   });
 
   it('makes rules verification on booster cases and recovery bis', async () => {
@@ -526,110 +504,6 @@ describe('Testing integration between Certificate and Validator', () => {
     await verifyRulesFromCertificate(
       dccNotCompleted, false, Validator.codes.TEST_NEEDED,
       null, Validator.mode.VISITORS_RSA_DGP,
-    );
-    mockdate.reset();
-  });
-
-  it('makes rules verification for Work (IT DL 4 Feb)', async () => {
-    // Test Italian EMA not completed in Work VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    let dccWork = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccWork.vaccinations[1].doseNumber = 1;
-    dccWork.vaccinations[1].countryOfVaccination = 'IT';
-    await verifyRulesFromCertificate(
-      dccWork, true, Validator.codes.VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test Italian EMA completed in Work VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    dccWork.vaccinations[1].doseNumber = 2;
-    dccWork.vaccinations[1].countryOfVaccination = 'IT';
-    await verifyRulesFromCertificate(
-      dccWork, true, Validator.codes.VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test Italian EMA booster in Work VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    dccWork.vaccinations[1].doseNumber = 3;
-    dccWork.vaccinations[1].countryOfVaccination = 'IT';
-    await verifyRulesFromCertificate(
-      dccWork, true, Validator.codes.VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test not EMA not completed in Work NOT_VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    dccWork.vaccinations[1].doseNumber = 1;
-    dccWork.vaccinations[1].countryOfVaccination = 'SK';
-    dccWork.vaccinations[1].medicinalProduct = 'Fake';
-    await verifyRulesFromCertificate(
-      dccWork, false, Validator.codes.NOT_VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test EMA and not Italian completed, worker < 50 years in Work VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    dccWork = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccWork.vaccinations[1].doseNumber = 2;
-    dccWork.vaccinations[1].countryOfVaccination = 'SK';
-    dccWork.dateOfBirth = '1987-05-22';
-    await verifyRulesFromCertificate(
-      dccWork, true, Validator.codes.VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test EMA and not Italian completed, worker > 50 years in Work VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    dccWork.vaccinations[1].doseNumber = 2;
-    dccWork.vaccinations[1].countryOfVaccination = 'SK';
-    dccWork.dateOfBirth = '1947-05-22';
-    await verifyRulesFromCertificate(
-      dccWork, true, Validator.codes.VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test EMA and not Italian completed, worker > 50 years extended in Work TEST_NEEDED
-    mockdate.set('2022-01-18T00:00:00.000Z');
-    dccWork.dateOfBirth = '1947-05-22';
-    await verifyRulesFromCertificate(
-      dccWork, false, Validator.codes.TEST_NEEDED,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-
-    // Test not EMA and worker < 50 years in Work is NOT VALID
-    mockdate.set('2022-01-18T00:00:00.000Z');
-    dccWork = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccWork.dateOfBirth = '1987-05-22';
-    dccWork.vaccinations[1].medicinalProduct = 'Fake';
-    await verifyRulesFromCertificate(
-      dccWork, false, Validator.codes.NOT_VALID,
-      null, Validator.mode.WORK_DGP,
-    );
-    mockdate.reset();
-    // Test If hasOwner50years && !isEMA Not Valid extends it with `vaccine_end_day_complete_extended_EMA` (GENERIC) and force TEST
-    mockdate.set('2022-01-18T00:00:00.000Z');
-    dccWork = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccWork.vaccinations[1].medicinalProduct = 'Fake';
-    await verifyRulesFromCertificate(
-      dccWork, false, Validator.codes.TEST_NEEDED,
-      null, Validator.mode.WORK_DGP,
     );
     mockdate.reset();
   });

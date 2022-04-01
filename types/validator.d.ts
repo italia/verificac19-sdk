@@ -20,7 +20,6 @@ declare module Validator {
     NORMAL_DGP = "3G",
     BOOSTER_DGP = "BOOSTER",
     VISITORS_RSA_DGP = BOOSTER_DGP,
-    WORK_DGP = "WORK",
     ENTRY_IT_DGP = "ENTRY_IT",
   }
 }
