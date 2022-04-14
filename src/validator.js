@@ -75,6 +75,14 @@ const modalities = {
 
 const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
 
+const hasOwnerMoreThan18years = (certificate, scanDate) => {
+  const now = new Date(scanDate);
+  now.setUTCHours(0, 0, 0, 0);
+  const dob = new Date(certificate.dateOfBirth);
+  dob.setUTCHours(0, 0, 0, 1);
+  return (new Date(new Date(now) - dob)).getUTCFullYear() - 1970 >= 18;
+};
+
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
   return element.name === name && element.type === propertyType;
@@ -225,10 +233,21 @@ const checkVaccinations = (certificate, rules, mode) => {
           rules,
           'vaccine_start_day_complete_NOT_IT',
         );
-        vaccineEndDay = findProperty(
+        const offsetDaysForUnderAge = findProperty(
           rules,
-          'vaccine_end_day_complete_NOT_IT',
+          'vaccine_complete_under_18_offset',
         );
+        if (!hasOwnerMoreThan18years(certificate, addDays(startDate, -offsetDaysForUnderAge.value))) {
+          vaccineEndDay = findProperty(
+            rules,
+            'vaccine_end_day_complete_under_18',
+          );
+        } else {
+          vaccineEndDay = findProperty(
+            rules,
+            'vaccine_end_day_complete_NOT_IT',
+          );
+        }
       } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
         vaccineStartDay = findProperty(
           rules,

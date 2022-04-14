@@ -112,12 +112,12 @@
   {
     "name": "ios",
     "type": "APP_MIN_VERSION",
-    "value": "1.2.0"
+    "value": "1.2.9"
   },
   {
     "name": "android",
     "type": "APP_MIN_VERSION",
-    "value": "1.2.0"
+    "value": "1.2.9"
   },
   {
     "name": "vaccine_start_day_not_complete",
@@ -290,8 +290,128 @@
     "value": "270"
   },
   {
+    "name": "3G_scan_mode_description",
+    "type": "IT",
+    "value": "Sono valide le certificazioni per: vaccinazione, guarigione, tampone o esenzione."
+  },
+  {
+    "name": "2G_scan_mode_description",
+    "type": "IT",
+    "value": "Sono valide le certificazioni per: vaccinazione, guarigione o esenzione."
+  },
+  {
+    "name": "booster_scan_mode_description",
+    "type": "IT",
+    "value": "da utilizzare per l'accesso di visitatori alle strutture ospedaliere, residenziali, socio-assistenziali, socio-sanitarie e hospice. Sono valide le certificazioni per vaccinazione con richiamo. Sono valide anche le certificazioni per vaccinazione (ciclo primario) o guarigione o esenzione con la contestuale presentazione di un tampone con esito negativo (nelle 48 ore precedenti)."
+  },
+  {
+    "name": "work_scan_mode_description",
+    "type": "IT",
+    "value": "Fino ai 49 anni di età sono valide le certificazioni per: vaccinazione, guarigione, tampone o esenzione. Dai 50 anni compiuti in su, sono valide solo quelle per vaccinazione, guarigione o esenzione."
+  },
+  {
+    "name": "italy_entry_scan_mode_description",
+    "type": "IT",
+    "value": "da utilizzare all’atto dell'ingresso in Italia dall'estero. Sono valide tutte le certificazioni (vaccinazione, guarigione o tampone) secondo le regole di validazione europee per la circolazione tra Stati Membri. Per vaccini non autorizzati EMA o non riconosciuti equivalenti, è necessario tampone negativo eseguito nelle 48 ore precedenti (test rapidi) oppure 72 ore precedenti (test molecolari)."
+  },
+  {
+    "name": "school_scan_mode_description",
+    "type": "IT",
+    "value": "da utilizzare nelle classi con casi di positività accertati della scuola primaria e secondaria. Sono valide le certificazioni da vaccinazione con richiamo o esenzione e quelle per ciclo primario o guarigione, se emesse da meno di 120 giorni."
+  },
+  {
+    "name": "valid_faq_text",
+    "type": "IT",
+    "value": "Cosa si può fare con la Certificazione verde COVID-19?"
+  },
+  {
+    "name": "valid_faq_link",
+    "type": "IT",
+    "value": "https://www.dgc.gov.it/web/faq.html#verifica19"
+  },
+  {
+    "name": "not_valid_faq_text",
+    "type": "IT",
+    "value": "Quali sono i motivi di non validità?"
+  },
+  {
+    "name": "not_valid_faq_link",
+    "type": "IT",
+    "value": "https://www.dgc.gov.it/web/faq.html#verifica19"
+  },
+  {
+    "name": "verification_needed_faq_text",
+    "type": "IT",
+    "value": "Perché è richiesto il tampone seppur valida?"
+  },
+  {
+    "name": "verification_needed_faq_link",
+    "type": "IT",
+    "value": "https://www.dgc.gov.it/web/faq.html#verifica19"
+  },
+  {
+    "name": "not_valid_yet_faq_text",
+    "type": "IT",
+    "value": "Quali sono i tempi di inizio validità?"
+  },
+  {
+    "name": "not_valid_yet_faq_link",
+    "type": "IT",
+    "value": "https://www.dgc.gov.it/web/faq.html#verifica19"
+  },
+  {
+    "name": "not_eu_dgc_faq_text",
+    "type": "IT",
+    "value": "Quale QR Code scansionare?"
+  },
+  {
+    "name": "not_eu_dgc_faq_link",
+    "type": "IT",
+    "value": "https://www.dgc.gov.it/web/faq.html#verifica19"
+  },
+  {
+    "name": "vaccine_end_day_complete",
+    "type": "EU/1/21/1618",
+    "value": "180"
+  },
+  {
+    "name": "vaccine_start_day_complete",
+    "type": "EU/1/21/1618",
+    "value": "0"
+  },
+  {
+    "name": "vaccine_end_day_not_complete",
+    "type": "EU/1/21/1618",
+    "value": "42"
+  },
+  {
+    "name": "vaccine_start_day_not_complete",
+    "type": "EU/1/21/1618",
+    "value": "15"
+  },
+  {
     "name": "EMA_vaccines",
     "type": "GENERIC",
-    "value": "EU/1/20/1525;EU/1/20/1507;EU/1/20/1528;EU/1/21/1529;Covishield;R-COVI;Covid-19-recombinant"
+    "value": "EU/1/20/1525;EU/1/20/1507;EU/1/20/1528;EU/1/21/1529;Covishield;R-COVI;Covid-19-recombinant;EU/1/21/1618"
+  },
+  {
+    "name": "info_scan_mode_popup",
+    "type": "IT",
+    "value": "<p style=\"font-family: TitilliumWeb-Regular, Helvetica-Neue; color: rgb(0, 69, 107);\">Le tipologie di verifica della Certificazione verde Covid-19 sono: <b>BASE, RAFFORZATA, VISITATORI RSA, INGRESSO IT.</b><br>Per il LAVORO fino al 30 aprile 2022 si utilizza la tipologia BASE<br><br><b>Tipologia BASE (B) - </b> Sono valide le certificazioni per: vaccinazione, guarigione, tampone o esenzione.<br><b>Tipologia RAFFORZATA (R)</b> - Sono valide le certificazioni per: vaccinazione, guarigione o esenzione.<br><b>Tipologia VISITATORI RSA (V):</b> <i>da utilizzare per l'accesso di visitatori alle strutture ospedaliere, residenziali, socio-assistenziali, socio-sanitarie e hospice.</i><br>Sono valide le certificazioni per vaccinazione con richiamo.<br>Sono valide anche le certificazioni per vaccinazione (ciclo primario) o guarigione o esenzione con la contestuale presentazione di un tampone con esito negativo (nelle 48 ore precedenti).<br><b>Tipologia INGRESSO IT (I):</b> <i>da utilizzare all’atto dell'ingresso in Italia dall'estero</i><br>Sono valide tutte le certificazioni (vaccinazione, guarigione o tampone) secondo le regole di validazione europee per la circolazione tra Stati Membri.<br>Per vaccini non autorizzati EMA o non riconosciuti equivalenti, è necessario tampone negativo eseguito nelle 48 ore precedenti (test rapidi) oppure 72 ore precedenti (test molecolari).<br><br>Consulta la tabella sulle attività consentite con o senza green pass base/rafforzato (link <a href=\"https://www.governo.it/sites/governo.it/files/documenti/documenti/Notizie-allegati/tabella_attivita_consentite.pdf\">https://www.governo.it/sites/governo.it/files/documenti/documenti/Notizie-allegati/tabella_attivita_consentite.pdf</a> )</p>"
+  },
+  {
+    "name": "error_scan_mode_popup",
+    "type": "IT",
+    "value": "<p style=\"font-family: TitilliumWeb-Regular, Helvetica-Neue; color: rgb(0, 69, 107);\">Per procedere alla scansione selezionare una delle tipologie di verifica della Certificazione verde Covid-19: <b>BASE, RAFFORZATA, VISITATORI RSA, INGRESSO IT.</b><br>Per il LAVORO fino al 30 aprile 2022 si utilizza la tipologia BASE<br><br><b>Tipologia BASE (B) - </b> Sono valide le certificazioni per: vaccinazione, guarigione, tampone o esenzione.<br><b>Tipologia RAFFORZATA (R)</b> - Sono valide le certificazioni per: vaccinazione, guarigione o esenzione.<br><b>Tipologia VISITATORI RSA (V):</b> <i>da utilizzare per l'accesso di visitatori alle strutture ospedaliere, residenziali, socio-assistenziali, socio-sanitarie e hospice.</i><br>Sono valide le certificazioni per vaccinazione con richiamo.<br>Sono valide anche le certificazioni per vaccinazione (ciclo primario) o guarigione o esenzione con la contestuale presentazione di un tampone con esito negativo (nelle 48 ore precedenti).<br><b>Tipologia INGRESSO IT (I):</b> <i>da utilizzare all’atto dell'ingresso in Italia dall'estero</i><br>Sono valide tutte le certificazioni (vaccinazione, guarigione o tampone) secondo le regole di validazione europee per la circolazione tra Stati Membri.<br>Per vaccini non autorizzati EMA o non riconosciuti equivalenti, è necessario tampone negativo eseguito nelle 48 ore precedenti (test rapidi) oppure 72 ore precedenti (test molecolari).<br><br>Consulta la tabella sulle attività consentite con o senza green pass base/rafforzato (link <a href=\"https://www.governo.it/sites/governo.it/files/documenti/documenti/Notizie-allegati/tabella_attivita_consentite.pdf\">https://www.governo.it/sites/governo.it/files/documenti/documenti/Notizie-allegati/tabella_attivita_consentite.pdf</a> )</p>"
+  },
+  {
+    "name": "vaccine_end_day_complete_under_18",
+    "type": "GENERIC",
+    "value": "540"
+  },
+  {
+    "name": "vaccine_complete_under_18_offset",
+    "type": "GENERIC",
+    "value": "0"
   }
 ]

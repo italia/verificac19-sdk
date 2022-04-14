@@ -425,6 +425,18 @@ describe('Testing integration between Certificate and Validator', () => {
     );
     mockdate.reset();
 
+    // Test Completed in Entry Italy VALID Under 18
+    mockdate.set('2021-06-18T00:00:00.000Z');
+    const dccCompletedUnder18 = await Certificate.fromImage(
+      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
+    );
+    dccCompletedUnder18.dateOfBirth = '2005-04-21';
+    await verifyRulesFromCertificate(
+      dccCompletedUnder18, true, Validator.codes.VALID,
+      null, Validator.mode.ENTRY_IT_DGP,
+    );
+    mockdate.reset();
+
     // Test Not Completed in Entry Italy NOT VALID
     mockdate.set('2021-06-18T00:00:00.000Z');
     const dccNotCompleted = await Certificate.fromImage(
