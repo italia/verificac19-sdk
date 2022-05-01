@@ -168,7 +168,7 @@ const checkVaccinations = (certificate, rules, mode) => {
         if (last.doseNumber >= last.totalSeriesOfDoses && last.doseNumber >= 2) {
           vaccinationStatus = VACCINATION_STATUS.BOOSTER;
         }
-      } else if (last.doseNumber >= last.totalSeriesOfDoses && last.doseNumber >= 3) {
+      } else if (last.doseNumber >= last.totalSeriesOfDoses || last.doseNumber >= 3) {
         vaccinationStatus = VACCINATION_STATUS.BOOSTER;
       }
     }
