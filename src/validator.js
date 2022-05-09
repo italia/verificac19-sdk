@@ -165,10 +165,10 @@ const checkVaccinations = (certificate, rules, mode) => {
       vaccinationStatus = VACCINATION_STATUS.COMPLETE;
       // Check if Booster
       if (type === JOHNSON) {
-        if (last.doseNumber >= last.totalSeriesOfDoses && last.doseNumber >= 2) {
+        if (last.doseNumber >= 2) {
           vaccinationStatus = VACCINATION_STATUS.BOOSTER;
         }
-      } else if (last.doseNumber >= last.totalSeriesOfDoses && last.doseNumber >= 3) {
+      } else if (last.doseNumber > last.totalSeriesOfDoses || last.doseNumber >= 3) {
         vaccinationStatus = VACCINATION_STATUS.BOOSTER;
       }
     }
