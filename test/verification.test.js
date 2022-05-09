@@ -263,7 +263,7 @@ describe('Testing integration between Certificate and Validator', () => {
       '^Doses 2/2 - Vaccination is not valid yet, .*$',
     );
     // Doses 2/2 expired
-    mockdate.set('2022-06-17T00:00:00.000Z');
+    mockdate.set('2023-06-17T00:00:00.000Z');
     await verifyRulesFromImage(
       path.join('test', 'data', 'eu_test_certificates', 'SK_4.png'), false,
       Validator.codes.NOT_VALID,
