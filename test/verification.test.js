@@ -203,10 +203,6 @@ describe('Testing integration between Certificate and Validator', () => {
       dcc, false, Validator.codes.TEST_NEEDED, null,
       Validator.mode.BOOSTER_DGP,
     );
-    await verifyRulesFromCertificate(
-      dcc, false, Validator.codes.NOT_VALID, null,
-      Validator.mode.ENTRY_IT_DGP,
-    );
     dcc.exemptions = [];
     await verifyRulesFromCertificate(
       dcc, false, Validator.codes.NOT_EU_DCC,
@@ -385,67 +381,6 @@ describe('Testing integration between Certificate and Validator', () => {
     dccWithBooster.vaccinations[1].doseNumber = 3;
     await verifyRulesFromCertificate(
       dccWithBooster, true, Validator.codes.VALID,
-    );
-    mockdate.reset();
-  });
-
-  it('makes rules verification to travel to Italy (IT DL 4 Feb)', async () => {
-    // Test not EMA in Entry Italy INVALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    const dccNotEma = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccNotEma.vaccinations[1].medicinalProduct = 'Fake';
-    await verifyRulesFromCertificate(
-      dccNotEma, false, Validator.codes.NOT_VALID,
-      null, Validator.mode.ENTRY_IT_DGP,
-    );
-    mockdate.reset();
-
-    // Test Booster in Entry Italy VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    const dccWithBoosterEntry = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccWithBoosterEntry.vaccinations[1].doseNumber = 3;
-    await verifyRulesFromCertificate(
-      dccWithBoosterEntry, true, Validator.codes.VALID,
-      null, Validator.mode.ENTRY_IT_DGP,
-    );
-    mockdate.reset();
-
-    // Test Completed in Entry Italy VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    const dccCompleted = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    await verifyRulesFromCertificate(
-      dccCompleted, true, Validator.codes.VALID,
-      null, Validator.mode.ENTRY_IT_DGP,
-    );
-    mockdate.reset();
-
-    // Test Completed in Entry Italy VALID Under 18
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    const dccCompletedUnder18 = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccCompletedUnder18.dateOfBirth = '2005-04-21';
-    await verifyRulesFromCertificate(
-      dccCompletedUnder18, true, Validator.codes.VALID,
-      null, Validator.mode.ENTRY_IT_DGP,
-    );
-    mockdate.reset();
-
-    // Test Not Completed in Entry Italy NOT VALID
-    mockdate.set('2021-06-18T00:00:00.000Z');
-    const dccNotCompleted = await Certificate.fromImage(
-      path.join('test', 'data', 'eu_test_certificates', 'SK_3.png'),
-    );
-    dccNotCompleted.vaccinations[1].doseNumber = 1;
-    await verifyRulesFromCertificate(
-      dccNotCompleted, false, Validator.codes.NOT_VALID,
-      null, Validator.mode.ENTRY_IT_DGP,
     );
     mockdate.reset();
   });
