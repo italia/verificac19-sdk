@@ -149,7 +149,6 @@ const result = await Validator.validate(dcc, Validator.mode.SUPER_DGP);
 | NORMAL_DGP     | Verifica normale (valore di default)     |
 | SUPER_DGP      | Verifica Super Green Pass                | 
 | VISITORS_RSA_DGP | RSA Visitors (ex verifica BOOSTER_DGP) | 
-| ENTRY_IT_DGP | Verifica ingressi in Italia | 
 
 [DECRETO-LEGGE 4 febbraio 2022, n. 5](https://www.gazzettaufficiale.it/eli/id/2022/02/04/22G00014/sg)
 

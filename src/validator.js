@@ -54,7 +54,6 @@ const SUPER_DGP = '2G';
 const NORMAL_DGP = '3G';
 const BOOSTER_DGP = 'BOOSTER';
 const VISITORS_RSA_DGP = BOOSTER_DGP;
-const ENTRY_IT_DGP = 'ENTRY_IT';
 
 const codes = {
   VALID,
@@ -70,18 +69,9 @@ const modalities = {
   NORMAL_DGP,
   BOOSTER_DGP,
   VISITORS_RSA_DGP,
-  ENTRY_IT_DGP,
 };
 
 const isVaccineInEmaList = (vaccine) => VACCINES_EMA_LIST.includes(vaccine);
-
-const hasOwnerMoreThan18years = (certificate, scanDate) => {
-  const now = new Date(scanDate);
-  now.setUTCHours(0, 0, 0, 0);
-  const dob = new Date(certificate.dateOfBirth);
-  dob.setUTCHours(0, 0, 0, 1);
-  return (new Date(new Date(now) - dob)).getUTCFullYear() - 1970 >= 18;
-};
 
 const findProperty = (rules, name, type) => rules.find((element) => {
   const propertyType = !type ? GENERIC_TYPE : type;
@@ -213,49 +203,6 @@ const checkVaccinations = (certificate, rules, mode) => {
         vaccineEndDay = findProperty(
           rules,
           'vaccine_end_day_booster_IT',
-        );
-      }
-    } else if (mode === ENTRY_IT_DGP) { // ENTRY ITALY DGP
-      if (!isEMA) {
-        return {
-          code: NOT_VALID,
-          message: 'Vaccine is not EMA',
-        };
-      }
-      if (vaccinationStatus === VACCINATION_STATUS.NOT_COMPLETE) {
-        return {
-          code: NOT_VALID,
-          message: 'Required complete vaccination to travel to Italy',
-        };
-      }
-      if (vaccinationStatus === VACCINATION_STATUS.COMPLETE) {
-        vaccineStartDay = findProperty(
-          rules,
-          'vaccine_start_day_complete_NOT_IT',
-        );
-        const offsetDaysForUnderAge = findProperty(
-          rules,
-          'vaccine_complete_under_18_offset',
-        );
-        if (!hasOwnerMoreThan18years(certificate, addDays(startDate, -offsetDaysForUnderAge.value))) {
-          vaccineEndDay = findProperty(
-            rules,
-            'vaccine_end_day_complete_under_18',
-          );
-        } else {
-          vaccineEndDay = findProperty(
-            rules,
-            'vaccine_end_day_complete_NOT_IT',
-          );
-        }
-      } else if (vaccinationStatus === VACCINATION_STATUS.BOOSTER) {
-        vaccineStartDay = findProperty(
-          rules,
-          'vaccine_start_day_booster_NOT_IT',
-        );
-        vaccineEndDay = findProperty(
-          rules,
-          'vaccine_end_day_booster_NOT_IT',
         );
       }
     } else if (mode === SUPER_DGP) { // SUPER DGP
@@ -474,8 +421,8 @@ const checkTests = (certificate, rules, mode) => {
 const checkRecovery = (certificate, rules, mode) => {
   try {
     const certificateInfo = getInfoFromCertificate(certificate);
-    const settingStartRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_start_day_NOT_IT' : 'recovery_cert_start_day_IT';
-    const settingEndRecovery = mode === ENTRY_IT_DGP ? 'recovery_cert_end_day_NOT_IT' : 'recovery_cert_end_day_IT';
+    const settingStartRecovery = 'recovery_cert_start_day_IT';
+    const settingEndRecovery = 'recovery_cert_end_day_IT';
     const isRecoveryBis = certificateInfo.country === ITALY && [OID_RECOVERY, OID_ALT_RECOVERY].includes(certificateInfo.oid);
     const recoveryCertStartDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_start_day' : settingStartRecovery);
     const recoveryCertEndDay = findProperty(rules, isRecoveryBis ? 'recovery_pv_cert_end_day' : settingEndRecovery);
@@ -538,12 +485,6 @@ const checkExemption = (certificate, rules, mode) => {
       return {
         code: TEST_NEEDED,
         message: 'Test needed',
-      };
-    }
-    if (mode === ENTRY_IT_DGP) {
-      return {
-        code: NOT_VALID,
-        message: 'Exemption is not valid',
       };
     }
     const last = certificate.exemptions[certificate.exemptions.length - 1];
